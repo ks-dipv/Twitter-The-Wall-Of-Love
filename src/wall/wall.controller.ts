@@ -1,7 +1,6 @@
 import { Controller, Post, Get, Param, Delete, Body, UseGuards, Request } from '@nestjs/common';
 import { WallService } from './service/wall.service';
 import { CreateWallDto } from './dtos/create-wall.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { Patch } from '@nestjs/common';
 import { UpdateWallDto } from './dtos/update-wall.dto';
 @Controller('api/walls')
