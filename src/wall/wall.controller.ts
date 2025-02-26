@@ -37,6 +37,12 @@ export class WallController {
     //Update a wall by ID 
     @Patch(':id')
     async updateWall(@Param('id') id: number, @Body() updateWallDto: UpdateWallDto, @Request() req) {
-        return await this.wallService.updateWall(id,  updateWallDto);
+        return await this.wallService.updateWall(id, updateWallDto);
     }
+
+    @Get('share/:link')
+    async getWallByShareableLink(@Param('link') link: string) {
+        return await this.wallService.getWallByShareableLink(link);
+    }
+
 }

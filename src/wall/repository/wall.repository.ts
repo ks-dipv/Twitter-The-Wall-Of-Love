@@ -14,6 +14,9 @@ export class WallRepository extends Repository<Wall> {
     async createWall(createWallDto: CreateWallDto, user: User): Promise<Wall> {
         const { title, logo, description, visibility } = createWallDto;
         const wall = this.create({ title, logo, description, visibility, user });
+
+        // Generate links before saving
+        wall.generateLinks();
         return await this.save(wall);
     }
 
@@ -41,5 +44,20 @@ export class WallRepository extends Repository<Wall> {
         Object.assign(wall, updateWallDto);
         return await this.save(wall);
     }
+
+    //  Get Wall By Shareable Link
+    async getWallByShareableLink(link: string): Promise<Wall> {
+        console.log("Searching for shareable link:", link);
+
+        const wall = await this.findOne({ where: { shareable_link: link } });
+
+        if (!wall) {
+            console.log("No wall found with this link");
+            throw new NotFoundException(`Wall with shareable link not found`);
+        }
+
+        return wall;
+    }
+
 
 }

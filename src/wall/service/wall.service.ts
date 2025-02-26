@@ -8,7 +8,7 @@ import { UpdateWallDto } from '../dtos/update-wall.dto';
 @Injectable()
 export class WallService {
 
-constructor(private readonly wallRepository: WallRepository) {}
+    constructor(private readonly wallRepository: WallRepository) { }
 
     async createWall(createWallDto: CreateWallDto, user: User): Promise<Wall> {
         return await this.wallRepository.createWall(createWallDto, user);
@@ -26,8 +26,13 @@ constructor(private readonly wallRepository: WallRepository) {}
         await this.wallRepository.deleteWall(id);
     }
 
-    async updateWall(id: number ,updateWallDto: UpdateWallDto): Promise<Wall> {
+    async updateWall(id: number, updateWallDto: UpdateWallDto): Promise<Wall> {
         return await this.wallRepository.updateWall(id, updateWallDto);
     }
-    
+
+    async getWallByShareableLink(link: string): Promise<Wall> {
+        return await this.wallRepository.getWallByShareableLink(link);
+    }
+
+
 }
