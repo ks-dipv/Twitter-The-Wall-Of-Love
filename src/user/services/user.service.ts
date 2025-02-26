@@ -12,6 +12,7 @@ import { HashingProvider } from './hashing.provider';
 import { GenerateTokenProvider } from './generate-token.provider';
 import { SignInDto } from '../dtos/signin.dto';
 import { UploadService } from './upload.service';
+import { UpdateDto } from '../dtos/update.dto';
 
 @Injectable()
 export class UserService {
@@ -82,5 +83,38 @@ export class UserService {
     }
 
     return await this.generateTokenProvider.generateTokens(user);
+  }
+
+  public async update(
+    id: number,
+    updateDto: UpdateDto,
+    profileImage?: Express.Multer.File,
+  ) {
+    const user = await this.userRepository.findOneBy({
+      id,
+    });
+
+    if (!user) {
+      throw new BadRequestException("user doesn't exist");
+    }
+
+    let profilePicUrl: string | null = null;
+
+    // Upload profile image to MinIO if provided
+    if (profileImage) {
+      profilePicUrl = await this.uploadService.uploadImage(profileImage);
+    }
+
+    user.email = updateDto.email;
+    user.name = updateDto.name;
+    user.profile_pic = profilePicUrl;
+
+    return await this.userRepository.save(user);
+  }
+
+  public async remove(id: number) {
+    await this.userRepository.delete(id);
+
+    return { id };
   }
 }
