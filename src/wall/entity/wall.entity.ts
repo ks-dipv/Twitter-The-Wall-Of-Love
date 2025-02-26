@@ -6,26 +6,25 @@ export class Wall {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ length: 100 })
+    @Column({ type: 'varchar', length: 250, nullable: false })
     title: string;
 
-    @Column({ nullable: true })
-    logo: string;
+    @Column({ type:'varchar',nullable: true })
+    logo?: string;
 
-    @Column({ length: 250, nullable: true })
-    description: string;
+    @Column({ type: 'varchar',length: 250, nullable: true })
+    description?: string;
 
     @Column({ type: 'enum', enum: WallVisibility, default: WallVisibility.PUBLIC })
     visibility: WallVisibility;
 
-    @ManyToOne(() => User, (user) => user.walls, { onDelete: 'CASCADE' })
-    user: User;
-
     @CreateDateColumn()
-    createdAt: Date;
+    created_at: Date;
 
     @UpdateDateColumn()
-    updatedAt: Date;
+    updated_at: Date;
 
+    @ManyToOne(() => User, (user) => user.walls, { onDelete: 'CASCADE' })
+    user: User;
 
 }
