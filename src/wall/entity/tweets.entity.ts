@@ -8,19 +8,19 @@ export class Tweets {
     id: number;
 
     @Column({ type: 'varchar', length: 200, unique: true, nullable: false })
-    tweetUrl: string;
+    tweet_url: string;
 
     @Column({ type: 'text', nullable: false })
     content: string;
 
     @Column({ type: 'varchar', length: 100, nullable: false })
-    authorName: string;
+    author_name: string;
 
     @Column({ type: 'varchar', length: 100, nullable: true })
-    authorProfileImage?: string;
+    author_profile_image?: string;
 
     @Column({ type: 'varchar', length: 200, nullable: true })
-    authorProfileLink?: string;
+    author_profile_link?: string;
 
     @Column({ type: 'int', default: 0 })
     likes: number;
@@ -28,8 +28,8 @@ export class Tweets {
     @Column({ type: 'int', default: 0 })
     comments: number;
 
-    @CreateDateColumn({ name: 'create_at' })
-    createdAt: Date;
+    @CreateDateColumn()
+    created_at: Date;
 
     @ManyToOne(() => Wall, (wall) => wall.id, { onDelete: 'CASCADE' })
     wall: Wall;
