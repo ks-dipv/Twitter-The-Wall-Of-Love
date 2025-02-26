@@ -44,6 +44,6 @@ export class Wall {
   @OneToMany(() => Tweets, (tweet) => tweet.wall)
   tweets: Tweets[];
 
-  @ManyToOne(() => User, (user) => user.walls, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.walls)
   user: User;
 }
