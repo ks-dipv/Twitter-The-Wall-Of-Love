@@ -22,8 +22,11 @@ export class User {
   @Column({ type: 'varchar', length: 100, nullable: false })
   password: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  resetPasswordToken?: string;
+  @Column({ type: 'varchar', nullable: true })
+  profile_pic: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  reset_password_token: string;
 
   @Column({ unique: true, nullable: true })
   twitter_id: string;
@@ -35,7 +38,7 @@ export class User {
   updated_at: Date;
 
   @DeleteDateColumn()
-  deleted_at?: Date;
+  deleted_at: Date;
 
   @OneToMany(() => Wall, (wall) => wall.user)
   walls: Wall[];
