@@ -2,29 +2,32 @@ import { Entity } from "typeorm";
 import { Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from "typeorm";
 import { Wall } from "src/wall/entity/wall.entity";
 import { OneToMany } from "typeorm";
-@Entity()
+@Entity('users')
 
 export class User {
 
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ unique: true })
-    username: string;
+    @Column({  type:'varchar' ,length: 100, nullable: false,unique: true })
+    name: string;
 
-    @Column({ unique: true })
+    @Column({ type:'varchar' ,length:100, nullable: false,unique: true })
     email: string;
 
-    @Column()
+    @Column({type: 'varchar', length: 100, nullable: false})
     password: string;
+
+    @Column({ type: 'varchar', length: 100, nullable: true })
+    resetPasswordToken?: string;
 
     @Column({ unique: true, nullable: true })
     twitter_id: string;
 
-    @CreateDateColumn()
+    @CreateDateColumn({ name: 'create_at' })
     createdAt: Date;
 
-    @UpdateDateColumn()
+    @UpdateDateColumn({ name: 'update_at' })
     updatedAt: Date;
 
     @DeleteDateColumn()
