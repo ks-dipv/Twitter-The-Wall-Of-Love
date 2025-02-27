@@ -51,4 +51,21 @@ export class UserController {
   public remove(@Param('id') id: number) {
     return this.userService.remove(id);
   }
+
+  @Post('auth/reset-password/request')
+  @Auth(AuthType.None)
+  public resetPasswordRequest(@Body() resetPassword: UpdateDto) {
+    const { email } = resetPassword;
+    return this.userService.resetPasswordRequest(email);
+  }
+
+  @Post('auth/reset-password/:token')
+  @Auth(AuthType.None)
+  public resetPassword(
+    @Param('token') token: string,
+    @Body() updatePassword: UpdateDto,
+  ) {
+    const { password } = updatePassword;
+    return this.userService.resetPassword(token, password);
+  }
 }

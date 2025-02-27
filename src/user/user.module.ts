@@ -4,17 +4,47 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserController } from './user.controller';
 import { UserService } from './services/user.service';
 import { HashingProvider } from './services/hashing.provider';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { GenerateTokenProvider } from './services/generate-token.provider';
 import { UploadService } from './services/upload.service';
+import { MailService } from './services/mail.service';
 import jwtConfig from './config/jwt.config';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { join } from 'path';
+import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
+    MailerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => ({
+        transport: {
+          host: config.get('appConfig.mailHost'),
+          secure: false,
+          port: 2525,
+          auth: {
+            user: config.get('appConfig.smtpUsername'),
+            pass: config.get('appConfig.smtpPassword'),
+          },
+        },
+        default: {
+          from: `twitter <no-reply@twitter.com>`,
+        },
+        template: {
+          dir: join(__dirname, 'templates'),
+          adapter: new EjsAdapter({
+            inlineCssEnabled: true,
+          }),
+          options: {
+            strict: false,
+          },
+        },
+      }),
+    }),
   ],
   controllers: [UserController],
   providers: [
@@ -22,6 +52,7 @@ import jwtConfig from './config/jwt.config';
     HashingProvider,
     GenerateTokenProvider,
     UploadService,
+    MailService,
   ],
 })
 export class UserModule {}

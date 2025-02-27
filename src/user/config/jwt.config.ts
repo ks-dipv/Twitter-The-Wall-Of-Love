@@ -4,5 +4,9 @@ export default registerAs('jwt', () => {
   return {
     secret: process.env.JWT_SECRET,
     accessTokenTtl: parseInt(process.env.JWT_ACCESS_TOKEN_TTL ?? '3600', 10),
+    resetPasswordTokenTtl: parseInt(
+      process.env.JWT_RESET_PASSWORD_TOKEN_TTL ?? '600',
+      10,
+    ),
   };
 });

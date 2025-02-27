@@ -48,4 +48,16 @@ export class GenerateTokenProvider {
       accessToken,
     };
   }
+
+  public async generateResetPasswordToken(user: User) {
+    const resetPasswordToken = await this.signToken<Partial<ActiveUserData>>(
+      user.id,
+      this.jwtConfiguration.resetPasswordTokenTtl,
+      {
+        email: user.email,
+      },
+    );
+
+    return resetPasswordToken;
+  }
 }

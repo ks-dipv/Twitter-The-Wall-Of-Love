@@ -13,6 +13,7 @@ import { GenerateTokenProvider } from './generate-token.provider';
 import { SignInDto } from '../dtos/signin.dto';
 import { UploadService } from './upload.service';
 import { UpdateDto } from '../dtos/update.dto';
+import { MailService } from './mail.service';
 
 @Injectable()
 export class UserService {
@@ -28,6 +29,8 @@ export class UserService {
     private readonly generateTokenProvider: GenerateTokenProvider,
 
     private readonly uploadService: UploadService,
+
+    private readonly mailService: MailService,
   ) {}
 
   public async signup(
@@ -105,9 +108,9 @@ export class UserService {
       profilePicUrl = await this.uploadService.uploadImage(profileImage);
     }
 
-    user.email = updateDto.email;
-    user.name = updateDto.name;
-    user.profile_pic = profilePicUrl;
+    user.email = updateDto.email ?? user.email;
+    user.name = updateDto.name ?? user.name;
+    user.profile_pic = profilePicUrl ?? user.profile_pic;
 
     return await this.userRepository.save(user);
   }
@@ -115,6 +118,49 @@ export class UserService {
   public async remove(id: number) {
     await this.userRepository.delete(id);
 
-    return { id };
+    return { id, Deleted: true };
+  }
+
+  public async resetPasswordRequest(email: string) {
+    const user = await this.userRepository.findOneBy({
+      email,
+    });
+
+    if (!user) {
+      throw new BadRequestException("user Doesn't exist");
+    }
+
+    user.reset_password_token =
+      (await this.generateTokenProvider.generateResetPasswordToken(user)) ??
+      null;
+
+    await this.userRepository.save(user);
+
+    const token = user.reset_password_token;
+
+    const url = `http://localhost:3000/api/user/auth/reset-password/${token}`;
+
+    const arrayToken = token.split('.');
+    const tokenPayload = JSON.parse(atob(arrayToken[1]));
+    const userEmail = tokenPayload.email;
+
+    await this.mailService.sendResetPassword(url, userEmail);
+
+    return 'Email Sent Successfully';
+  }
+
+  public async resetPassword(token: string, password: string) {
+    const user = await this.userRepository.findOne({
+      where: {
+        reset_password_token: token,
+      },
+    });
+
+    user.password =
+      (await this.hashingProvider.hashPassword(password)) ?? user.password;
+    user.reset_password_token = null;
+
+    await this.userRepository.save(user);
+    return 'Password Reset Successfully';
   }
 }

@@ -4,7 +4,6 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  DeleteDateColumn,
 } from 'typeorm';
 import { Wall } from 'src/wall/entity/wall.entity';
 import { OneToMany } from 'typeorm';
@@ -36,9 +35,6 @@ export class User {
 
   @UpdateDateColumn()
   updated_at: Date;
-
-  @DeleteDateColumn()
-  deleted_at: Date;
 
   @OneToMany(() => Wall, (wall) => wall.user)
   walls: Wall[];
