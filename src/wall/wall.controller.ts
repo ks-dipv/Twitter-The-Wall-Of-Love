@@ -3,6 +3,8 @@ import { WallService } from './service/wall.service';
 import { CreateWallDto } from './dtos/create-wall.dto';
 import { Patch } from '@nestjs/common';
 import { UpdateWallDto } from './dtos/update-wall.dto';
+
+
 @Controller('api/walls')
 // @UseGuards(AuthGuard('jwt'))
 export class WallController {
@@ -35,10 +37,9 @@ export class WallController {
 
     //Update a wall by ID 
     @Patch(':id')
-    async updateWall(@Param('id') id: number, @Body() updateWallDto: UpdateWallDto, @Request() req) {
+    async updateWall(@Param('id') id: number, @Body() updateWallDto: UpdateWallDto) {
         return await this.wallService.updateWall(id, updateWallDto);
     }
-
     @Get('share/:link')
     async getWallByShareableLink(@Param('link') link: string) {
         return await this.wallService.getWallByShareableLink(link);

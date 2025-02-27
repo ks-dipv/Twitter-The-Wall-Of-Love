@@ -1,6 +1,7 @@
-import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsEnum, IsOptional, IsString,IsArray,ValidateNested, MaxLength } from 'class-validator';
 import { WallVisibility } from '../enum/wall-visibility.enum';
-
+import { Type } from 'class-transformer';
+import { SocialLinkDto } from './social-link.dto';
 export class UpdateWallDto {
     @IsOptional()
     @IsString()
@@ -19,4 +20,10 @@ export class UpdateWallDto {
     @IsOptional()
     @IsEnum(WallVisibility)
     visibility?: WallVisibility;
+
+    @IsOptional()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => SocialLinkDto)
+    social_links?: SocialLinkDto[];
 }

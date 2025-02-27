@@ -44,7 +44,7 @@ export class Wall {
         this.shareable_link = uniqueId; // Store only the unique ID
         this.embed_link = `<iframe src="https://yourdomain.com/walls/embed/${uniqueId}" width="600" height="400"></iframe>`;
     }
-    
+
 
     @CreateDateColumn()
     created_at: Date;
@@ -52,12 +52,14 @@ export class Wall {
     @UpdateDateColumn()
     updated_at: Date;
 
-    @OneToMany(() => SocialLink, (link) => link.wall)
-    social_link: SocialLink[];
+     @OneToMany(() => SocialLink, (socialLink) => socialLink.wall, { cascade: true })
+    social_links: SocialLink[];32
 
     @OneToMany(() => Tweets, (tweet) => tweet.wall)
     tweets: Tweets[];
 
     @ManyToOne(() => User, (user) => user.walls)
     user: User;
+
+
 }
