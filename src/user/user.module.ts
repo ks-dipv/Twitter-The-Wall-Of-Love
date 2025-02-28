@@ -13,6 +13,7 @@ import jwtConfig from './config/jwt.config';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { join } from 'path';
 import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
+import { TwitterStrategy } from './strategy/twitter.strategy';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
     GenerateTokenProvider,
     UploadService,
     MailService,
+    TwitterStrategy,
   ],
 })
 export class UserModule {}

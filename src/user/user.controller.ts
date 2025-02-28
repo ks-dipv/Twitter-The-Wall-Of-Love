@@ -2,10 +2,13 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   Post,
   Put,
+  Req,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { SignUpDto } from './dtos/signup.dto';
@@ -15,6 +18,7 @@ import { Auth } from './decorator/auth.decorator';
 import { AuthType } from './enum/auth-type.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateDto } from './dtos/update.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('api/user')
 export class UserController {
@@ -67,5 +71,20 @@ export class UserController {
   ) {
     const { password } = updatePassword;
     return this.userService.resetPassword(token, password);
+  }
+
+  @Get('auth/twitter')
+  @Auth(AuthType.None)
+  @UseGuards(AuthGuard('twitter'))
+  async twitterLogin() {
+    return { message: 'Redirecting to Twitter for authentication' };
+  }
+
+  @Get('auth/twitter/callback')
+  @Auth(AuthType.None)
+  @UseGuards(AuthGuard('twitter'))
+  async twitterAuthCallback(@Req() req) {
+    const response = await this.userService.validateOrCreateUser(req.user);
+    return response;
   }
 }

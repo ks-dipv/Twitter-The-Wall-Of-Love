@@ -163,4 +163,29 @@ export class UserService {
     await this.userRepository.save(user);
     return 'Password Reset Successfully';
   }
+
+  public async validateOrCreateUser(profile: any) {
+    const { id: twitterId, username, emails, photos } = profile;
+
+    // Extract email if available
+    const email = emails?.[0]?.value || null;
+
+    // Check if a user already exists by Twitter ID or Email
+    let user = await this.userRepository.findOne({
+      where: { twitter_id: twitterId }, // Find by Twitter ID
+    });
+
+    if (!user) {
+      user = this.userRepository.create({
+        twitter_id: twitterId,
+        name: username,
+        email: email, // May be null
+        profile_pic: photos?.[0]?.value || null,
+      });
+
+      await this.userRepository.save(user);
+    }
+
+    return user;
+  }
 }

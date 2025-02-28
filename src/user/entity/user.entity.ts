@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { Wall } from 'src/wall/entity/wall.entity';
 import { OneToMany } from 'typeorm';
+import { Exclude } from 'class-transformer';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -18,16 +19,18 @@ export class User {
   @Column({ type: 'varchar', length: 100, nullable: false, unique: true })
   email: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: false })
-  password: string;
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  @Exclude()
+  password?: string;
 
   @Column({ type: 'varchar', nullable: true })
-  profile_pic: string;
+  profile_pic?: string;
 
   @Column({ type: 'varchar', nullable: true })
-  reset_password_token: string;
+  reset_password_token?: string;
 
   @Column({ unique: true, nullable: true })
+  @Exclude()
   twitter_id: string;
 
   @CreateDateColumn()
