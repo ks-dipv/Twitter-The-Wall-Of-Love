@@ -1,17 +1,20 @@
 import { Controller, Post, Get, Param, Body } from '@nestjs/common';
 import { TweetService } from './service/tweet.service';
 
-@Controller('api/tweets')
+@Controller('api/walls')
 export class TweetController {
-    constructor(private readonly tweetService: TweetService) {}
+    constructor(private readonly tweetService: TweetService) { }
 
-    @Post('add/:wallId')
+    @Post(':wallId/tweets')
     async addTweet(@Param('wallId') wallId: number, @Body('tweetUrl') tweetUrl: string) {
         return await this.tweetService.addTweetToWall(tweetUrl, wallId);
     }
 
-    @Get('wall/:wallId')
-    async getTweets(@Param('wallId') wallId: number) {
-        return await this.tweetService.getTweetsByWall(wallId);
+    // Get all tweets by wall id 
+    @Get(':wallId/tweets/list')
+    async getAllTweetsByWall(@Param('wallId') wallId: number) {
+        return await this.tweetService.getAllTweetsByWall(wallId);
     }
+
+
 }

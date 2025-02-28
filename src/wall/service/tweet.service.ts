@@ -10,17 +10,22 @@ export class TweetService {
         private readonly tweetRepository: TweetRepository,
         private readonly wallRepository: WallRepository,
         private readonly twitterService: TwitterService
-    ) {}
+    ) { }
 
     async addTweetToWall(tweetUrl: string, wallId: number): Promise<Tweet> {
         const wall = await this.wallRepository.findOne({ where: { id: wallId } });
-        if (!wall) throw new NotFoundException('Wall not found');
-
+        if (!wall) {
+            throw new NotFoundException('Wall not found');
+        }
         const tweetData = await this.twitterService.fetchTweetDetails(tweetUrl);
         return await this.tweetRepository.addTweet(tweetData, wall);
     }
 
-    async getTweetsByWall(wallId: number): Promise<Tweet[]> {
-        return await this.tweetRepository.getTweetsByWall(wallId);
+    // Get All tweets in by WAll Id
+    async getAllTweetsByWall(wallId: number): Promise<Tweet[]> {
+        return await this.tweetRepository.find({ where: { wall: { id: wallId } } });
     }
+
+    
+
 }
