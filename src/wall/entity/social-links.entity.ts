@@ -12,10 +12,10 @@ export class SocialLink {
   url: string;
 
   @Column({
-        type: 'enum',
-        enum: SocialPlatform
-    })
-    platform: SocialPlatform;
+    type: 'enum',
+    enum: SocialPlatform
+  })
+  platform: SocialPlatform;
 
   @ManyToOne(() => Wall, (wall) => wall.social_links, { onDelete: 'CASCADE' })
   wall: Wall;

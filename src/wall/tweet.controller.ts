@@ -29,6 +29,7 @@ export class TweetController {
         return await this.tweetService.deleteTweetByWall(tweetId, wallId);
     }
 
+    // Reorder a tweets 
     @Put(':wallId/tweets/reorder')
     async reorderTweets(
         @Param('wallId') wallId: number,

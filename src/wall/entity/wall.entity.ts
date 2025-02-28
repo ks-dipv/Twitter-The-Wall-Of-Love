@@ -53,7 +53,7 @@ export class Wall {
     updated_at: Date;
 
      @OneToMany(() => SocialLink, (socialLink) => socialLink.wall, { cascade: true })
-    social_links: SocialLink[];32
+    social_links: SocialLink[];
 
     @OneToMany(() => Tweet, (tweet) => tweet.wall)
     tweets: Tweet[];
