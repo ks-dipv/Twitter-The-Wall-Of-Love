@@ -26,6 +26,25 @@ export class TweetService {
         return await this.tweetRepository.find({ where: { wall: { id: wallId } } });
     }
 
-    
+    // Get particular tweet by wall id 
+    async getTweetByWall(tweetId: number, wallId: number): Promise<Tweet> {
+        return await this.tweetRepository.findOne({ where: { id: tweetId, wall: { id: wallId } } });
+
+    }
+
+    // Delete a particular tweet by wall id 
+    async deleteTweetByWall(tweetId: number, wallId: number): Promise<{ message: string }> {
+        const tweet = await this.tweetRepository.findOne({ where: { id: tweetId, wall: { id: wallId } } });
+
+        if (!tweet) {
+            throw new NotFoundException(`Tweet with ID ${tweetId} not found for Wall ID ${wallId}`);
+        }
+
+        await this.tweetRepository.remove(tweet);
+
+        return { message: `Tweet with ID ${tweetId} deleted successfully from Wall ID ${wallId}` };
+    }
+
+
 
 }
