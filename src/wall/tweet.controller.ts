@@ -1,6 +1,6 @@
-import { Controller, Post, Get, Param, Body, Delete } from '@nestjs/common';
+import { Controller, Post, Get,Put, Query, Param, Body, Delete } from '@nestjs/common';
 import { TweetService } from './service/tweet.service';
-
+import { BadRequestException } from '@nestjs/common';
 @Controller('api/walls')
 export class TweetController {
     constructor(private readonly tweetService: TweetService) { }
@@ -12,8 +12,8 @@ export class TweetController {
 
     // Get all tweets by wall id 
     @Get(':wallId/tweets/list')
-    async getAllTweetsByWall(@Param('wallId') wallId: number) {
-        return await this.tweetService.getAllTweetsByWall(wallId);
+    async getAllTweetsByWall(@Param('wallId') wallId: number, @Query('randomize') randomize: string) {
+        return await this.tweetService.getAllTweetsByWall(wallId,randomize === 'true');
     }
 
 
@@ -27,6 +27,17 @@ export class TweetController {
     @Delete(':wallId/tweets/:tweetId')
     async deleteTweetByWall(@Param('tweetId') tweetId: number, @Param('wallId') wallId: number) {
         return await this.tweetService.deleteTweetByWall(tweetId, wallId);
+    }
+
+    @Put(':wallId/tweets/reorder')
+    async reorderTweets(
+        @Param('wallId') wallId: number,
+        @Body('orderedTweetIds') orderedTweetIds: number[]
+    ) {
+        if (!Array.isArray(orderedTweetIds) || orderedTweetIds.length === 0) {
+            throw new BadRequestException('Invalid orderedTweetIds array.');
+        }
+        return await this.tweetService.reorderTweets(wallId, orderedTweetIds);
     }
 
 
