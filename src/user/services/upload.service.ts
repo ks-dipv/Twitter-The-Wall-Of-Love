@@ -1,4 +1,8 @@
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  DeleteObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
@@ -37,5 +41,14 @@ export class UploadService {
     await this.s3Client.send(new PutObjectCommand(uploadParams));
 
     return `${this.configService.get('MINIO_ENDPOINT')}/${this.bucketName}/${fileName}`;
+  }
+
+  async deleteImage(fileName: string) {
+    await this.s3Client.send(
+      new DeleteObjectCommand({
+        Bucket: this.bucketName,
+        Key: fileName,
+      }),
+    );
   }
 }

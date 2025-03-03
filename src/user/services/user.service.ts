@@ -93,32 +93,49 @@ export class UserService {
     updateDto: UpdateDto,
     profileImage?: Express.Multer.File,
   ) {
-    const user = await this.userRepository.findOneBy({
-      id,
-    });
+    const user = await this.userRepository.findOneBy({ id });
 
     if (!user) {
-      throw new BadRequestException("user doesn't exist");
+      throw new BadRequestException("User doesn't exist");
     }
 
-    let profilePicUrl: string | null = null;
+    let profilePicUrl: string | null = user.profile_pic;
 
-    // Upload profile image to MinIO if provided
     if (profileImage) {
+      if (user.profile_pic) {
+        const fileName = user.profile_pic.split('/').pop();
+        if (fileName) {
+          await this.uploadService.deleteImage(fileName);
+        }
+      }
+
       profilePicUrl = await this.uploadService.uploadImage(profileImage);
     }
 
     user.email = updateDto.email ?? user.email;
     user.name = updateDto.name ?? user.name;
-    user.profile_pic = profilePicUrl ?? user.profile_pic;
+    user.profile_pic = profilePicUrl;
 
     return await this.userRepository.save(user);
   }
 
   public async remove(id: number) {
+    const user = await this.userRepository.findOneBy({ id });
+
+    if (!user) {
+      throw new BadRequestException("User doesn't exist");
+    }
+
+    if (user.profile_pic) {
+      const fileName = user.profile_pic.split('/').pop();
+      if (fileName) {
+        await this.uploadService.deleteImage(fileName);
+      }
+    }
+
     await this.userRepository.delete(id);
 
-    return { id, Deleted: true };
+    return { id, deleted: true };
   }
 
   public async resetPasswordRequest(email: string) {
