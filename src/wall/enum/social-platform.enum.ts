@@ -1,4 +1,7 @@
 export enum SocialPlatform {
-    Twitter = 'Twitter',
-    LinkedIn = 'LinkedIn',
+    TWITTER = 'Twitter',
+    FACEBOOK = 'Facebook',
+    INSTAGRAM = 'Instagram',
+    LINKEDIN = 'LinkedIn',
+    YOUTUBE = 'YouTube'
 }
