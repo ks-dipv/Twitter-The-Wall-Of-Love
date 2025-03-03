@@ -12,6 +12,7 @@ import { UploadService } from './upload.service';
 import { UpdateDto } from '../dtos/update.dto';
 import { MailService } from './mail.service';
 import { UserRepository } from '../repositories/user.repository';
+import { REQUEST_USER_KEY } from '../constants/auth.constant';
 
 @Injectable()
 export class UserService {
@@ -55,7 +56,7 @@ export class UserService {
     return await this.userRepository.save(newUser);
   }
 
-  public async signIn(signInDto: SignInDto) {
+  public async signIn(signInDto: SignInDto, res) {
     //find the user using email ID
     // throw an exception user not password
     const user = await this.userRepository.getByEmail(signInDto.email);
@@ -78,57 +79,70 @@ export class UserService {
       throw new UnauthorizedException('Incorrect Password');
     }
 
-    return await this.generateTokenProvider.generateTokens(user);
+    const token = await this.generateTokenProvider.generateTokens(user);
+
+    res.cookie('access_token', token, {
+      httpOnly: true,
+    });
+
+    res.send('Login Successful!');
   }
 
   public async update(
-    id: number,
+    req: Request,
     updateDto: UpdateDto,
     profileImage?: Express.Multer.File,
   ) {
-    const user = await this.userRepository.getById(id);
+    const user = req[REQUEST_USER_KEY];
 
     if (!user) {
+      throw new UnauthorizedException('User not authenticated');
+    }
+
+    const existingUser = await this.userRepository.getByEmail(user.email);
+
+    if (!existingUser) {
       throw new BadRequestException("User doesn't exist");
     }
 
-    let profilePicUrl: string | null = user.profile_pic;
+    let profilePicUrl: string | null = existingUser.profile_pic;
 
     if (profileImage) {
-      if (user.profile_pic) {
-        const fileName = user.profile_pic.split('/').pop();
+      if (existingUser.profile_pic) {
+        const fileName = existingUser.profile_pic.split('/').pop();
         if (fileName) {
           await this.uploadService.deleteImage(fileName);
         }
       }
-
       profilePicUrl = await this.uploadService.uploadImage(profileImage);
     }
 
-    user.email = updateDto.email ?? user.email;
-    user.name = updateDto.name ?? user.name;
-    user.profile_pic = profilePicUrl;
+    existingUser.email = updateDto.email ?? existingUser.email;
+    existingUser.name = updateDto.name ?? existingUser.name;
+    existingUser.profile_pic = profilePicUrl;
 
-    return await this.userRepository.save(user);
+    return await this.userRepository.save(existingUser);
   }
 
-  public async remove(id: number) {
-    const user = await this.userRepository.getById(id);
+  public async remove(req: Request) {
+    const user = req[REQUEST_USER_KEY];
 
-    if (!user) {
+    const existuser = await this.userRepository.getById(user.sub);
+
+    if (!existuser) {
       throw new BadRequestException("User doesn't exist");
     }
 
-    if (user.profile_pic) {
-      const fileName = user.profile_pic.split('/').pop();
+    if (existuser.profile_pic) {
+      const fileName = existuser.profile_pic.split('/').pop();
       if (fileName) {
         await this.uploadService.deleteImage(fileName);
       }
     }
 
-    await this.userRepository.delete(id);
+    await this.userRepository.delete(user.sub);
 
-    return { id, deleted: true };
+    return { deleted: true };
   }
 
   public async resetPasswordRequest(email: string) {

@@ -10,6 +10,8 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors,
+  Response,
+  Request,
 } from '@nestjs/common';
 import { SignUpDto } from './dtos/signup.dto';
 import { UserService } from './services/user.service';
@@ -36,24 +38,28 @@ export class UserController {
 
   @Post('auth/signin')
   @Auth(AuthType.None)
-  public signin(@Body() signInDto: SignInDto) {
-    return this.userService.signIn(signInDto);
+  public signin(
+    @Body() signInDto: SignInDto,
+    @Response({ passthrough: true }) res,
+  ) {
+    return this.userService.signIn(signInDto, res);
   }
 
-  @Put('update/:id')
+  @Put('update')
   @Auth(AuthType.Bearer)
   @UseInterceptors(FileInterceptor('profileImage'))
   public update(
-    @Param('id') id: number,
+    @Request() req,
     @Body() updateDto: UpdateDto,
     @UploadedFile() profileImage?: Express.Multer.File,
   ) {
-    return this.userService.update(id, updateDto, profileImage);
+    return this.userService.update(req, updateDto, profileImage);
   }
 
-  @Delete('delete/:id')
-  public remove(@Param('id') id: number) {
-    return this.userService.remove(id);
+  @Delete('delete')
+  @Auth(AuthType.Bearer)
+  public remove(@Request() req) {
+    return this.userService.remove(req);
   }
 
   @Post('auth/reset-password/request')
