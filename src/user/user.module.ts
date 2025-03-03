@@ -14,6 +14,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { join } from 'path';
 import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
 import { TwitterStrategy } from './strategy/twitter.strategy';
+import { UserRepository } from './repositories/user.repository';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { TwitterStrategy } from './strategy/twitter.strategy';
     UploadService,
     MailService,
     TwitterStrategy,
+    UserRepository,
   ],
 })
 export class UserModule {}

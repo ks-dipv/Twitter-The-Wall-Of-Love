@@ -4,9 +4,6 @@ import {
   RequestTimeoutException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../entity/user.entity';
-import { Repository } from 'typeorm';
 import { SignUpDto } from '../dtos/signup.dto';
 import { HashingProvider } from './hashing.provider';
 import { GenerateTokenProvider } from './generate-token.provider';
@@ -14,12 +11,12 @@ import { SignInDto } from '../dtos/signin.dto';
 import { UploadService } from './upload.service';
 import { UpdateDto } from '../dtos/update.dto';
 import { MailService } from './mail.service';
+import { UserRepository } from '../repositories/user.repository';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private readonly userRepository: UserRepository,
 
     private readonly hashingProvider: HashingProvider,
 
@@ -37,9 +34,7 @@ export class UserService {
     signupDto: SignUpDto,
     profileImage?: Express.Multer.File,
   ) {
-    const existUser = await this.userRepository.findOne({
-      where: { email: signupDto.email },
-    });
+    const existUser = await this.userRepository.getByEmail(signupDto.email);
 
     if (existUser) {
       throw new BadRequestException('user already exist, enter a new email');
@@ -63,9 +58,7 @@ export class UserService {
   public async signIn(signInDto: SignInDto) {
     //find the user using email ID
     // throw an exception user not password
-    const user = await await this.userRepository.findOne({
-      where: { email: signInDto.email },
-    });
+    const user = await this.userRepository.getByEmail(signInDto.email);
 
     //compare password to the hash
     let isEqual: boolean = false;
@@ -93,7 +86,7 @@ export class UserService {
     updateDto: UpdateDto,
     profileImage?: Express.Multer.File,
   ) {
-    const user = await this.userRepository.findOneBy({ id });
+    const user = await this.userRepository.getById(id);
 
     if (!user) {
       throw new BadRequestException("User doesn't exist");
@@ -120,7 +113,7 @@ export class UserService {
   }
 
   public async remove(id: number) {
-    const user = await this.userRepository.findOneBy({ id });
+    const user = await this.userRepository.getById(id);
 
     if (!user) {
       throw new BadRequestException("User doesn't exist");
@@ -139,9 +132,7 @@ export class UserService {
   }
 
   public async resetPasswordRequest(email: string) {
-    const user = await this.userRepository.findOneBy({
-      email,
-    });
+    const user = await this.userRepository.getByEmail(email);
 
     if (!user) {
       throw new BadRequestException("user Doesn't exist");
@@ -167,11 +158,7 @@ export class UserService {
   }
 
   public async resetPassword(token: string, password: string) {
-    const user = await this.userRepository.findOne({
-      where: {
-        reset_password_token: token,
-      },
-    });
+    const user = await this.userRepository.getResetPasswordToken(token);
 
     user.password =
       (await this.hashingProvider.hashPassword(password)) ?? user.password;
