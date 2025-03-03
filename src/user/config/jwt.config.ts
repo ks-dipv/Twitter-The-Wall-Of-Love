@@ -8,5 +8,6 @@ export default registerAs('jwt', () => {
       process.env.JWT_RESET_PASSWORD_TOKEN_TTL ?? '600',
       10,
     ),
+    refreshTokenTtl: parseInt(process.env.JWT_REFRESH_TOKEN_TTL ?? '86400', 10),
   };
 });

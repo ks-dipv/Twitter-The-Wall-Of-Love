@@ -27,13 +27,14 @@ export class GenerateTokenProvider {
         ...payload,
       },
       {
+        secret: this.jwtConfiguration.secret,
         expiresIn,
       },
     );
   }
 
   public async generateTokens(user: User) {
-    const [accessToken] = await Promise.all([
+    const [accessToken, refreshToken] = await Promise.all([
       // generate the access token
       this.signToken<Partial<ActiveUserData>>(
         user.id,
@@ -42,10 +43,14 @@ export class GenerateTokenProvider {
           email: user.email,
         },
       ),
+
+      //generate refresh token
+      this.signToken(user.id, this.jwtConfiguration.refreshTokenTtl),
     ]);
 
     return {
       accessToken,
+      refreshToken,
     };
   }
 
