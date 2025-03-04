@@ -13,7 +13,7 @@ export class SocialLink {
 
   @Column({
     type: 'enum',
-    enum: SocialPlatform
+    enum: SocialPlatform,
   })
   platform: SocialPlatform;
 
