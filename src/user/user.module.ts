@@ -58,5 +58,6 @@ import { UserRepository } from './repositories/user.repository';
     TwitterStrategy,
     UserRepository,
   ],
+  exports: [UserModule],
 })
 export class UserModule {}
