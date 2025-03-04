@@ -7,11 +7,11 @@ import {
 } from 'typeorm';
 import { Wall } from './wall.entity';
 @Entity()
-export class Tweets {
+export class Tweet {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 200, unique: true, nullable: false })
+  @Column({ type: 'varchar', length: 200,nullable:false,unique:true })
   tweet_url: string;
 
   @Column({ type: 'text', nullable: false })
@@ -31,6 +31,9 @@ export class Tweets {
 
   @Column({ type: 'int', default: 0 })
   comments: number;
+
+  @Column({ default: 0 })
+  orderIndex: number;
 
   @CreateDateColumn()
   created_at: Date;

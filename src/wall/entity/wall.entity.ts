@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { WallVisibility } from '../enum/wall-visibility.enum';
 import { SocialLink } from './social-links.entity';
-import { Tweets } from './tweets.entity';
+import { Tweet } from './tweets.entity';
 @Entity()
 export class Wall {
   @PrimaryGeneratedColumn()
