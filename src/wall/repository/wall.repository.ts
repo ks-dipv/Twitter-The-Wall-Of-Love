@@ -8,10 +8,15 @@ export class WallRepository extends Repository<Wall> {
     super(Wall, dataSource.createEntityManager());
   }
 
-  // Get wall by ID
   async getById(id: number): Promise<Wall> {
     return await this.findOne({
       where: { id },
+    });
+  }
+
+  async getWallByIdAndUser(wallId: number, userId: number): Promise<Wall> {
+    return await this.findOne({
+      where: { id: wallId, user: { id: userId } },
     });
   }
 }

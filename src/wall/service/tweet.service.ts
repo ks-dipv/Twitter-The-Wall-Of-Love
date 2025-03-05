@@ -1,95 +1,155 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { TweetRepository } from '../repository/tweet.repository';
-import { TwitterService } from './twitter.service';
 import { WallRepository } from '../repository/wall.repository';
-import { Tweet } from '../entity/tweets.entity';
-import { BadRequestException } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { TwitterService } from './twitter.service';
+import { Tweets } from '../entity/tweets.entity';
+import { REQUEST_USER_KEY } from 'src/user/constants/auth.constant';
+import { UserRepository } from 'src/user/repositories/user.repository';
+
 @Injectable()
 export class TweetService {
-    constructor(
-        private readonly tweetRepository: TweetRepository,
-        private readonly wallRepository: WallRepository,
-        private readonly twitterService: TwitterService,
-        private readonly dataSource: DataSource
-    ) { }
+  constructor(
+    private readonly tweetRepository: TweetRepository,
+    private readonly wallRepository: WallRepository,
+    private readonly twitterService: TwitterService,
+    private readonly userRepository: UserRepository,
+  ) {}
 
-    async addTweetToWall(tweetUrl: string, wallId: number): Promise<Tweet> {
-        const wall = await this.wallRepository.findOne({ where: { id: wallId } });
-        if (!wall) {
-            throw new NotFoundException('Wall not found');
+  async addTweetToWall(tweetUrl: string, wallId: number, req: Request) {
+    const user = req[REQUEST_USER_KEY];
+    if (!user) throw new UnauthorizedException('User not authenticated');
+
+    const existingUser = await this.userRepository.getByEmail(user.email);
+
+    const wall = await this.wallRepository.getWallByIdAndUser(
+      wallId,
+      existingUser.id,
+    );
+
+    if (!wall) throw new NotFoundException('Wall not found or access denied');
+
+    const tweetData = await this.twitterService.fetchTweetDetails(tweetUrl);
+
+    const tweet = this.tweetRepository.create({
+      ...tweetData,
+      wall,
+    });
+
+    await this.tweetRepository.save(tweet);
+    return { message: 'Tweet added successfully' };
+  }
+
+  async getAllTweetsByWall(wallId: number, req: Request): Promise<Tweets[]> {
+    const user = req[REQUEST_USER_KEY];
+
+    const existingUser = await this.userRepository.getByEmail(user.email);
+
+    const wall = await this.wallRepository.getWallByIdAndUser(
+      wallId,
+      existingUser.id,
+    );
+
+    if (!wall) throw new NotFoundException('Wall not found or access denied');
+
+    return await this.tweetRepository.getTweetsByWall(wallId);
+  }
+
+  async getTweetByWall(tweetId: number, wallId: number, req: Request) {
+    const user = req[REQUEST_USER_KEY];
+
+    const existingUser = await this.userRepository.getByEmail(user.email);
+
+    const wall = await this.wallRepository.getWallByIdAndUser(
+      wallId,
+      existingUser.id,
+    );
+
+    if (!wall) throw new NotFoundException('Wall not found or access denied');
+
+    const tweet = await this.tweetRepository.getTweetByIdAndWall(
+      tweetId,
+      wallId,
+    );
+
+    if (!tweet) throw new NotFoundException('Tweet not found');
+
+    return tweet;
+  }
+
+  async deleteTweetByWall(tweetId: number, wallId: number, req: Request) {
+    const user = req[REQUEST_USER_KEY];
+    const existingUser = await this.userRepository.getByEmail(user.email);
+
+    const wall = await this.wallRepository.getWallByIdAndUser(
+      wallId,
+      existingUser.id,
+    );
+
+    if (!wall) throw new NotFoundException('Wall not found or access denied');
+
+    const tweet = await this.tweetRepository.getTweetByIdAndWall(
+      tweetId,
+      wallId,
+    );
+
+    if (!tweet) throw new NotFoundException('Tweet not found');
+
+    await this.tweetRepository.remove(tweet);
+    return { message: 'Tweet deleted successfully' };
+  }
+
+  async reorderTweets(
+    wallId: number,
+    req: Request,
+    orderedTweetIds?: number[],
+    randomize?: boolean,
+  ) {
+    const user = req[REQUEST_USER_KEY];
+    const existingUser = await this.userRepository.getByEmail(user.email);
+
+    const wall = await this.wallRepository.getWallByIdAndUser(
+      wallId,
+      existingUser.id,
+    );
+    if (!wall) throw new NotFoundException('Wall not found or access denied');
+
+    const tweets = await this.tweetRepository.getTweetsByWall(wallId);
+    if (!tweets.length)
+      throw new BadRequestException('No tweets found for this wall');
+
+    if (randomize) {
+      tweets.sort(() => Math.random() - 0.5);
+    } else if (orderedTweetIds) {
+      if (tweets.length !== orderedTweetIds.length) {
+        throw new BadRequestException('Invalid tweet order data.');
+      }
+
+      const tweetMap = new Map(tweets.map((tweet) => [tweet.id, tweet]));
+
+      for (const tweetId of orderedTweetIds) {
+        if (!tweetMap.has(tweetId)) {
+          throw new BadRequestException('Invalid tweet ID in reorder list.');
         }
-        const tweetData = await this.twitterService.fetchTweetDetails(tweetUrl);
-        return await this.tweetRepository.addTweet(tweetData, wall);
+      }
+
+      tweets.sort(
+        (a, b) => orderedTweetIds.indexOf(a.id) - orderedTweetIds.indexOf(b.id),
+      );
+    } else {
+      throw new BadRequestException(
+        'Either provide an ordered list or set randomize to true.',
+      );
     }
 
-    // Get All tweets in by WAll Id
-    async getAllTweetsByWall(wallId: number, randomize: boolean = false): Promise<Tweet[]> {
-        let tweets = await this.tweetRepository.find({ where: { wall: { id: wallId } }, order: { orderIndex: 'ASC' } });
-        if (randomize) {
-            tweets = tweets.sort(() => Math.random() - 0.5); // Shuffle order
-
-        }
-        return tweets;
+    for (let i = 0; i < tweets.length; i++) {
+      await this.tweetRepository.update(tweets[i].id, { orderIndex: i });
     }
 
-    // Get particular tweet by wall id 
-    async getTweetByWall(tweetId: number, wallId: number): Promise<Tweet> {
-        return await this.tweetRepository.findOne({ where: { id: tweetId, wall: { id: wallId } } });
-
-    }
-
-    // Delete a particular tweet by wall id 
-    async deleteTweetByWall(tweetId: number, wallId: number): Promise<{ message: string }> {
-        const tweet = await this.tweetRepository.findOne({ where: { id: tweetId, wall: { id: wallId } } });
-
-        if (!tweet) {
-            throw new NotFoundException(`Tweet with ID ${tweetId} not found for Wall ID ${wallId}`);
-        }
-
-        await this.tweetRepository.remove(tweet);
-
-        return { message: `Tweet with ID ${tweetId} deleted successfully from Wall ID ${wallId}` };
-    }
-
-    // Reorder of tweets 
-    async reorderTweets(wallId: number, orderedTweetIds: number[]): Promise<{ message: string }> {
-        const tweets = await this.tweetRepository.find({
-            where: { wall: { id: wallId } },
-            order: { orderIndex: 'ASC' }
-        });
-
-        if (tweets.length !== orderedTweetIds.length) {
-            throw new BadRequestException('Invalid tweet order data: Some tweets may be missing.');
-        }
-
-        // Validate all tweet IDs exist in the current wall
-        const tweetMap = new Map(tweets.map(tweet => [tweet.id, tweet]));
-        for (const tweetId of orderedTweetIds) {
-            if (!tweetMap.has(tweetId)) {
-                throw new BadRequestException(`Tweet ID ${tweetId} is not associated with Wall ID ${wallId}`);
-            }
-        }
-
-        // Use transaction to update order indexes in bulk
-        const queryRunner = this.dataSource.createQueryRunner();
-        await queryRunner.connect();
-        await queryRunner.startTransaction();
-
-        try {
-            for (let i = 0; i < orderedTweetIds.length; i++) {
-                await queryRunner.manager.update(Tweet, orderedTweetIds[i], { orderIndex: i });
-            }
-            await queryRunner.commitTransaction();
-        } catch (error) {
-            await queryRunner.rollbackTransaction();
-            throw new BadRequestException('Failed to reorder tweets. Please try again.');
-        } finally {
-            await queryRunner.release();
-        }
-
-        return { message: 'Tweet order updated successfully' };
-    }
-
-
+    return { message: 'Tweet order updated successfully' };
+  }
 }

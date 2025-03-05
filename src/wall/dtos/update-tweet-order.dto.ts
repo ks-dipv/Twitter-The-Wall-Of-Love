@@ -1,4 +1,3 @@
 export class UpdateTweetOrderDto {
-    order: { id: number; orderIndex: number }[];
-  }
-  
+  order: { id: number; orderIndex: number }[];
+}

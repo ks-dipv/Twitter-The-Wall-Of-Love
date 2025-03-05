@@ -9,4 +9,5 @@ export default registerAs('appConfig', () => ({
   mailHost: process.env.MAIL_HOST,
   smtpUsername: process.env.SMTP_USERNAME,
   smtpPassword: process.env.SMTP_PASSWORD,
+  twitterBererToken: process.env.TWITTER_BEARER_TOKEN,
 }));
