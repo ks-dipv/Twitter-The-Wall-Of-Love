@@ -11,7 +11,7 @@ export class TweetRepository extends Repository<Tweets> {
   async getTweetsByWall(wallId: number): Promise<Tweets[]> {
     return await this.find({
       where: { wall: { id: wallId } },
-      order: { orderIndex: 'ASC' },
+      order: { order_index: 'ASC' },
     });
   }
 

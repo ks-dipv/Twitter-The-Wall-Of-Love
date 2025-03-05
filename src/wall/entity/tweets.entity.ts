@@ -33,7 +33,7 @@ export class Tweets {
   comments: number;
 
   @Column({ default: 0 })
-  orderIndex: number;
+  order_index: number;
 
   @CreateDateColumn()
   created_at: Date;

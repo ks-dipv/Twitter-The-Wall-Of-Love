@@ -147,7 +147,7 @@ export class TweetService {
     }
 
     for (let i = 0; i < tweets.length; i++) {
-      await this.tweetRepository.update(tweets[i].id, { orderIndex: i });
+      await this.tweetRepository.update(tweets[i].id, { order_index: i });
     }
 
     return { message: 'Tweet order updated successfully' };
