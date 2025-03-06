@@ -1,9 +1,12 @@
-import { IsString, IsNotEmpty } from 'class-validator';
-
+import { IsString, IsNotEmpty, IsInt, IsEnum, IsOptional } from 'class-validator';
+import { SocialPlatform } from '../enum/social-platform.enum';
 export class SocialLinkDto {
+
+
+  @IsEnum(SocialPlatform)
   @IsString()
   @IsNotEmpty()
-  platform: string; // Example: Twitter, LinkedIn, Instagram
+  platform?:SocialPlatform; // Example: Twitter, LinkedIn, Instagram
 
   @IsString()
   @IsNotEmpty()

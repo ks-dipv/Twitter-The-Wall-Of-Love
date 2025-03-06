@@ -25,7 +25,7 @@ export class WallService {
 
     @InjectRepository(SocialLink)
     private readonly socialLinkRepository: Repository<SocialLink>,
-  ) {}
+  ) { }
 
   async createWall(
     createWallDto: CreateWallDto,
@@ -184,17 +184,28 @@ export class WallService {
 
     // Update Social Links (Replace old ones)
     if (updateWallDto.social_links && updateWallDto.social_links.length > 0) {
-      await this.socialLinkRepository.delete({ wall: { id } });
 
-      const newSocialLinks = updateWallDto.social_links.map((link) =>
-        this.socialLinkRepository.create({
-          platform: link.platform as SocialPlatform,
-          url: link.url,
-          wall,
-        }),
-      );
-      await this.socialLinkRepository.save(newSocialLinks);
-      wall.social_links = newSocialLinks;
+      for (const linkDto of updateWallDto.social_links) {
+        // Find the existing social link by platform
+        const existingLink = wall.social_links.find(
+          (link) => link.platform === linkDto.platform,
+        );
+
+        if (existingLink) {
+          // Update the existing social link
+          existingLink.url = linkDto.url;
+          await this.socialLinkRepository.save(existingLink);
+        } else {
+          // If no existing link is found, create a new one
+          const newSocialLink = this.socialLinkRepository.create({
+            platform: linkDto.platform,
+            url: linkDto.url,
+            wall,
+          });
+          await this.socialLinkRepository.save(newSocialLink);
+          wall.social_links.push(newSocialLink);
+        }
+      }
     }
 
     return await this.wallRepository.save(wall);
