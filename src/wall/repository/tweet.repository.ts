@@ -22,7 +22,8 @@ export class TweetRepository extends Repository<Tweets> {
   }
 
   async getAllTweets(): Promise<Tweets[]> {
-    return this.createQueryBuilder('tweet').getMany();
+    return this.find(); 
   }
+  
 
 }

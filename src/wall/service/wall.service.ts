@@ -15,7 +15,9 @@ import { SocialLink } from '../entity/social-links.entity';
 import { SocialPlatform } from '../enum/social-platform.enum';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-
+import { Like } from 'typeorm';
+import { WallVisibility } from '../enum/wall-visibility.enum';
+import { v4 as uuidv4 } from 'uuid';
 @Injectable()
 export class WallService {
   constructor(
@@ -27,6 +29,18 @@ export class WallService {
     private readonly socialLinkRepository: Repository<SocialLink>,
   ) { }
 
+  // Generate links
+  private generateLinks(): { shareable_link: string; embed_link: string } {
+    const uniqueId = uuidv4();
+    const baseUrl = 'http://localhost:3000/api/walls';
+
+    return {
+      shareable_link: `${baseUrl}/share/${uniqueId}`,
+      embed_link: `${baseUrl}/embed/${uniqueId}`,
+    };
+  }
+
+  // Create wall
   async createWall(
     createWallDto: CreateWallDto,
     req: Request,
@@ -46,13 +60,16 @@ export class WallService {
       logoUrl = await this.uploadService.logo(wallLogo);
     }
 
+
     const wall = this.wallRepository.create({
       title,
       logo: logoUrl,
       description,
       visibility,
       user: existingUser,
+      ...this.generateLinks(),  // 🔹 Generate unique links here
     });
+   
 
     const savedWall = await this.wallRepository.save(wall);
 
@@ -88,6 +105,7 @@ export class WallService {
     });
   }
 
+  // Get wall bY ID
   async getWallById(id: number, req: Request): Promise<Wall> {
     const user = req[REQUEST_USER_KEY];
 
@@ -108,6 +126,25 @@ export class WallService {
 
     return wall;
   }
+
+  // Get wall by sharable Link 
+  async getWallBySharableLink(sharableLink: string): Promise<Wall> {
+    console.log('Searching wall with shareable link:', sharableLink);
+  
+    const wall = await this.wallRepository.findOne({ where: { shareable_link: Like(`%${sharableLink}`) } });
+  
+    if (!wall) {
+      throw new NotFoundException('Wall not found');
+    }
+  
+    // Check if wall is private
+    if (wall.visibility === WallVisibility.PRIVATE) {
+      throw new UnauthorizedException('This Wall is private and cannot be accessed via sharable link');
+    }
+  
+    return wall;
+  }
+  
 
   async deleteWall(id: number, req: Request) {
     const user = req[REQUEST_USER_KEY];
@@ -182,6 +219,11 @@ export class WallService {
     wall.visibility = updateWallDto.visibility ?? wall.visibility;
     wall.logo = logoUrl;
 
+    // Regenerate links if title is updated (optional based on requirement)
+    if (updateWallDto.title) {
+      Object.assign(wall, this.generateLinks());
+
+    }
     // Update Social Links (Replace old ones)
     if (updateWallDto.social_links && updateWallDto.social_links.length > 0) {
 
@@ -210,4 +252,6 @@ export class WallService {
 
     return await this.wallRepository.save(wall);
   }
+
+
 }

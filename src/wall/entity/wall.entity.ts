@@ -11,6 +11,7 @@ import {
 import { WallVisibility } from '../enum/wall-visibility.enum';
 import { SocialLink } from './social-links.entity';
 import { Tweets } from './tweets.entity';
+
 @Entity()
 export class Wall {
   @PrimaryGeneratedColumn()
@@ -32,6 +33,12 @@ export class Wall {
   })
   visibility: WallVisibility;
 
+  @Column({ type: 'varchar', unique: true, nullable:true })
+  shareable_link: string;
+
+  @Column({ type: 'varchar', unique: true, nullable: true })
+  embed_link: string;
+  
   @CreateDateColumn()
   created_at: Date;
 
