@@ -17,7 +17,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('api/walls')
 export class WallController {
-  constructor(private readonly wallService: WallService) {}
+  constructor(private readonly wallService: WallService) { }
 
   // Create a new Wall
   @Post('entry')
@@ -41,6 +41,16 @@ export class WallController {
   async getWallById(@Param('id') id: number, @Request() req) {
     return await this.wallService.getWallById(id, req);
   }
+
+
+  // Get Wall by sharable link
+  @Get('share/:sharableLink')
+  async getWallBySharableLink(@Param('sharableLink') sharableLink: string) {
+    console.log('Received sharableLink:', sharableLink);
+    return await this.wallService.getWallBySharableLink(sharableLink);
+  }
+
+
 
   // Delete a Wall by ID
   @Delete('remove/:id')

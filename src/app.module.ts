@@ -13,6 +13,7 @@ import { AuthenticationGuard } from './user/guards/authentication/authentication
 import { AccessTokenGuard } from './user/guards/access-token/access-token.guard';
 import jwtConfig from './user/config/jwt.config';
 import { JwtModule } from '@nestjs/jwt';
+import { ScheduleModule } from '@nestjs/schedule';
 const ENV = process.env.NODE_ENV;
 
 @Module({
@@ -24,7 +25,9 @@ const ENV = process.env.NODE_ENV;
       validationSchema: environmentValidation,
     }),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
+      imports: [ConfigModule,
+        ScheduleModule.forRoot()
+      ],
       inject: [ConfigService],
 
       useFactory: (configService: ConfigService) => ({
@@ -53,4 +56,4 @@ const ENV = process.env.NODE_ENV;
     AccessTokenGuard,
   ],
 })
-export class AppModule {}
+export class AppModule { }

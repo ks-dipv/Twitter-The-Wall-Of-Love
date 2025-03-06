@@ -20,4 +20,10 @@ export class TweetRepository extends Repository<Tweets> {
       where: { id: tweetId, wall: { id: wallId } },
     });
   }
+
+  async getAllTweets(): Promise<Tweets[]> {
+    return this.find(); 
+  }
+  
+
 }

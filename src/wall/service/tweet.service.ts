@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   UnauthorizedException,
+  Logger
 } from '@nestjs/common';
 import { TweetRepository } from '../repository/tweet.repository';
 import { WallRepository } from '../repository/wall.repository';
@@ -10,15 +11,16 @@ import { TwitterService } from './twitter.service';
 import { Tweets } from '../entity/tweets.entity';
 import { REQUEST_USER_KEY } from 'src/user/constants/auth.constant';
 import { UserRepository } from 'src/user/repositories/user.repository';
-
+import { Cron, CronExpression } from '@nestjs/schedule';
 @Injectable()
 export class TweetService {
+  private readonly logger = new Logger(TweetService.name);
   constructor(
     private readonly tweetRepository: TweetRepository,
     private readonly wallRepository: WallRepository,
     private readonly twitterService: TwitterService,
     private readonly userRepository: UserRepository,
-  ) {}
+  ) { }
 
   async addTweetToWall(tweetUrl: string, wallId: number, req: Request) {
     const user = req[REQUEST_USER_KEY];
@@ -40,8 +42,9 @@ export class TweetService {
       wall,
     });
 
-    await this.tweetRepository.save(tweet);
-    return { message: 'Tweet added successfully' };
+    const savedTweet = await this.tweetRepository.save(tweet);
+
+    return savedTweet;
   }
 
   async getAllTweetsByWall(wallId: number, req: Request): Promise<Tweets[]> {
@@ -59,27 +62,6 @@ export class TweetService {
     return await this.tweetRepository.getTweetsByWall(wallId);
   }
 
-  async getTweetByWall(tweetId: number, wallId: number, req: Request) {
-    const user = req[REQUEST_USER_KEY];
-
-    const existingUser = await this.userRepository.getByEmail(user.email);
-
-    const wall = await this.wallRepository.getWallByIdAndUser(
-      wallId,
-      existingUser.id,
-    );
-
-    if (!wall) throw new NotFoundException('Wall not found or access denied');
-
-    const tweet = await this.tweetRepository.getTweetByIdAndWall(
-      tweetId,
-      wallId,
-    );
-
-    if (!tweet) throw new NotFoundException('Tweet not found');
-
-    return tweet;
-  }
 
   async deleteTweetByWall(tweetId: number, wallId: number, req: Request) {
     const user = req[REQUEST_USER_KEY];
@@ -150,6 +132,40 @@ export class TweetService {
       await this.tweetRepository.update(tweets[i].id, { order_index: i });
     }
 
-    return { message: 'Tweet order updated successfully' };
+    const updatedTweets = await this.tweetRepository.getTweetsByWall(wallId);
+
+    return updatedTweets; 
+  }
+
+  // Cron job to update tweet like & comment count every night at 8 PM
+  // Runs at 8:00 PM (20:00) daily
+  @Cron('0 20 * * *')
+  async updateTweetStatsDaily() {
+    this.logger.log('Running daily tweet stats update...');
+
+    const tweets = await this.tweetRepository.getAllTweets();
+    if (!tweets.length) {
+      this.logger.log('No tweets found to update.');
+      return;
+    }
+
+    for (const tweet of tweets) {
+      try {
+        const updatedTweetData = await this.twitterService.fetchTweetDetails(
+          tweet.tweet_url,
+        );
+
+        await this.tweetRepository.update(tweet.id, {
+          likes: updatedTweetData.likeCount,
+          comments: updatedTweetData.commentCount,
+        });
+
+        this.logger.log(`Updated tweet ID ${tweet.id}`);
+      } catch (error) {
+        this.logger.error(`Failed to update tweet ID ${tweet.id}: ${error.message}`);
+      }
+    }
+
+    this.logger.log('Daily tweet stats update completed.');
   }
 }
