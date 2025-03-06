@@ -14,43 +14,58 @@ import { REQUEST_USER_KEY } from 'src/user/constants/auth.constant';
 @Injectable()
 export class AccessTokenGuard implements CanActivate {
   constructor(
-    /**
-     * inject jwtService
-     */
     private readonly jwtService: JwtService,
-
-    /**
-     * inject jwtConfiguration
-     */
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
   ) {}
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    // Extract the request from the execution context
-    const request = context.switchToHttp().getRequest();
 
-    //Extract the token from header
-    const token = request.cookies?.access_token.accessToken;
-    
-    //validate the token
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    const { token, source } = this.extractToken(request);
+
     if (!token) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Access token is required');
     }
 
     try {
-      const payload = await this.jwtService.verifyAsync(
-        token,
-        this.jwtConfiguration,
-      );
+      const secret =
+        source === 'cookie'
+          ? this.jwtConfiguration.secret
+          : this.jwtConfiguration.apiSecret;
+
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: secret,
+      });
       request[REQUEST_USER_KEY] = payload;
+      return true;
     } catch (error) {
-      throw new UnauthorizedException(error);
+      if (error.name === 'TokenExpiredError') {
+        throw new UnauthorizedException('Token expired, please log in again');
+      }
+      if (error.name === 'JsonWebTokenError') {
+        throw new UnauthorizedException('Invalid token signature');
+      }
+      throw new UnauthorizedException('Failed to authenticate token');
     }
-    return true;
   }
 
-  // private extractRequestFromHeader(request: Request): string | undefined {
-  //   const [_, token] = request.headers.authorization?.split(' ') ?? [];
-  //   return token;
-  // }
+  private extractToken(request: Request): {
+    token?: string;
+    source: 'cookie' | 'header' | 'none';
+  } {
+    // Check token in cookies
+    if (request.cookies?.access_token) {
+      const token = request.cookies.access_token;
+      return { token, source: 'cookie' };
+    }
+
+    // Check token in Authorization header
+    const authHeader = request.headers.authorization;
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      return { token, source: 'header' };
+    }
+
+    return { source: 'none' };
+  }
 }

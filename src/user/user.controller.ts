@@ -16,11 +16,11 @@ import {
 import { SignUpDto } from './dtos/signup.dto';
 import { UserService } from './services/user.service';
 import { SignInDto } from './dtos/signin.dto';
-import { Auth } from './decorator/auth.decorator';
 import { AuthType } from './enum/auth-type.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateDto } from './dtos/update.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { Auth } from 'src/user/decorator/auth.decorator';
 
 @Controller('api/user')
 export class UserController {
@@ -100,5 +100,10 @@ export class UserController {
   async twitterAuthCallback(@Req() req) {
     const response = await this.userService.validateOrCreateUser(req.user);
     return response;
+  }
+
+  @Post('developer/api-token')
+  async apiKeyGenerate(@Request() req) {
+    return this.userService.apiKeyGenerate(req);
   }
 }

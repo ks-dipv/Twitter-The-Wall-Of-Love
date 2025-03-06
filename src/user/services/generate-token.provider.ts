@@ -20,49 +20,60 @@ export class GenerateTokenProvider {
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
   ) {}
 
-  public async signToken<T>(userId: number, expiresIn: number, payload?: T) {
+  public async signToken<T>(
+    userId: number,
+    expiresIn: number,
+    secretKey: string,
+    payload?: T,
+  ) {
     return await this.jwtService.signAsync(
       {
         sub: userId,
         ...payload,
       },
       {
-        secret: this.jwtConfiguration.secret,
+        secret: secretKey,
         expiresIn,
       },
     );
   }
 
   public async generateTokens(user: User) {
-    const [accessToken, refreshToken] = await Promise.all([
-      // generate the access token
-      this.signToken<Partial<ActiveUserData>>(
-        user.id,
-        this.jwtConfiguration.accessTokenTtl,
-        {
-          email: user.email,
-        },
-      ),
+    const accessToken = await this.signToken<Partial<ActiveUserData>>(
+      user.id,
+      this.jwtConfiguration.accessTokenTtl,
+      this.jwtConfiguration.secret,
+      {
+        email: user.email,
+      },
+    );
 
-      //generate refresh token
-      this.signToken(user.id, this.jwtConfiguration.refreshTokenTtl),
-    ]);
-
-    return {
-      accessToken,
-      refreshToken,
-    };
+    return accessToken;
   }
 
   public async generateResetPasswordToken(user: User) {
     const resetPasswordToken = await this.signToken<Partial<ActiveUserData>>(
       user.id,
       this.jwtConfiguration.resetPasswordTokenTtl,
+      this.jwtConfiguration.secret,
       {
         email: user.email,
       },
     );
 
     return resetPasswordToken;
+  }
+
+  public async generateApiToken(user: User) {
+    const apiToken = await this.signToken<Partial<ActiveUserData>>(
+      user.id,
+      this.jwtConfiguration.apiTokenTtl,
+      this.jwtConfiguration.apiSecret,
+      {
+        email: user.email,
+      },
+    );
+
+    return apiToken;
   }
 }

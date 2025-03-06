@@ -29,6 +29,9 @@ export class User {
   @Column({ type: 'varchar', nullable: true })
   reset_password_token?: string;
 
+  @Column({ nullable: true, unique: true })
+  api_token?: string;
+
   @Column({ unique: true, nullable: true })
   @Exclude()
   twitter_id: string;
