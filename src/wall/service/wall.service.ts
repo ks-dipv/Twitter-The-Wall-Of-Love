@@ -32,11 +32,11 @@ export class WallService {
   // Generate links
   private generateLinks(): { shareable_link: string; embed_link: string } {
     const uniqueId = uuidv4();
-    const baseUrl = 'http://localhost:3000/api/walls';
+    const baseUrl = 'http://localhost:3000/';
 
     return {
-      shareable_link: `${baseUrl}/share/${uniqueId}`,
-      embed_link: `${baseUrl}/embed/${uniqueId}`,
+      shareable_link: `${baseUrl}api/walls/share/${uniqueId}`,
+      embed_link: `<iframe src="${baseUrl}/walls/embed/${uniqueId}" width="600" height="400" style="border:none;"></iframe>`,
     };
   }
 
@@ -69,7 +69,7 @@ export class WallService {
       user: existingUser,
       ...this.generateLinks(),  // 🔹 Generate unique links here
     });
-   
+
 
     const savedWall = await this.wallRepository.save(wall);
 
@@ -130,21 +130,21 @@ export class WallService {
   // Get wall by sharable Link 
   async getWallBySharableLink(sharableLink: string): Promise<Wall> {
     console.log('Searching wall with shareable link:', sharableLink);
-  
+
     const wall = await this.wallRepository.findOne({ where: { shareable_link: Like(`%${sharableLink}`) } });
-  
+
     if (!wall) {
       throw new NotFoundException('Wall not found');
     }
-  
+
     // Check if wall is private
     if (wall.visibility === WallVisibility.PRIVATE) {
       throw new UnauthorizedException('This Wall is private and cannot be accessed via sharable link');
     }
-  
+
     return wall;
   }
-  
+
 
   async deleteWall(id: number, req: Request) {
     const user = req[REQUEST_USER_KEY];
@@ -219,11 +219,6 @@ export class WallService {
     wall.visibility = updateWallDto.visibility ?? wall.visibility;
     wall.logo = logoUrl;
 
-    // Regenerate links if title is updated (optional based on requirement)
-    if (updateWallDto.title) {
-      Object.assign(wall, this.generateLinks());
-
-    }
     // Update Social Links (Replace old ones)
     if (updateWallDto.social_links && updateWallDto.social_links.length > 0) {
 
