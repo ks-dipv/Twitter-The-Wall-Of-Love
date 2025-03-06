@@ -42,8 +42,9 @@ export class TweetService {
       wall,
     });
 
-    await this.tweetRepository.save(tweet);
-    return { message: 'Tweet added successfully' };
+    const savedTweet = await this.tweetRepository.save(tweet);
+
+    return savedTweet;
   }
 
   async getAllTweetsByWall(wallId: number, req: Request): Promise<Tweets[]> {
@@ -131,7 +132,9 @@ export class TweetService {
       await this.tweetRepository.update(tweets[i].id, { order_index: i });
     }
 
-    return { message: 'Tweet order updated successfully' };
+    const updatedTweets = await this.tweetRepository.getTweetsByWall(wallId);
+
+    return updatedTweets; 
   }
 
   // Cron job to update tweet like & comment count every night at 8 PM
