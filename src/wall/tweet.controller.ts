@@ -31,15 +31,6 @@ export class TweetController {
     return await this.tweetService.getAllTweetsByWall(wallId, req);
   }
 
-  @Get(':wallId/tweets/:tweetId')
-  async getTweetByWall(
-    @Param('tweetId') tweetId: number,
-    @Param('wallId') wallId: number,
-    @Request() req: Request,
-  ) {
-    return await this.tweetService.getTweetByWall(tweetId, wallId, req);
-  }
-
   @Delete(':wallId/tweets/:tweetId')
   async deleteTweetByWall(
     @Param('tweetId') tweetId: number,
