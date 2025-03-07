@@ -15,7 +15,6 @@ import { SocialLink } from '../entity/social-links.entity';
 import { SocialPlatform } from '../enum/social-platform.enum';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like } from 'typeorm';
 import { WallVisibility } from '../enum/wall-visibility.enum';
 import { v4 as uuidv4 } from 'uuid';
 @Injectable()
@@ -27,16 +26,34 @@ export class WallService {
 
     @InjectRepository(SocialLink)
     private readonly socialLinkRepository: Repository<SocialLink>,
-  ) { }
+  ) {}
 
   // Generate links
-  private generateLinks(): { shareable_link: string; embed_link: string } {
+  public async generateLinks(wallId: number, req: Request) {
+    const user = req[REQUEST_USER_KEY];
+
+    const existingUser = await this.userRepository.getByEmail(user.email);
+    if (!existingUser) {
+      throw new Error('User not found');
+    }
+
+    const wall = await this.wallRepository.getWallByIdAndUser(
+      wallId,
+      existingUser.id,
+    );
+
+    if (!wall || wall.user.id !== existingUser.id) {
+      throw new NotFoundException('Wall not found or access denied');
+    }
+
     const uniqueId = uuidv4();
-    const baseUrl = 'http://localhost:3000/';
+    const baseUrl = 'http://localhost:3000';
+    const shareable_link = `${baseUrl}/api/walls/${wallId}/link/${uniqueId}`;
+    const embed_link = `<iframe src="${baseUrl}/api/walls/${wallId}/link/${uniqueId}" width="600" height="400""></iframe>`;
 
     return {
-      shareable_link: `${baseUrl}api/walls/share/${uniqueId}`,
-      embed_link: `<iframe src="${baseUrl}/walls/embed/${uniqueId}" width="600" height="400" style="border:none;"></iframe>`,
+      shareable_link,
+      embed_link,
     };
   }
 
@@ -60,16 +77,13 @@ export class WallService {
       logoUrl = await this.uploadService.logo(wallLogo);
     }
 
-
     const wall = this.wallRepository.create({
       title,
       logo: logoUrl,
       description,
       visibility,
       user: existingUser,
-      ...this.generateLinks(),  // 🔹 Generate unique links here
     });
-
 
     const savedWall = await this.wallRepository.save(wall);
 
@@ -127,11 +141,12 @@ export class WallService {
     return wall;
   }
 
-  // Get wall by sharable Link 
-  async getWallBySharableLink(sharableLink: string): Promise<Wall> {
-    console.log('Searching wall with shareable link:', sharableLink);
-
-    const wall = await this.wallRepository.findOne({ where: { shareable_link: Like(`%${sharableLink}`) } });
+  // Get wall by sharable Link
+  async getWallBySharableLink(wallId: number): Promise<Wall> {
+    const wall = await this.wallRepository.findOne({
+      where: { id: wallId },
+      relations: ['tweets'],
+    });
 
     if (!wall) {
       throw new NotFoundException('Wall not found');
@@ -139,12 +154,13 @@ export class WallService {
 
     // Check if wall is private
     if (wall.visibility === WallVisibility.PRIVATE) {
-      throw new UnauthorizedException('This Wall is private and cannot be accessed via sharable link');
+      throw new UnauthorizedException(
+        'This Wall is private and cannot be accessed via sharable link',
+      );
     }
 
     return wall;
   }
-
 
   async deleteWall(id: number, req: Request) {
     const user = req[REQUEST_USER_KEY];
@@ -221,7 +237,6 @@ export class WallService {
 
     // Update Social Links (Replace old ones)
     if (updateWallDto.social_links && updateWallDto.social_links.length > 0) {
-
       for (const linkDto of updateWallDto.social_links) {
         // Find the existing social link by platform
         const existingLink = wall.social_links.find(
@@ -247,6 +262,4 @@ export class WallService {
 
     return await this.wallRepository.save(wall);
   }
-
-
 }
