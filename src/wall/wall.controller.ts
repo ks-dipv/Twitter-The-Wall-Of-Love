@@ -19,7 +19,7 @@ import { ApiOperation, ApiResponse, ApiTags, ApiParam, ApiBody } from '@nestjs/s
 @ApiTags('Walls')
 @Controller('api/walls')
 export class WallController {
-  constructor(private readonly wallService: WallService) {}
+  constructor(private readonly wallService: WallService) { }
 
   // Create a new Wall
   @Post('entry')
@@ -53,20 +53,22 @@ export class WallController {
     return await this.wallService.getWallById(id, req);
   }
 
-
-  // Get Wall by sharable link
-  @Get('share/:sharableLink')
-  @ApiOperation({ summary: 'Get Wall by sharable link' })
-  @ApiParam({ name: 'sharableLink', description: 'Sharable link of the Wall', type: String })
-  @ApiResponse({ status: 200, description: 'Wall retrieved successfully' })
+  @Post(':wallId/generate-link')
+  @ApiOperation({ summary: 'Generate a shareable link for a Wall' })
+  @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
+  @ApiResponse({ status: 200, description: 'Shareable link generated' })
   @ApiResponse({ status: 404, description: 'Wall not found' })
-  async getWallBySharableLink(@Param('sharableLink') sharableLink: string) {
-    console.log('Received sharableLink:', sharableLink);
-    return await this.wallService.getWallBySharableLink(sharableLink);
+  async generateLink(@Param('wallId') wallId: number, @Request() req) {
+    return await this.wallService.generateLinks(wallId, req);
   }
 
   // Get Wall by sharable link
   @Get(':wallId/link/:uuid')
+  @ApiOperation({ summary: 'Get a Wall by shareable link' })
+  @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
+  @ApiParam({ name: 'uuid', description: 'Unique identifier for the shareable link', type: String })
+  @ApiResponse({ status: 200, description: 'Wall details retrieved' })
+  @ApiResponse({ status: 404, description: 'Wall not found' })
   async getWallBySharableLink(@Param('wallId') wallId: number) {
     return await this.wallService.getWallBySharableLink(wallId);
   }
