@@ -19,7 +19,7 @@ import { ApiOperation, ApiResponse, ApiTags, ApiParam, ApiBody } from '@nestjs/s
 @ApiTags('Walls')
 @Controller('api/walls')
 export class WallController {
-  constructor(private readonly wallService: WallService) { }
+  constructor(private readonly wallService: WallService) {}
 
   // Create a new Wall
   @Post('entry')
@@ -65,7 +65,11 @@ export class WallController {
     return await this.wallService.getWallBySharableLink(sharableLink);
   }
 
-
+  // Get Wall by sharable link
+  @Get(':wallId/link/:uuid')
+  async getWallBySharableLink(@Param('wallId') wallId: number) {
+    return await this.wallService.getWallBySharableLink(wallId);
+  }
 
   // Delete a Wall by ID
   @Delete('remove/:id')
@@ -103,5 +107,4 @@ export class WallController {
   async deleteSocialLink(@Param('id') id: number, @Request() req) {
     return await this.wallService.deleteSocialLink(id, req);
   }
-
 }

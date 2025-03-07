@@ -3,7 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   UnauthorizedException,
-  Logger
+  Logger,
 } from '@nestjs/common';
 import { TweetRepository } from '../repository/tweet.repository';
 import { WallRepository } from '../repository/wall.repository';
@@ -11,7 +11,7 @@ import { TwitterService } from './twitter.service';
 import { Tweets } from '../entity/tweets.entity';
 import { REQUEST_USER_KEY } from 'src/user/constants/auth.constant';
 import { UserRepository } from 'src/user/repositories/user.repository';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 @Injectable()
 export class TweetService {
   private readonly logger = new Logger(TweetService.name);
@@ -20,7 +20,7 @@ export class TweetService {
     private readonly wallRepository: WallRepository,
     private readonly twitterService: TwitterService,
     private readonly userRepository: UserRepository,
-  ) { }
+  ) {}
 
   async addTweetToWall(tweetUrl: string, wallId: number, req: Request) {
     const user = req[REQUEST_USER_KEY];
@@ -61,7 +61,6 @@ export class TweetService {
 
     return await this.tweetRepository.getTweetsByWall(wallId);
   }
-
 
   async deleteTweetByWall(tweetId: number, wallId: number, req: Request) {
     const user = req[REQUEST_USER_KEY];
@@ -134,7 +133,7 @@ export class TweetService {
 
     const updatedTweets = await this.tweetRepository.getTweetsByWall(wallId);
 
-    return updatedTweets; 
+    return updatedTweets;
   }
 
   // Cron job to update tweet like & comment count every night at 8 PM
@@ -162,7 +161,9 @@ export class TweetService {
 
         this.logger.log(`Updated tweet ID ${tweet.id}`);
       } catch (error) {
-        this.logger.error(`Failed to update tweet ID ${tweet.id}: ${error.message}`);
+        this.logger.error(
+          `Failed to update tweet ID ${tweet.id}: ${error.message}`,
+        );
       }
     }
 

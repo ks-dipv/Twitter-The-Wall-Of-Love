@@ -33,12 +33,6 @@ export class Wall {
   })
   visibility: WallVisibility;
 
-  @Column({ type: 'varchar', unique: true, nullable:true })
-  shareable_link: string;
-
-  @Column({ type: 'varchar', unique: true, nullable: true })
-  embed_link: string;
-  
   @CreateDateColumn()
   created_at: Date;
 

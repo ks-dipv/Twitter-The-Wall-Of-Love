@@ -25,9 +25,7 @@ const ENV = process.env.NODE_ENV;
       validationSchema: environmentValidation,
     }),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule,
-        ScheduleModule.forRoot()
-      ],
+      imports: [ConfigModule, ScheduleModule.forRoot()],
       inject: [ConfigService],
 
       useFactory: (configService: ConfigService) => ({
@@ -56,4 +54,4 @@ const ENV = process.env.NODE_ENV;
     AccessTokenGuard,
   ],
 })
-export class AppModule { }
+export class AppModule {}
