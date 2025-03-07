@@ -21,12 +21,18 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateDto } from './dtos/update.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Auth } from 'src/user/decorator/auth.decorator';
+import { ApiOperation, ApiBody, ApiResponse, ApiTags, ApiParam   } from '@nestjs/swagger';
 
+@ApiTags('Users')
 @Controller('api/user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   @Post('auth/signup')
+  @ApiOperation({ summary: 'User signup' })
+  @ApiBody({ type: SignUpDto })
+  @ApiResponse({ status: 201, description: 'User signed up successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid input data' })
   @Auth(AuthType.None)
   @UseInterceptors(FileInterceptor('profileImage'))
   public entry(
@@ -37,6 +43,10 @@ export class UserController {
   }
 
   @Post('auth/signin')
+  @ApiOperation({ summary: 'User sign-in' })
+  @ApiBody({ type: SignInDto })
+  @ApiResponse({ status: 200, description: 'User signed in successfully' })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
   @Auth(AuthType.None)
   public signin(
     @Body() signInDto: SignInDto,
@@ -46,6 +56,8 @@ export class UserController {
   }
 
   @Post('auth/logout')
+  @ApiOperation({ summary: 'Logout the user' })
+  @ApiResponse({ status: 200, description: 'Logged out successfully' })
   @Auth(AuthType.Bearer)
   public logout(@Response({ passthrough: true }) res) {
     res.clearCookie('access_token');
@@ -54,6 +66,10 @@ export class UserController {
   }
 
   @Put('update')
+  @ApiOperation({ summary: 'Update user details' })
+  @ApiBody({ type: UpdateDto })
+  @ApiResponse({ status: 200, description: 'User updated successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid input data' })
   @Auth(AuthType.Bearer)
   @UseInterceptors(FileInterceptor('profileImage'))
   public update(
@@ -66,11 +82,26 @@ export class UserController {
 
   @Delete('delete')
   @Auth(AuthType.Bearer)
+  @ApiOperation({ summary: 'Delete user account' })
+  @ApiResponse({ status: 200, description: 'User deleted successfully' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @Auth(AuthType.Bearer)
   public remove(@Request() req) {
     return this.userService.remove(req);
   }
 
   @Post('auth/reset-password/request')
+  @ApiOperation({ summary: 'Request password reset' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string', example: 'user@example.com' },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Password reset email sent' })
+  @ApiResponse({ status: 404, description: 'User not found' })
   @Auth(AuthType.None)
   public resetPasswordRequest(@Body() resetPassword: UpdateDto) {
     const { email } = resetPassword;
@@ -78,6 +109,18 @@ export class UserController {
   }
 
   @Post('auth/reset-password/:token')
+  @ApiOperation({ summary: 'Reset password using token' })
+  @ApiParam({ name: 'token', description: 'Password reset token', type: 'string' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        password: { type: 'string', example: 'newPassword123' },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Password reset successful' })
+  @ApiResponse({ status: 400, description: 'Invalid token or password' })
   @Auth(AuthType.None)
   public resetPassword(
     @Param('token') token: string,
@@ -88,6 +131,8 @@ export class UserController {
   }
 
   @Get('auth/twitter')
+  @ApiOperation({ summary: 'Redirect user to Twitter authentication' })
+  @ApiResponse({ status: 302, description: 'Redirecting to Twitter' })
   @Auth(AuthType.None)
   @UseGuards(AuthGuard('twitter'))
   async twitterLogin() {
@@ -95,6 +140,8 @@ export class UserController {
   }
 
   @Get('auth/twitter/callback')
+  @ApiOperation({ summary: 'Handle Twitter authentication callback' })
+  @ApiResponse({ status: 200, description: 'User authenticated via Twitter' })
   @Auth(AuthType.None)
   @UseGuards(AuthGuard('twitter'))
   async twitterAuthCallback(@Req() req) {
@@ -103,6 +150,8 @@ export class UserController {
   }
 
   @Post('developer/api-token')
+  @ApiOperation({ summary: 'Generate API token for developers' })
+  @ApiResponse({ status: 200, description: 'API token generated successfully' })
   async apiKeyGenerate(@Request() req) {
     return this.userService.apiKeyGenerate(req);
   }
