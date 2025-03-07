@@ -4,20 +4,17 @@ import {
   BadRequestException,
   UnauthorizedException,
   InternalServerErrorException,
-  Logger,
 } from '@nestjs/common';
 import { TweetRepository } from '../repository/tweet.repository';
 import { WallRepository } from '../repository/wall.repository';
 import { TwitterService } from './twitter.service';
 import { Tweets } from '../entity/tweets.entity';
-import { REQUEST_USER_KEY } from 'src/user/constants/auth.constant';
+import { REQUEST_USER_KEY } from 'src/common/constants/auth.constant';
 import { UserRepository } from 'src/user/repositories/user.repository';
 import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class TweetService {
-  private readonly logger = new Logger(TweetService.name);
-
   constructor(
     private readonly tweetRepository: TweetRepository,
     private readonly wallRepository: WallRepository,
@@ -39,18 +36,20 @@ export class TweetService {
       );
       if (!wall) throw new NotFoundException('Wall not found or access denied');
 
-      let tweetData;
-      try {
-        tweetData = await this.twitterService.fetchTweetDetails(tweetUrl);
-      } catch (error) {
-        this.logger.error(`Failed to fetch tweet details: ${error.message}`);
+      const tweetData = await this.twitterService.fetchTweetDetails(tweetUrl);
+      if (!tweetData)
         throw new BadRequestException('Invalid tweet URL or tweet not found');
-      }
 
       const tweet = this.tweetRepository.create({ ...tweetData, wall });
       return await this.tweetRepository.save(tweet);
     } catch (error) {
-      this.logger.error(`Error adding tweet to wall: ${error.message}`);
+      if (
+        error instanceof UnauthorizedException ||
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
+        throw error; // Rethrow known exceptions
+      }
       throw new InternalServerErrorException('Failed to add tweet to wall');
     }
   }
@@ -71,7 +70,13 @@ export class TweetService {
 
       return await this.tweetRepository.getTweetsByWall(wallId);
     } catch (error) {
-      this.logger.error(`Error fetching tweets: ${error.message}`);
+      if (
+        error instanceof UnauthorizedException ||
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
+      }
       throw new InternalServerErrorException('Failed to fetch tweets');
     }
   }
@@ -99,7 +104,13 @@ export class TweetService {
       await this.tweetRepository.remove(tweet);
       return { message: 'Tweet deleted successfully' };
     } catch (error) {
-      this.logger.error(`Error deleting tweet: ${error.message}`);
+      if (
+        error instanceof UnauthorizedException ||
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
+      }
       throw new InternalServerErrorException('Failed to delete tweet');
     }
   }
@@ -158,45 +169,37 @@ export class TweetService {
 
       return await this.tweetRepository.getTweetsByWall(wallId);
     } catch (error) {
-      this.logger.error(`Error reordering tweets: ${error.message}`);
+      if (
+        error instanceof UnauthorizedException ||
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
+      }
       throw new InternalServerErrorException('Failed to reorder tweets');
     }
   }
 
   @Cron('0 0 * * *')
   async updateTweetStatsDaily() {
-    this.logger.log('Running daily tweet stats update...');
-
     try {
       const tweets = await this.tweetRepository.find();
-      if (!tweets.length) {
-        this.logger.log('No tweets found to update.');
-        return;
-      }
+      if (!tweets.length) return;
 
       for (const tweet of tweets) {
-        try {
-          const updatedTweetData = await this.twitterService.fetchTweetDetails(
-            tweet.tweet_url,
-          );
+        const updatedTweetData = await this.twitterService.fetchTweetDetails(
+          tweet.tweet_url,
+        );
 
-          await this.tweetRepository.update(tweet.id, {
-            likes: updatedTweetData.likeCount,
-            comments: updatedTweetData.commentCount,
-          });
-
-          this.logger.log(`Updated tweet ID ${tweet.id}`);
-        } catch (error) {
-          this.logger.error(
-            `Failed to update tweet ID ${tweet.id}: ${error.message}`,
-          );
-        }
+        await this.tweetRepository.update(tweet.id, {
+          likes: updatedTweetData.likeCount,
+          comments: updatedTweetData.commentCount,
+        });
       }
-
-      this.logger.log('Daily tweet stats update completed.');
     } catch (error) {
-      this.logger.error(`Cron job failed: ${error.message}`);
-      throw new InternalServerErrorException('Tweet update job failed');
+      throw new InternalServerErrorException(
+        error.message || 'Tweet update job failed',
+      );
     }
   }
 }

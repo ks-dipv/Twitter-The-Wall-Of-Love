@@ -5,6 +5,7 @@ import * as session from 'express-session';
 import * as passport from 'passport';
 import * as cookieParser from 'cookie-parser';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { HttpExceptionFilter } from './common/exception-filter/http-exception.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -22,12 +23,12 @@ async function bootstrap() {
     .setVersion('1.0')
     .setTitle('Twiiter/X wall of Love')
     .setDescription('Use api http://localhost:3000')
-    .setTermsOfService('http://localhost:3000/terms-of-service')
     .addServer('http://localhost:3000')
-    //  .setLicense('MIT License','')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
+
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   app.use(
     session({

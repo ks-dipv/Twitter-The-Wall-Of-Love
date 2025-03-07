@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import jwtConfig from '../config/jwt.config';
 import { ConfigType } from '@nestjs/config';
 import { User } from '../entity/user.entity';
-import { ActiveUserData } from '../interface/active-user.interface';
+import { ActiveUserData } from '../../common/interface/active-user.interface';
 
 @Injectable()
 export class GenerateTokenProvider {

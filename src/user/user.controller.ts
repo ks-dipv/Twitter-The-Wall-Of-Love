@@ -16,7 +16,6 @@ import { SignInDto } from './dtos/signin.dto';
 import { AuthType } from './enum/auth-type.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateDto } from './dtos/update.dto';
-import { Auth } from 'src/user/decorator/auth.decorator';
 import {
   ApiOperation,
   ApiBody,
@@ -24,6 +23,7 @@ import {
   ApiTags,
   ApiParam,
 } from '@nestjs/swagger';
+import { Auth } from 'src/common/decorator/auth.decorator';
 
 @ApiTags('Users')
 @Controller('api/user')

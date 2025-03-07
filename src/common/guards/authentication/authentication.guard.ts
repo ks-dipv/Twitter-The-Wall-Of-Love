@@ -7,7 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { AccessTokenGuard } from '../access-token/access-token.guard';
 import { AuthType } from 'src/user/enum/auth-type.enum';
-import { AUTH_TYPE_KEY } from 'src/user/constants/auth.constant';
+import { AUTH_TYPE_KEY } from 'src/common/constants/auth.constant';
 
 @Injectable()
 export class AuthenticationGuard implements CanActivate {

@@ -8,7 +8,7 @@ import { WallRepository } from '../repository/wall.repository';
 import { CreateWallDto } from '../dtos/create-wall.dto';
 import { Wall } from '../entity/wall.entity';
 import { UpdateWallDto } from '../dtos/update-wall.dto';
-import { REQUEST_USER_KEY } from 'src/user/constants/auth.constant';
+import { REQUEST_USER_KEY } from 'src/common/constants/auth.constant';
 import { UserRepository } from 'src/user/repositories/user.repository';
 import { UploadService } from 'src/user/services/upload.service';
 import { SocialLink } from '../entity/social-links.entity';
