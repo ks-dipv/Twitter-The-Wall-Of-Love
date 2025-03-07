@@ -2,7 +2,6 @@ import { IsNotEmpty, IsString, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateTweetDto {
-
   @ApiProperty({
     description: 'The URL of the tweet',
     example: 'https://twitter.com/username/status/1234567890123456789',

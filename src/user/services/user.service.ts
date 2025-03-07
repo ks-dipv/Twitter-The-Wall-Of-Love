@@ -193,34 +193,6 @@ export class UserService {
     }
   }
 
-  public async validateOrCreateUser(profile: any) {
-    try {
-      const { id: twitterId, username, emails, photos } = profile;
-      const email = emails?.[0]?.value || null;
-
-      let user = await this.userRepository.findOne({
-        where: { twitter_id: twitterId },
-      });
-
-      if (!user) {
-        user = this.userRepository.create({
-          twitter_id: twitterId,
-          name: username,
-          email: email,
-          profile_pic: photos?.[0]?.value || null,
-        });
-
-        await this.userRepository.save(user);
-      }
-
-      return user;
-    } catch (error) {
-      throw new InternalServerErrorException(
-        `Failed to validate or create user: ${error.message}`,
-      );
-    }
-  }
-
   public async apiKeyGenerate(req: Request) {
     try {
       const user = req[REQUEST_USER_KEY];

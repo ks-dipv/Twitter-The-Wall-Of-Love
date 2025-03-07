@@ -168,7 +168,7 @@ export class TweetService {
     this.logger.log('Running daily tweet stats update...');
 
     try {
-      const tweets = await this.tweetRepository.getAllTweets();
+      const tweets = await this.tweetRepository.find();
       if (!tweets.length) {
         this.logger.log('No tweets found to update.');
         return;

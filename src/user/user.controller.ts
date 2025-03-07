@@ -2,13 +2,10 @@ import {
   Body,
   Controller,
   Delete,
-  Get,
   Param,
   Post,
   Put,
-  Req,
   UploadedFile,
-  UseGuards,
   UseInterceptors,
   Response,
   Request,
@@ -19,14 +16,19 @@ import { SignInDto } from './dtos/signin.dto';
 import { AuthType } from './enum/auth-type.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateDto } from './dtos/update.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { Auth } from 'src/user/decorator/auth.decorator';
-import { ApiOperation, ApiBody, ApiResponse, ApiTags, ApiParam   } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiBody,
+  ApiResponse,
+  ApiTags,
+  ApiParam,
+} from '@nestjs/swagger';
 
 @ApiTags('Users')
 @Controller('api/user')
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   @Post('auth/signup')
   @ApiOperation({ summary: 'User signup' })
@@ -110,7 +112,11 @@ export class UserController {
 
   @Post('auth/reset-password/:token')
   @ApiOperation({ summary: 'Reset password using token' })
-  @ApiParam({ name: 'token', description: 'Password reset token', type: 'string' })
+  @ApiParam({
+    name: 'token',
+    description: 'Password reset token',
+    type: 'string',
+  })
   @ApiBody({
     schema: {
       type: 'object',
@@ -128,25 +134,6 @@ export class UserController {
   ) {
     const { password } = updatePassword;
     return this.userService.resetPassword(token, password);
-  }
-
-  @Get('auth/twitter')
-  @ApiOperation({ summary: 'Redirect user to Twitter authentication' })
-  @ApiResponse({ status: 302, description: 'Redirecting to Twitter' })
-  @Auth(AuthType.None)
-  @UseGuards(AuthGuard('twitter'))
-  async twitterLogin() {
-    return { message: 'Redirecting to Twitter for authentication' };
-  }
-
-  @Get('auth/twitter/callback')
-  @ApiOperation({ summary: 'Handle Twitter authentication callback' })
-  @ApiResponse({ status: 200, description: 'User authenticated via Twitter' })
-  @Auth(AuthType.None)
-  @UseGuards(AuthGuard('twitter'))
-  async twitterAuthCallback(@Req() req) {
-    const response = await this.userService.validateOrCreateUser(req.user);
-    return response;
   }
 
   @Post('developer/api-token')

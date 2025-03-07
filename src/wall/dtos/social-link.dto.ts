@@ -1,9 +1,8 @@
-import { IsString, IsNotEmpty, IsInt, IsEnum, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum } from 'class-validator';
 import { SocialPlatform } from '../enum/social-platform.enum';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class SocialLinkDto {
-
   @ApiProperty({
     description: 'The social media platform',
     example: SocialPlatform.TWITTER,
@@ -12,7 +11,7 @@ export class SocialLinkDto {
   @IsEnum(SocialPlatform)
   @IsString()
   @IsNotEmpty()
-  platform?: SocialPlatform; // Example: Twitter, LinkedIn, Instagram
+  platform: SocialPlatform; // Example: Twitter, LinkedIn, Instagram
 
   @ApiProperty({
     description: 'The URL of the social media profile',

@@ -14,12 +14,18 @@ import { WallService } from './service/wall.service';
 import { CreateWallDto } from './dtos/create-wall.dto';
 import { UpdateWallDto } from './dtos/update-wall.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiOperation, ApiResponse, ApiTags, ApiParam, ApiBody } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+  ApiParam,
+  ApiBody,
+} from '@nestjs/swagger';
 
 @ApiTags('Walls')
 @Controller('api/walls')
 export class WallController {
-  constructor(private readonly wallService: WallService) { }
+  constructor(private readonly wallService: WallService) {}
 
   // Create a new Wall
   @Post('entry')
@@ -66,7 +72,11 @@ export class WallController {
   @Get(':wallId/link/:uuid')
   @ApiOperation({ summary: 'Get a Wall by shareable link' })
   @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
-  @ApiParam({ name: 'uuid', description: 'Unique identifier for the shareable link', type: String })
+  @ApiParam({
+    name: 'uuid',
+    description: 'Unique identifier for the shareable link',
+    type: String,
+  })
   @ApiResponse({ status: 200, description: 'Wall details retrieved' })
   @ApiResponse({ status: 404, description: 'Wall not found' })
   async getWallBySharableLink(@Param('wallId') wallId: number) {

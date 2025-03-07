@@ -10,10 +10,9 @@ import {
 import { WallVisibility } from '../enum/wall-visibility.enum';
 import { SocialLinkDto } from './social-link.dto';
 import { Type } from 'class-transformer';
-import { ApiProperty , ApiPropertyOptional} from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateWallDto {
-
   @ApiProperty({
     description: 'The title of the wall',
     example: 'My Awesome Wall',

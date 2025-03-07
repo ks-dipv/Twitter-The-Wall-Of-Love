@@ -9,12 +9,18 @@ import {
   Request,
 } from '@nestjs/common';
 import { TweetService } from './service/tweet.service';
-import { ApiOperation, ApiParam, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiParam,
+  ApiBody,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 @ApiTags('Tweets')
 @Controller('api/walls')
 export class TweetController {
-  constructor(private readonly tweetService: TweetService) { }
+  constructor(private readonly tweetService: TweetService) {}
 
   @Post(':wallId/tweets')
   @ApiOperation({ summary: 'Add a tweet to a wall' })

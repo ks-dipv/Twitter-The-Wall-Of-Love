@@ -2,7 +2,6 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsString, Matches, MinLength } from 'class-validator';
 
 export class SignUpDto {
-
   @ApiProperty({
     description: 'Full name of the user',
     example: 'John Doe',
@@ -37,12 +36,4 @@ export class SignUpDto {
   @IsString()
   @IsOptional()
   profile_pic?: string;
-
-  @ApiPropertyOptional({
-    description: 'Twitter ID for authentication via Twitter',
-    example: '1234567890',
-  })
-  @IsString()
-  @IsOptional()
-  twitter_id?: string;
 }

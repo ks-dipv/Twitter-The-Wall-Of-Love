@@ -32,10 +32,6 @@ export class User {
   @Column({ nullable: true, unique: true })
   api_token?: string;
 
-  @Column({ unique: true, nullable: true })
-  @Exclude()
-  twitter_id: string;
-
   @CreateDateColumn()
   created_at: Date;
 
