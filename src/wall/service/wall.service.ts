@@ -248,5 +248,36 @@ export class WallService {
     return await this.wallRepository.save(wall);
   }
 
+  // Delete a social link by id 
+  async deleteSocialLink(id: number, req: Request): Promise<{ message: string }> {
+    const user = req[REQUEST_USER_KEY];
+  
+    if (!user) {
+      throw new UnauthorizedException('User not authenticated');
+    }
+  
+    const existingUser = await this.userRepository.getByEmail(user.email);
+    if (!existingUser) {
+      throw new BadRequestException("User doesn't exist");
+    }
+  
+    const socialLink = await this.socialLinkRepository.findOne({
+      where: { id },
+      relations: ['wall'],
+    });
+  
+    if (!socialLink) {
+      throw new NotFoundException('Social link not found');
+    }
+  
+    if (socialLink.wall.user.id !== existingUser.id) {
+      throw new UnauthorizedException('You do not have permission to delete this social link');
+    }
+  
+    await this.socialLinkRepository.delete(id);
+    return { message: 'Social link deleted successfully' };
+  }
+  
+
 
 }

@@ -69,4 +69,11 @@ export class WallController {
   ) {
     return await this.wallService.updateWall(id, updateWallDto, req, logo);
   }
+
+  //Delete a social link
+  @Delete('social-link/:id')
+  async deleteSocialLink(@Param('id') id: number, @Request() req) {
+    return await this.wallService.deleteSocialLink(id, req);
+  }
+
 }
