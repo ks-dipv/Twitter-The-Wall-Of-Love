@@ -17,6 +17,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WallVisibility } from '../enum/wall-visibility.enum';
 import { v4 as uuidv4 } from 'uuid';
+
 @Injectable()
 export class WallService {
   constructor(
@@ -30,31 +31,36 @@ export class WallService {
 
   // Generate links
   public async generateLinks(wallId: number, req: Request) {
-    const user = req[REQUEST_USER_KEY];
+    try {
+      const user = req[REQUEST_USER_KEY];
 
-    const existingUser = await this.userRepository.getByEmail(user.email);
-    if (!existingUser) {
-      throw new Error('User not found');
+      const existingUser = await this.userRepository.getByEmail(user.email);
+      if (!existingUser) {
+        throw new NotFoundException('User not found');
+      }
+
+      const wall = await this.wallRepository.getWallByIdAndUser(
+        wallId,
+        existingUser.id,
+      );
+      if (!wall || wall.user.id !== existingUser.id) {
+        throw new NotFoundException('Wall not found or access denied');
+      }
+
+      const uniqueId = uuidv4();
+      const baseUrl = 'http://localhost:3000';
+      const shareable_link = `${baseUrl}/api/walls/${wallId}/link/${uniqueId}`;
+      const embed_link = `<iframe src="${baseUrl}/api/walls/${wallId}/link/${uniqueId}" width="600" height="400"></iframe>`;
+
+      return {
+        shareable_link,
+        embed_link,
+      };
+    } catch (error) {
+      throw new BadRequestException(
+        error.message || 'Failed to generate links',
+      );
     }
-
-    const wall = await this.wallRepository.getWallByIdAndUser(
-      wallId,
-      existingUser.id,
-    );
-
-    if (!wall || wall.user.id !== existingUser.id) {
-      throw new NotFoundException('Wall not found or access denied');
-    }
-
-    const uniqueId = uuidv4();
-    const baseUrl = 'http://localhost:3000';
-    const shareable_link = `${baseUrl}/api/walls/${wallId}/link/${uniqueId}`;
-    const embed_link = `<iframe src="${baseUrl}/api/walls/${wallId}/link/${uniqueId}" width="600" height="400""></iframe>`;
-
-    return {
-      shareable_link,
-      embed_link,
-    };
   }
 
   // Create wall
@@ -63,125 +69,147 @@ export class WallService {
     req: Request,
     wallLogo?: Express.Multer.File,
   ) {
-    const user = req[REQUEST_USER_KEY];
-    const { title, logo, description, visibility } = createWallDto;
+    try {
+      const user = req[REQUEST_USER_KEY];
+      const { title, logo, description, visibility } = createWallDto;
 
-    let logoUrl: string | null = logo || null;
+      let logoUrl: string | null = logo || null;
 
-    const existingUser = await this.userRepository.getByEmail(user.email);
-    if (!existingUser) {
-      throw new Error('User not found');
+      const existingUser = await this.userRepository.getByEmail(user.email);
+      if (!existingUser) {
+        throw new NotFoundException('User not found');
+      }
+
+      if (wallLogo) {
+        logoUrl = await this.uploadService.logo(wallLogo);
+      }
+
+      const wall = this.wallRepository.create({
+        title,
+        logo: logoUrl,
+        description,
+        visibility,
+        user: existingUser,
+      });
+
+      const savedWall = await this.wallRepository.save(wall);
+
+      if (createWallDto.social_links && createWallDto.social_links.length > 0) {
+        const socialLinksEntities = createWallDto.social_links.map((link) =>
+          this.socialLinkRepository.create({
+            platform: link.platform as SocialPlatform,
+            url: link.url,
+            wall: savedWall,
+          }),
+        );
+        await this.socialLinkRepository.save(socialLinksEntities);
+        savedWall.social_links = socialLinksEntities;
+      }
+
+      return savedWall;
+    } catch (error) {
+      throw new BadRequestException(error.message || 'Failed to create wall');
     }
-
-    if (wallLogo) {
-      logoUrl = await this.uploadService.logo(wallLogo);
-    }
-
-    const wall = this.wallRepository.create({
-      title,
-      logo: logoUrl,
-      description,
-      visibility,
-      user: existingUser,
-    });
-
-    const savedWall = await this.wallRepository.save(wall);
-
-    if (createWallDto.social_links && createWallDto.social_links.length > 0) {
-      const socialLinksEntities = createWallDto.social_links.map((link) =>
-        this.socialLinkRepository.create({
-          platform: link.platform as SocialPlatform,
-          url: link.url,
-          wall: savedWall,
-        }),
-      );
-      await this.socialLinkRepository.save(socialLinksEntities);
-      savedWall.social_links = socialLinksEntities;
-    }
-
-    return savedWall;
   }
 
   async getAllWalls(req: Request): Promise<Wall[]> {
-    const user = req[REQUEST_USER_KEY];
+    try {
+      const user = req[REQUEST_USER_KEY];
 
-    if (!user) {
-      throw new UnauthorizedException('User not authenticated');
+      if (!user) {
+        throw new UnauthorizedException('User not authenticated');
+      }
+
+      const existingUser = await this.userRepository.getByEmail(user.email);
+      if (!existingUser) {
+        throw new NotFoundException("User doesn't exist");
+      }
+
+      return await this.wallRepository.find({
+        where: { user: { id: existingUser.id } },
+      });
+    } catch (error) {
+      throw new BadRequestException(error.message || 'Failed to fetch walls');
     }
-
-    const existingUser = await this.userRepository.getByEmail(user.email);
-    if (!existingUser) {
-      throw new BadRequestException("User doesn't exist");
-    }
-
-    return await this.wallRepository.find({
-      where: { user: { id: existingUser.id } },
-    });
   }
 
-  // Get wall bY ID
+  // Get wall by ID
   async getWallById(id: number, req: Request): Promise<Wall> {
-    const user = req[REQUEST_USER_KEY];
+    try {
+      const user = req[REQUEST_USER_KEY];
 
-    if (!user) {
-      throw new UnauthorizedException('User not authenticated');
+      if (!user) {
+        throw new UnauthorizedException('User not authenticated');
+      }
+
+      const existingUser = await this.userRepository.getByEmail(user.email);
+      if (!existingUser) {
+        throw new NotFoundException("User doesn't exist");
+      }
+
+      const wall = await this.wallRepository.getById(id);
+
+      if (!wall || wall.user.id !== existingUser.id) {
+        throw new NotFoundException('Wall not found or access denied');
+      }
+
+      return wall;
+    } catch (error) {
+      throw new BadRequestException(error.message || 'Failed to fetch wall');
     }
-
-    const existingUser = await this.userRepository.getByEmail(user.email);
-    if (!existingUser) {
-      throw new BadRequestException("User doesn't exist");
-    }
-
-    const wall = await this.wallRepository.getById(id);
-
-    if (!wall || wall.user.id !== existingUser.id) {
-      throw new NotFoundException('Wall not found or access denied');
-    }
-
-    return wall;
   }
 
   // Get wall by sharable Link
   async getWallBySharableLink(wallId: number): Promise<Wall> {
-    const wall = await this.wallRepository.findOne({
-      where: { id: wallId },
-      relations: ['tweets'],
-    });
+    try {
+      const wall = await this.wallRepository.findOne({
+        where: { id: wallId },
+        relations: ['tweets'],
+      });
 
-    if (!wall) {
-      throw new NotFoundException('Wall not found');
-    }
+      if (!wall) {
+        throw new NotFoundException('Wall not found');
+      }
 
-    // Check if wall is private
-    if (wall.visibility === WallVisibility.PRIVATE) {
-      throw new UnauthorizedException(
-        'This Wall is private and cannot be accessed via sharable link',
+      // Check if wall is private
+      if (wall.visibility === WallVisibility.PRIVATE) {
+        throw new UnauthorizedException(
+          'This Wall is private and cannot be accessed via sharable link',
+        );
+      }
+
+      return wall;
+    } catch (error) {
+      throw new BadRequestException(
+        error.message || 'Failed to fetch wall by sharable link',
       );
     }
-
-    return wall;
   }
 
   async deleteWall(id: number, req: Request) {
-    const user = req[REQUEST_USER_KEY];
+    try {
+      const user = req[REQUEST_USER_KEY];
 
-    if (!user) {
-      throw new UnauthorizedException('User not authenticated');
+      if (!user) {
+        throw new UnauthorizedException('User not authenticated');
+      }
+
+      const existingUser = await this.userRepository.getByEmail(user.email);
+      if (!existingUser) {
+        throw new NotFoundException("User doesn't exist");
+      }
+
+      const wall = await this.wallRepository.getById(id);
+
+      if (!wall || wall.user.id !== existingUser.id) {
+        throw new NotFoundException('Wall not found or access denied');
+      }
+
+      await this.wallRepository.delete(id);
+      return { message: 'Wall deleted successfully' };
+    } catch (error) {
+      throw new BadRequestException(error.message || 'Failed to delete wall');
     }
-
-    const existingUser = await this.userRepository.getByEmail(user.email);
-    if (!existingUser) {
-      throw new BadRequestException("User doesn't exist");
-    }
-
-    const wall = await this.wallRepository.getById(id);
-
-    if (!wall || wall.user.id !== existingUser.id) {
-      throw new NotFoundException('Wall not found or access denied');
-    }
-
-    await this.wallRepository.delete(id);
-    return { message: 'Wall deleted successfully' };
   }
 
   async updateWall(
@@ -190,77 +218,81 @@ export class WallService {
     req: Request,
     logo?: Express.Multer.File,
   ): Promise<Wall> {
-    const user = req[REQUEST_USER_KEY];
+    try {
+      const user = req[REQUEST_USER_KEY];
 
-    if (!user) {
-      throw new UnauthorizedException('User not authenticated');
-    }
-
-    const existingUser = await this.userRepository.getByEmail(user.email);
-
-    if (!existingUser) {
-      throw new BadRequestException("User doesn't exist");
-    }
-
-    // Find the existing wall
-    const wall = await this.wallRepository.getById(id);
-
-    if (!wall) {
-      throw new NotFoundException(`Wall with ID ${id} not found`);
-    }
-
-    // Ensure the user owns the wall
-    if (wall.user.id !== existingUser.id) {
-      throw new NotFoundException(
-        'You do not have permission to update this wall',
-      );
-    }
-
-    let logoUrl: string | null = wall.logo;
-
-    if (logo) {
-      if (wall.logo) {
-        const fileName = wall.logo.split('/').pop();
-        if (fileName) {
-          await this.uploadService.deleteLogo(fileName);
-        }
+      if (!user) {
+        throw new UnauthorizedException('User not authenticated');
       }
 
-      logoUrl = await this.uploadService.logo(logo);
-    }
+      const existingUser = await this.userRepository.getByEmail(user.email);
 
-    // Update wall properties
-    wall.title = updateWallDto.title ?? wall.title;
-    wall.description = updateWallDto.description ?? wall.description;
-    wall.visibility = updateWallDto.visibility ?? wall.visibility;
-    wall.logo = logoUrl;
+      if (!existingUser) {
+        throw new NotFoundException("User doesn't exist");
+      }
 
-    // Update Social Links (Replace old ones)
-    if (updateWallDto.social_links && updateWallDto.social_links.length > 0) {
-      for (const linkDto of updateWallDto.social_links) {
-        // Find the existing social link by platform
-        const existingLink = wall.social_links.find(
-          (link) => link.platform === linkDto.platform,
+      // Find the existing wall
+      const wall = await this.wallRepository.getById(id);
+
+      if (!wall) {
+        throw new NotFoundException(`Wall with ID ${id} not found`);
+      }
+
+      // Ensure the user owns the wall
+      if (wall.user.id !== existingUser.id) {
+        throw new UnauthorizedException(
+          'You do not have permission to update this wall',
         );
+      }
 
-        if (existingLink) {
-          // Update the existing social link
-          existingLink.url = linkDto.url;
-          await this.socialLinkRepository.save(existingLink);
-        } else {
-          // If no existing link is found, create a new one
-          const newSocialLink = this.socialLinkRepository.create({
-            platform: linkDto.platform,
-            url: linkDto.url,
-            wall,
-          });
-          await this.socialLinkRepository.save(newSocialLink);
-          wall.social_links.push(newSocialLink);
+      let logoUrl: string | null = wall.logo;
+
+      if (logo) {
+        if (wall.logo) {
+          const fileName = wall.logo.split('/').pop();
+          if (fileName) {
+            await this.uploadService.deleteLogo(fileName);
+          }
+        }
+
+        logoUrl = await this.uploadService.logo(logo);
+      }
+
+      // Update wall properties
+      wall.title = updateWallDto.title ?? wall.title;
+      wall.description = updateWallDto.description ?? wall.description;
+      wall.visibility = updateWallDto.visibility ?? wall.visibility;
+      wall.logo = logoUrl;
+
+      // Update Social Links (Replace old ones)
+      if (updateWallDto.social_links && updateWallDto.social_links.length > 0) {
+        for (const linkDto of updateWallDto.social_links) {
+          // Find the existing social link by platform
+          const existingLink = wall.social_links.find(
+            (link) => link.platform === linkDto.platform,
+          );
+
+          if (existingLink) {
+            // Update the existing social link
+            existingLink.url = linkDto.url;
+            await this.socialLinkRepository.save(existingLink);
+          } else {
+            // If no existing link is found, create a new one
+            const newSocialLink = this.socialLinkRepository.create({
+              platform: linkDto.platform,
+              url: linkDto.url,
+              wall,
+            });
+            await this.socialLinkRepository.save(newSocialLink);
+            wall.social_links.push(newSocialLink);
+          }
         }
       }
-    }
 
-    return await this.wallRepository.save(wall);
+      return await this.wallRepository.save(wall);
+    } catch (error) {
+      throw new BadRequestException(error.message || 'Failed to update wall');
+    }
   }
 
   // Delete a social link by id
@@ -268,33 +300,39 @@ export class WallService {
     id: number,
     req: Request,
   ): Promise<{ message: string }> {
-    const user = req[REQUEST_USER_KEY];
+    try {
+      const user = req[REQUEST_USER_KEY];
 
-    if (!user) {
-      throw new UnauthorizedException('User not authenticated');
-    }
+      if (!user) {
+        throw new UnauthorizedException('User not authenticated');
+      }
 
-    const existingUser = await this.userRepository.getByEmail(user.email);
-    if (!existingUser) {
-      throw new BadRequestException("User doesn't exist");
-    }
+      const existingUser = await this.userRepository.getByEmail(user.email);
+      if (!existingUser) {
+        throw new NotFoundException("User doesn't exist");
+      }
 
-    const socialLink = await this.socialLinkRepository.findOne({
-      where: { id },
-      relations: ['wall'],
-    });
+      const socialLink = await this.socialLinkRepository.findOne({
+        where: { id },
+        relations: ['wall'],
+      });
 
-    if (!socialLink) {
-      throw new NotFoundException('Social link not found');
-    }
+      if (!socialLink) {
+        throw new NotFoundException('Social link not found');
+      }
 
-    if (socialLink.wall.user.id !== existingUser.id) {
-      throw new UnauthorizedException(
-        'You do not have permission to delete this social link',
+      if (socialLink.wall.user.id !== existingUser.id) {
+        throw new UnauthorizedException(
+          'You do not have permission to delete this social link',
+        );
+      }
+
+      await this.socialLinkRepository.delete(id);
+      return { message: 'Social link deleted successfully' };
+    } catch (error) {
+      throw new BadRequestException(
+        error.message || 'Failed to delete social link',
       );
     }
-
-    await this.socialLinkRepository.delete(id);
-    return { message: 'Social link deleted successfully' };
   }
 }

@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   UnauthorizedException,
+  InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
 import { TweetRepository } from '../repository/tweet.repository';
@@ -12,9 +13,11 @@ import { Tweets } from '../entity/tweets.entity';
 import { REQUEST_USER_KEY } from 'src/user/constants/auth.constant';
 import { UserRepository } from 'src/user/repositories/user.repository';
 import { Cron } from '@nestjs/schedule';
+
 @Injectable()
 export class TweetService {
   private readonly logger = new Logger(TweetService.name);
+
   constructor(
     private readonly tweetRepository: TweetRepository,
     private readonly wallRepository: WallRepository,
@@ -23,65 +26,82 @@ export class TweetService {
   ) {}
 
   async addTweetToWall(tweetUrl: string, wallId: number, req: Request) {
-    const user = req[REQUEST_USER_KEY];
-    if (!user) throw new UnauthorizedException('User not authenticated');
+    try {
+      const user = req[REQUEST_USER_KEY];
+      if (!user) throw new UnauthorizedException('User not authenticated');
 
-    const existingUser = await this.userRepository.getByEmail(user.email);
+      const existingUser = await this.userRepository.getByEmail(user.email);
+      if (!existingUser) throw new BadRequestException("User doesn't exist");
 
-    const wall = await this.wallRepository.getWallByIdAndUser(
-      wallId,
-      existingUser.id,
-    );
+      const wall = await this.wallRepository.getWallByIdAndUser(
+        wallId,
+        existingUser.id,
+      );
+      if (!wall) throw new NotFoundException('Wall not found or access denied');
 
-    if (!wall) throw new NotFoundException('Wall not found or access denied');
+      let tweetData;
+      try {
+        tweetData = await this.twitterService.fetchTweetDetails(tweetUrl);
+      } catch (error) {
+        this.logger.error(`Failed to fetch tweet details: ${error.message}`);
+        throw new BadRequestException('Invalid tweet URL or tweet not found');
+      }
 
-    const tweetData = await this.twitterService.fetchTweetDetails(tweetUrl);
-
-    const tweet = this.tweetRepository.create({
-      ...tweetData,
-      wall,
-    });
-
-    const savedTweet = await this.tweetRepository.save(tweet);
-
-    return savedTweet;
+      const tweet = this.tweetRepository.create({ ...tweetData, wall });
+      return await this.tweetRepository.save(tweet);
+    } catch (error) {
+      this.logger.error(`Error adding tweet to wall: ${error.message}`);
+      throw new InternalServerErrorException('Failed to add tweet to wall');
+    }
   }
 
   async getAllTweetsByWall(wallId: number, req: Request): Promise<Tweets[]> {
-    const user = req[REQUEST_USER_KEY];
+    try {
+      const user = req[REQUEST_USER_KEY];
+      if (!user) throw new UnauthorizedException('User not authenticated');
 
-    const existingUser = await this.userRepository.getByEmail(user.email);
+      const existingUser = await this.userRepository.getByEmail(user.email);
+      if (!existingUser) throw new BadRequestException("User doesn't exist");
 
-    const wall = await this.wallRepository.getWallByIdAndUser(
-      wallId,
-      existingUser.id,
-    );
+      const wall = await this.wallRepository.getWallByIdAndUser(
+        wallId,
+        existingUser.id,
+      );
+      if (!wall) throw new NotFoundException('Wall not found or access denied');
 
-    if (!wall) throw new NotFoundException('Wall not found or access denied');
-
-    return await this.tweetRepository.getTweetsByWall(wallId);
+      return await this.tweetRepository.getTweetsByWall(wallId);
+    } catch (error) {
+      this.logger.error(`Error fetching tweets: ${error.message}`);
+      throw new InternalServerErrorException('Failed to fetch tweets');
+    }
   }
 
   async deleteTweetByWall(tweetId: number, wallId: number, req: Request) {
-    const user = req[REQUEST_USER_KEY];
-    const existingUser = await this.userRepository.getByEmail(user.email);
+    try {
+      const user = req[REQUEST_USER_KEY];
+      if (!user) throw new UnauthorizedException('User not authenticated');
 
-    const wall = await this.wallRepository.getWallByIdAndUser(
-      wallId,
-      existingUser.id,
-    );
+      const existingUser = await this.userRepository.getByEmail(user.email);
+      if (!existingUser) throw new BadRequestException("User doesn't exist");
 
-    if (!wall) throw new NotFoundException('Wall not found or access denied');
+      const wall = await this.wallRepository.getWallByIdAndUser(
+        wallId,
+        existingUser.id,
+      );
+      if (!wall) throw new NotFoundException('Wall not found or access denied');
 
-    const tweet = await this.tweetRepository.getTweetByIdAndWall(
-      tweetId,
-      wallId,
-    );
+      const tweet = await this.tweetRepository.getTweetByIdAndWall(
+        tweetId,
+        wallId,
+      );
+      if (!tweet) throw new NotFoundException('Tweet not found');
 
-    if (!tweet) throw new NotFoundException('Tweet not found');
-
-    await this.tweetRepository.remove(tweet);
-    return { message: 'Tweet deleted successfully' };
+      await this.tweetRepository.remove(tweet);
+      return { message: 'Tweet deleted successfully' };
+    } catch (error) {
+      this.logger.error(`Error deleting tweet: ${error.message}`);
+      throw new InternalServerErrorException('Failed to delete tweet');
+    }
   }
 
   async reorderTweets(
@@ -90,83 +110,93 @@ export class TweetService {
     orderedTweetIds?: number[],
     randomize?: boolean,
   ) {
-    const user = req[REQUEST_USER_KEY];
-    const existingUser = await this.userRepository.getByEmail(user.email);
+    try {
+      const user = req[REQUEST_USER_KEY];
+      if (!user) throw new UnauthorizedException('User not authenticated');
 
-    const wall = await this.wallRepository.getWallByIdAndUser(
-      wallId,
-      existingUser.id,
-    );
-    if (!wall) throw new NotFoundException('Wall not found or access denied');
+      const existingUser = await this.userRepository.getByEmail(user.email);
+      if (!existingUser) throw new BadRequestException("User doesn't exist");
 
-    const tweets = await this.tweetRepository.getTweetsByWall(wallId);
-    if (!tweets.length)
-      throw new BadRequestException('No tweets found for this wall');
+      const wall = await this.wallRepository.getWallByIdAndUser(
+        wallId,
+        existingUser.id,
+      );
+      if (!wall) throw new NotFoundException('Wall not found or access denied');
 
-    if (randomize) {
-      tweets.sort(() => Math.random() - 0.5);
-    } else if (orderedTweetIds) {
-      if (tweets.length !== orderedTweetIds.length) {
-        throw new BadRequestException('Invalid tweet order data.');
-      }
+      const tweets = await this.tweetRepository.getTweetsByWall(wallId);
+      if (!tweets.length)
+        throw new BadRequestException('No tweets found for this wall');
 
-      const tweetMap = new Map(tweets.map((tweet) => [tweet.id, tweet]));
-
-      for (const tweetId of orderedTweetIds) {
-        if (!tweetMap.has(tweetId)) {
-          throw new BadRequestException('Invalid tweet ID in reorder list.');
+      if (randomize) {
+        tweets.sort(() => Math.random() - 0.5);
+      } else if (orderedTweetIds) {
+        if (tweets.length !== orderedTweetIds.length) {
+          throw new BadRequestException('Invalid tweet order data.');
         }
+
+        const tweetMap = new Map(tweets.map((tweet) => [tweet.id, tweet]));
+
+        for (const tweetId of orderedTweetIds) {
+          if (!tweetMap.has(tweetId)) {
+            throw new BadRequestException('Invalid tweet ID in reorder list.');
+          }
+        }
+
+        tweets.sort(
+          (a, b) =>
+            orderedTweetIds.indexOf(a.id) - orderedTweetIds.indexOf(b.id),
+        );
+      } else {
+        throw new BadRequestException(
+          'Either provide an ordered list or set randomize to true.',
+        );
       }
 
-      tweets.sort(
-        (a, b) => orderedTweetIds.indexOf(a.id) - orderedTweetIds.indexOf(b.id),
-      );
-    } else {
-      throw new BadRequestException(
-        'Either provide an ordered list or set randomize to true.',
-      );
+      for (let i = 0; i < tweets.length; i++) {
+        await this.tweetRepository.update(tweets[i].id, { order_index: i });
+      }
+
+      return await this.tweetRepository.getTweetsByWall(wallId);
+    } catch (error) {
+      this.logger.error(`Error reordering tweets: ${error.message}`);
+      throw new InternalServerErrorException('Failed to reorder tweets');
     }
-
-    for (let i = 0; i < tweets.length; i++) {
-      await this.tweetRepository.update(tweets[i].id, { order_index: i });
-    }
-
-    const updatedTweets = await this.tweetRepository.getTweetsByWall(wallId);
-
-    return updatedTweets;
   }
 
-  // Cron job to update tweet like & comment count every night at 8 PM
-  // Runs at 8:00 PM (20:00) daily
-  @Cron('0 20 * * *')
+  @Cron('0 0 * * *')
   async updateTweetStatsDaily() {
     this.logger.log('Running daily tweet stats update...');
 
-    const tweets = await this.tweetRepository.getAllTweets();
-    if (!tweets.length) {
-      this.logger.log('No tweets found to update.');
-      return;
-    }
-
-    for (const tweet of tweets) {
-      try {
-        const updatedTweetData = await this.twitterService.fetchTweetDetails(
-          tweet.tweet_url,
-        );
-
-        await this.tweetRepository.update(tweet.id, {
-          likes: updatedTweetData.likeCount,
-          comments: updatedTweetData.commentCount,
-        });
-
-        this.logger.log(`Updated tweet ID ${tweet.id}`);
-      } catch (error) {
-        this.logger.error(
-          `Failed to update tweet ID ${tweet.id}: ${error.message}`,
-        );
+    try {
+      const tweets = await this.tweetRepository.getAllTweets();
+      if (!tweets.length) {
+        this.logger.log('No tweets found to update.');
+        return;
       }
-    }
 
-    this.logger.log('Daily tweet stats update completed.');
+      for (const tweet of tweets) {
+        try {
+          const updatedTweetData = await this.twitterService.fetchTweetDetails(
+            tweet.tweet_url,
+          );
+
+          await this.tweetRepository.update(tweet.id, {
+            likes: updatedTweetData.likeCount,
+            comments: updatedTweetData.commentCount,
+          });
+
+          this.logger.log(`Updated tweet ID ${tweet.id}`);
+        } catch (error) {
+          this.logger.error(
+            `Failed to update tweet ID ${tweet.id}: ${error.message}`,
+          );
+        }
+      }
+
+      this.logger.log('Daily tweet stats update completed.');
+    } catch (error) {
+      this.logger.error(`Cron job failed: ${error.message}`);
+      throw new InternalServerErrorException('Tweet update job failed');
+    }
   }
 }
