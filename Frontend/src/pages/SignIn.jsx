@@ -32,7 +32,7 @@ const SignIn = () => {
       // Uncomment the next line if you want to navigate on success
       // navigate('/dashboard');
     } catch (err) {
-      console.error('Error during sign in:', err);
+    //   console.error('Error during sign in:', err);
       if (err.response) {
         console.error('Error code:', err.response.status);
         setError(`Error ${err.response.status}: ${err.response.data?.message || 'Sign in failed. Please try again.'}`);
