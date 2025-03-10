@@ -65,7 +65,8 @@ export class UserService {
 
       const token = await this.generateTokenProvider.generateTokens(user);
       res.cookie('access_token', token, { httpOnly: true });
-      res.send(token);
+      // res.send(token);
+      return {token};
     } catch (error) {
       if (
         error instanceof NotFoundException ||
