@@ -9,7 +9,7 @@ import { SignUpDto } from '../dtos/signup.dto';
 import { HashingProvider } from './hashing.provider';
 import { GenerateTokenProvider } from './generate-token.provider';
 import { SignInDto } from '../dtos/signin.dto';
-import { UploadService } from './upload.service';
+import { UploadService } from '../../common/services/upload.service';
 import { UpdateDto } from '../dtos/update.dto';
 import { MailService } from './mail.service';
 import { UserRepository } from '../repositories/user.repository';
@@ -126,7 +126,7 @@ export class UserService {
       }
 
       await this.userRepository.delete(user.sub);
-      return { deleted: true };
+      return { id: user.sub };
     } catch (error) {
       if (
         error instanceof UnauthorizedException ||

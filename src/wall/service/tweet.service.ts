@@ -9,8 +9,8 @@ import { TweetRepository } from '../repository/tweet.repository';
 import { WallRepository } from '../repository/wall.repository';
 import { TwitterService } from './twitter.service';
 import { Tweets } from '../entity/tweets.entity';
-import { REQUEST_USER_KEY } from 'src/common/constants/auth.constant';
-import { UserRepository } from 'src/user/repositories/user.repository';
+import { REQUEST_USER_KEY } from '../../common/constants/auth.constant';
+import { UserRepository } from '../../user/repositories/user.repository';
 import { Cron } from '@nestjs/schedule';
 
 @Injectable()

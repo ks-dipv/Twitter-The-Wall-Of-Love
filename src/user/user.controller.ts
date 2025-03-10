@@ -23,7 +23,7 @@ import {
   ApiTags,
   ApiParam,
 } from '@nestjs/swagger';
-import { Auth } from 'src/common/decorator/auth.decorator';
+import { Auth } from '../common/decorator/auth.decorator';
 
 @ApiTags('Users')
 @Controller('api/user')

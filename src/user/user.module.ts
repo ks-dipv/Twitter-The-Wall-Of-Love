@@ -7,7 +7,7 @@ import { HashingProvider } from './services/hashing.provider';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { GenerateTokenProvider } from './services/generate-token.provider';
-import { UploadService } from './services/upload.service';
+import { UploadService } from '../common/services/upload.service';
 import { MailService } from './services/mail.service';
 import jwtConfig from './config/jwt.config';
 import { MailerModule } from '@nestjs-modules/mailer';

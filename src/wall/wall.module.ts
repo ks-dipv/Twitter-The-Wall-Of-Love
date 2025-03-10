@@ -10,9 +10,9 @@ import { TweetService } from './service/tweet.service';
 import { TweetController } from './tweet.controller';
 import { TwitterService } from './service/twitter.service';
 import { TweetRepository } from './repository/tweet.repository';
-import { UserModule } from 'src/user/user.module';
-import { UserRepository } from 'src/user/repositories/user.repository';
-import { UploadService } from 'src/user/services/upload.service';
+import { UserModule } from '../user/user.module';
+import { UserRepository } from '../user/repositories/user.repository';
+import { UploadService } from '../common/services/upload.service';
 @Module({
   imports: [TypeOrmModule.forFeature([Wall, SocialLink, Tweets]), UserModule],
   controllers: [WallController, TweetController],
