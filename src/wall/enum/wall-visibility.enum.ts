@@ -1,4 +1,4 @@
 export enum WallVisibility {
-    PUBLIC = 'public',
-    PRIVATE = 'private',
+  PUBLIC = 'public',
+  PRIVATE = 'private',
 }

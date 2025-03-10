@@ -11,6 +11,7 @@ import {
 import { WallVisibility } from '../enum/wall-visibility.enum';
 import { SocialLink } from './social-links.entity';
 import { Tweets } from './tweets.entity';
+
 @Entity()
 export class Wall {
   @PrimaryGeneratedColumn()
@@ -38,12 +39,17 @@ export class Wall {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @OneToMany(() => SocialLink, (link) => link.wall)
-  social_link: SocialLink[];
+  @OneToMany(() => SocialLink, (socialLink) => socialLink.wall, {
+    eager: true,
+  })
+  social_links: SocialLink[];
 
   @OneToMany(() => Tweets, (tweet) => tweet.wall)
   tweets: Tweets[];
 
-  @ManyToOne(() => User, (user) => user.walls, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.walls, {
+    onDelete: 'CASCADE',
+    eager: true,
+  })
   user: User;
 }

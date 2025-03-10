@@ -11,7 +11,7 @@ export class Tweets {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 200, unique: true, nullable: false })
+  @Column({ type: 'varchar', length: 200, nullable: false, unique: true })
   tweet_url: string;
 
   @Column({ type: 'text', nullable: false })
@@ -20,17 +20,20 @@ export class Tweets {
   @Column({ type: 'varchar', length: 100, nullable: false })
   author_name: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  author_profile_image?: string;
+  @Column({ type: 'varchar', length: 200, nullable: false })
+  author_profile_link: string;
 
   @Column({ type: 'varchar', length: 200, nullable: true })
-  author_profile_link?: string;
+  author_profile_pic?: string;
 
   @Column({ type: 'int', default: 0 })
   likes: number;
 
   @Column({ type: 'int', default: 0 })
   comments: number;
+
+  @Column({ default: 0 })
+  order_index: number;
 
   @CreateDateColumn()
   created_at: Date;

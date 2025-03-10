@@ -11,9 +11,12 @@ export class SocialLink {
   @Column({ type: 'varchar', length: 255, nullable: false })
   url: string;
 
-  @Column({ type: 'enum', enum: SocialPlatform, nullable: false })
+  @Column({
+    type: 'enum',
+    enum: SocialPlatform,
+  })
   platform: SocialPlatform;
 
-  @ManyToOne(() => Wall, (wall) => wall.social_link, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Wall, (wall) => wall.social_links, { onDelete: 'CASCADE' })
   wall: Wall;
 }
