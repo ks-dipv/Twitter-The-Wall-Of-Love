@@ -152,7 +152,7 @@ export class UserService {
           'Failed to generate reset password token',
         );
 
-      const url = `http://localhost:3000/api/user/auth/reset-password/${token}`;
+      const url = `http://localhost:5173/reset-password/${token}`;
       const arrayToken = token.split('.');
       const tokenPayload = JSON.parse(atob(arrayToken[1]));
       const userEmail = tokenPayload.email;
