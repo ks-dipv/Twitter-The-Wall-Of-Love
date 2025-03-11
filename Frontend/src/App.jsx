@@ -7,21 +7,7 @@ import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/protectedRoute";
-function Home() {
-  return (
-    <div className="p-4">
-      <h1 className="text-xl font-bold">Welcome to the Home Page</h1>
-      <nav className="mt-4">
-        <Link to="/signin" className="mr-4 text-blue-600 hover:underline">
-          Sign In
-        </Link>
-        <Link to="/signup" className="text-blue-600 hover:underline">
-          Sign Up
-        </Link>
-      </nav>
-    </div>
-  );
-}
+import Home from "./pages/Home";
 
 function App() {
   return (
