@@ -3,7 +3,8 @@ import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import SignUp from "./pages/SignUp";
 import SignIn from "./pages/SignIn";
 import ListWalls from "./pages/listWallsPage";
-
+import ForgotPassword from "./components/Forgotpassword";
+import ResetPassword from "./components/Resetpassword";
 function Home() {
   return (
     <div className="p-4">
@@ -28,7 +29,8 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/walls" element={<ListWalls />}/>
-       
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
       </Routes>
     </BrowserRouter>
   );

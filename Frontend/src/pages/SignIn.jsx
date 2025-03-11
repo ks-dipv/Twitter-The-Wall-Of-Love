@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
+import { Link } from 'react-router-dom';
 const SignIn = () => {
   const [credentials, setCredentials] = useState({
     email: '',
@@ -30,7 +30,7 @@ const SignIn = () => {
       );
       console.log('Sign in successful:', response.data);
       // Uncomment the next line if you want to navigate on success
-      // navigate('/dashboard');
+      navigate('/walls');
     } catch (err) {
     //   console.error('Error during sign in:', err);
       if (err.response) {
@@ -89,6 +89,13 @@ const SignIn = () => {
             Sign In
           </button>
         </form>
+
+        {/* Forgot Password Link */}
+        <p className="text-center mt-4">
+          <Link to="/forgot-password" className="text-blue-500 hover:underline">
+            Forgot Password?
+          </Link>
+        </p>
       </div>
     </div>
   );
