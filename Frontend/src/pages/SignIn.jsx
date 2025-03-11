@@ -17,7 +17,7 @@ const SignIn = () => {
     e.preventDefault();
     setError("");
     try {
-      await login(credentials.email, credentials.password);
+      await login(credentials);
       navigate("/");
     } catch (err) {
       setError(err.response?.data?.message || "Login failed, try again.");

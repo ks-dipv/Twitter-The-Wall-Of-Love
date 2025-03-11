@@ -1,11 +1,25 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { loginUser, logoutUser, registerUser } from "../services/api";
+import Cookies from "js-cookie";
 
 // Create Auth Context
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState();
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    try {
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+      }
+    } catch (error) {
+      console.error("Error parsing user data:", error);
+      localStorage.removeItem("user");
+    }
+  }, []);
 
   const signup = async (formData) => {
     try {
@@ -16,10 +30,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (email, password) => {
+  const login = async (userData) => {
     try {
-      await loginUser({ email, password });
-      setUser({ email });
+      const response = await loginUser(userData);
+
+      const { token } = response.data;
+      // Store the token in a cookie named 'Access'
+      Cookies.set("access_token", token, {
+        secure: true,
+        sameSite: "Strict",
+      });
+      setUser(response.data);
+      localStorage.setItem("user", JSON.stringify(userData));
     } catch (error) {
       console.error("Login failed:", error.response?.data?.message);
       throw error;
