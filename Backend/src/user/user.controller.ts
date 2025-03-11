@@ -63,7 +63,6 @@ export class UserController {
   @Auth(AuthType.Bearer)
   public logout(@Response({ passthrough: true }) res) {
     res.clearCookie('access_token');
-    res.clearCookie('refresh_token');
     return { message: 'Logged out successfully' };
   }
 
