@@ -32,9 +32,10 @@ const SignIn = () => {
           "url('https://img.freepik.com/free-vector/realistic-luxury-background_23-2149354608.jpg')",
       }}
     >
-    {/* <div className="min-h-screen flex items-center justify-center bg-black bg-opacity-50 p-4"> */}
-      <div className="bg-gray-200 p-8 rounded shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-6">Sign In</h2>
+      <div className="bg-gradient-to-br from-white to-gray-100 dark:from-gray-900 dark:to-gray-800 p-8 rounded-xl shadow-2xl border border-gray-300 dark:border-gray-700 w-full max-w-md">
+        <h2 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">
+          Sign In
+        </h2>
         {error && (
           <div className="bg-red-100 text-red-700 p-2 rounded mb-4">
             {error}
@@ -42,26 +43,30 @@ const SignIn = () => {
         )}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-gray-700 mb-2">Email</label>
+            <label className="block text-gray-700 dark:text-gray-300 mb-2">
+              Email
+            </label>
             <input
               type="email"
               name="email"
               value={credentials.email}
               onChange={handleChange}
               required
-              className="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
               placeholder="Enter your email"
             />
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700 mb-2">Password</label>
+            <label className="block text-gray-700 dark:text-gray-300 mb-2">
+              Password
+            </label>
             <input
               type="password"
               name="password"
               value={credentials.password}
               onChange={handleChange}
               required
-              className="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
               placeholder="Enter your password"
             />
           </div>
@@ -77,8 +82,7 @@ const SignIn = () => {
             Forgot Password?
           </Link>
         </p>
-
-        <p className="text-center mt-4 text-gray-600">
+        <p className="text-center mt-4 text-gray-600 dark:text-gray-300">
           Don't have an account?{" "}
           <Link to="/signup" className="text-blue-500 hover:underline">
             Sign Up
@@ -86,6 +90,7 @@ const SignIn = () => {
         </p>
       </div>
     </div>
+
     // </div>
   );
 };
