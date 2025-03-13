@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { registerUser } from "../services/api";
+import { Link } from "react-router-dom";
 
 const SignUp = () => {
   const { signup } = useAuth();
@@ -22,7 +23,7 @@ const SignUp = () => {
     setError("");
     try {
       const response = await registerUser(formData);
-      signup(response.data)
+      signup(response.data);
       navigate("/signin");
     } catch (err) {
       setError(err.response?.data?.message || "Signup failed, try again.");
@@ -83,6 +84,14 @@ const SignUp = () => {
             Sign Up
           </button>
         </form>
+        
+        {/* Already have an account? Sign in */}
+        <p className="mt-4 text-center text-gray-600">
+          Already have an account?{" "}
+          <Link to="/signin" className="text-blue-500 hover:underline">
+            Sign In
+          </Link>
+        </p>
       </div>
     </div>
   );
