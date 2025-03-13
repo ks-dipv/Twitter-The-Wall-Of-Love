@@ -25,8 +25,15 @@ const SignIn = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
+    <div
+      className="min-h-screen flex items-center justify-center bg-cover bg-center"
+      style={{
+        backgroundImage:
+          "url('https://img.freepik.com/free-vector/realistic-luxury-background_23-2149354608.jpg')",
+      }}
+    >
+    {/* <div className="min-h-screen flex items-center justify-center bg-black bg-opacity-50 p-4"> */}
+      <div className="bg-gray-200 p-8 rounded shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold text-center mb-6">Sign In</h2>
         {error && (
           <div className="bg-red-100 text-red-700 p-2 rounded mb-4">
@@ -79,6 +86,7 @@ const SignIn = () => {
         </p>
       </div>
     </div>
+    // </div>
   );
 };
 

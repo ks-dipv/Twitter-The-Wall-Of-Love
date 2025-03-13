@@ -129,7 +129,14 @@ const WallsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div
+      className="min-h-screen flex flex-col bg-cover bg-center relative"
+      style={{
+        backgroundImage:
+          "url('https://img.freepik.com/free-vector/realistic-luxury-background_23-2149354608.jpg')",
+      }}
+    >
+    {/* <div className="min-h-screen bg-black bg-opacity-60 p-6"> */}
       {/* Navbar */}
       <div className="flex justify-between items-center bg-white p-4 rounded shadow-md">
         <h2 className="text-2xl font-bold">Wall Management</h2>
@@ -261,7 +268,7 @@ const WallsPage = () => {
                     <option value="YouTube">YouTube</option>
                     <option value="Facebook">Facebook</option>
                   </select>
-                  
+
                   <input
                     type="text"
                     name="url"

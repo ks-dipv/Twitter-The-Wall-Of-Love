@@ -3,7 +3,6 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { registerUser } from "../services/api";
 import { Link } from "react-router-dom";
-
 const SignUp = () => {
   const { signup } = useAuth();
   const navigate = useNavigate();
@@ -23,7 +22,7 @@ const SignUp = () => {
     setError("");
     try {
       const response = await registerUser(formData);
-      signup(response.data);
+      signup(response.data)
       navigate("/signin");
     } catch (err) {
       setError(err.response?.data?.message || "Signup failed, try again.");
@@ -31,9 +30,18 @@ const SignUp = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-6">Sign Up</h2>
+    <div
+      className="min-h-screen flex items-center justify-center bg-cover bg-center"
+      style={{
+        backgroundImage:
+          "url('https://img.freepik.com/free-vector/realistic-luxury-background_23-2149354608.jpg')",
+      }}
+    >
+
+   
+    {/* <div className="min-h-screen flex items-center justify-center bg-black bg-opacity-50  p-4"> */}
+      <div className="bg-gray-200 p-8 rounded shadow-md w-full max-w-md">
+        <h2 className="text-2xl font-bold text-center mb-6">Create an account</h2>
         {error && (
           <div className="bg-red-100 text-red-700 p-2 rounded mb-4">
             {error}
@@ -84,9 +92,8 @@ const SignUp = () => {
             Sign Up
           </button>
         </form>
-        
-        {/* Already have an account? Sign in */}
-        <p className="mt-4 text-center text-gray-600">
+         {/* Already have an account? Sign in */}
+         <p className="mt-4 text-center text-gray-600">
           Already have an account?{" "}
           <Link to="/signin" className="text-blue-500 hover:underline">
             Sign In
