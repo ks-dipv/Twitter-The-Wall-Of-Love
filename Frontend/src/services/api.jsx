@@ -36,5 +36,24 @@ export const requestPasswordReset = async (email) => {
   return api.post("/user/auth/reset-password/request", { email });
 };
 
+// Fetch Wall by ID
+export const getWallById = async (wallId) => {
+  return api.get(`/walls/fetch/${wallId}`);
+};
+
+// Fetch Tweets for a Wall
+export const getTweetsByWall = async (wallId) => {
+  return api.get(`/walls/${wallId}/tweets/list`);
+};
+
+export const deleteTweet = async (wallId, tweetId) => {
+  return api.delete(`/walls/${wallId}/tweets/${tweetId}`);
+};
+
+export const updateWall = async (wallId, wallData) => {
+  return api.put(`/walls/update/${wallId}`, wallData);
+};
+
+
 
 export default api;
