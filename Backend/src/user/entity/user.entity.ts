@@ -26,6 +26,13 @@ export class User {
   @Column({ type: 'varchar', nullable: true })
   profile_pic?: string;
 
+  @Column({ type: 'boolean', default: false })
+  is_email_verified: boolean;
+
+  @Column({ type: 'varchar', nullable: true })
+  @Exclude()
+  email_verification_token?: string;
+
   @Column({ type: 'varchar', nullable: true })
   @Exclude()
   reset_password_token?: string;

@@ -10,6 +10,7 @@ import {
   Response,
   Request,
   ClassSerializerInterceptor,
+  Query,
 } from '@nestjs/common';
 import { SignUpDto } from './dtos/signup.dto';
 import { UserService } from './services/user.service';
@@ -43,6 +44,12 @@ export class UserController {
     @UploadedFile() profileImage?: Express.Multer.File,
   ) {
     return this.userService.signup(signupDto, profileImage);
+  }
+
+  @Post('auth/verify-email')
+  @UseInterceptors(ClassSerializerInterceptor)
+  async verifyEmail(@Query('token') token: string) {
+    return this.userService.verifyEmail(token);
   }
 
   @Post('auth/signin')
