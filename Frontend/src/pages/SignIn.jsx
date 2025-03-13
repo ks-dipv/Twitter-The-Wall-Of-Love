@@ -23,7 +23,7 @@ const SignIn = () => {
       setError(err.response?.data?.message || "Login failed, try again.");
     }
   };
-  
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
@@ -68,6 +68,13 @@ const SignIn = () => {
         <p className="text-center mt-4">
           <Link to="/forgot-password" className="text-blue-500 hover:underline">
             Forgot Password?
+          </Link>
+        </p>
+
+        <p className="text-center mt-4 text-gray-600">
+          Don't have an account?{" "}
+          <Link to="/signup" className="text-blue-500 hover:underline">
+            Sign Up
           </Link>
         </p>
       </div>
