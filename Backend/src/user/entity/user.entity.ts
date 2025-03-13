@@ -27,9 +27,11 @@ export class User {
   profile_pic?: string;
 
   @Column({ type: 'varchar', nullable: true })
+  @Exclude()
   reset_password_token?: string;
 
   @Column({ nullable: true, unique: true })
+  @Exclude()
   api_token?: string;
 
   @CreateDateColumn()

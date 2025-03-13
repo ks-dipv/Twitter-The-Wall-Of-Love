@@ -9,6 +9,7 @@ import {
   UseInterceptors,
   Response,
   Request,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { SignUpDto } from './dtos/signup.dto';
 import { UserService } from './services/user.service';
@@ -36,7 +37,7 @@ export class UserController {
   @ApiResponse({ status: 201, description: 'User signed up successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @Auth(AuthType.None)
-  @UseInterceptors(FileInterceptor('profileImage'))
+  @UseInterceptors(FileInterceptor('profileImage'), ClassSerializerInterceptor)
   public entry(
     @Body() signupDto: SignUpDto,
     @UploadedFile() profileImage?: Express.Multer.File,
@@ -72,7 +73,7 @@ export class UserController {
   @ApiResponse({ status: 200, description: 'User updated successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @Auth(AuthType.Bearer)
-  @UseInterceptors(FileInterceptor('profileImage'))
+  @UseInterceptors(FileInterceptor('profileImage'), ClassSerializerInterceptor)
   public update(
     @Request() req,
     @Body() updateDto: UpdateDto,

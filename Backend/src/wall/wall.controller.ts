@@ -9,6 +9,7 @@ import {
   UseInterceptors,
   UploadedFile,
   Put,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { WallService } from './service/wall.service';
 import { CreateWallDto } from './dtos/create-wall.dto';
@@ -32,7 +33,7 @@ export class WallController {
   @ApiOperation({ summary: 'Create a new Wall' })
   @ApiResponse({ status: 201, description: 'Wall created successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
-  @UseInterceptors(FileInterceptor('logo'))
+  @UseInterceptors(FileInterceptor('logo'), ClassSerializerInterceptor)
   async createWall(
     @Body() createWallDto: CreateWallDto,
     @Request() req,
@@ -43,6 +44,7 @@ export class WallController {
 
   // Get all Walls for the logged-in user
   @Get()
+  @UseInterceptors(ClassSerializerInterceptor)
   @ApiOperation({ summary: 'Get all Walls for the logged-in user' })
   @ApiResponse({ status: 200, description: 'List of walls retrieved' })
   async getAllWalls(@Request() req) {
@@ -51,6 +53,7 @@ export class WallController {
 
   // Get a specific Wall by ID
   @Get(':id')
+  @UseInterceptors(ClassSerializerInterceptor)
   @ApiOperation({ summary: 'Get a specific Wall by ID' })
   @ApiParam({ name: 'id', description: 'ID of the Wall', type: Number })
   @ApiResponse({ status: 200, description: 'Wall details retrieved' })
@@ -100,7 +103,7 @@ export class WallController {
   @ApiBody({ type: UpdateWallDto })
   @ApiResponse({ status: 200, description: 'Wall updated successfully' })
   @ApiResponse({ status: 404, description: 'Wall not found' })
-  @UseInterceptors(FileInterceptor('logo'))
+  @UseInterceptors(FileInterceptor('logo'), ClassSerializerInterceptor)
   async updateWall(
     @Param('id') id: number,
     @Body() updateWallDto: UpdateWallDto,
