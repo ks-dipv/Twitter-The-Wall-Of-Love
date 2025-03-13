@@ -47,7 +47,7 @@ export class TweetController {
     return await this.tweetService.addTweetToWall(tweetUrl, wallId, req);
   }
 
-  @Get(':wallId/tweets/list')
+  @Get(':wallId/tweets')
   @ApiOperation({ summary: 'Get all tweets for a specific wall' })
   @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
   @ApiResponse({ status: 200, description: 'List of tweets retrieved' })

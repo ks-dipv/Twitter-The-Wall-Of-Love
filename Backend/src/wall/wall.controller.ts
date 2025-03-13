@@ -28,7 +28,7 @@ export class WallController {
   constructor(private readonly wallService: WallService) {}
 
   // Create a new Wall
-  @Post('entry')
+  @Post()
   @ApiOperation({ summary: 'Create a new Wall' })
   @ApiResponse({ status: 201, description: 'Wall created successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
@@ -42,7 +42,7 @@ export class WallController {
   }
 
   // Get all Walls for the logged-in user
-  @Get('list')
+  @Get()
   @ApiOperation({ summary: 'Get all Walls for the logged-in user' })
   @ApiResponse({ status: 200, description: 'List of walls retrieved' })
   async getAllWalls(@Request() req) {
@@ -50,7 +50,7 @@ export class WallController {
   }
 
   // Get a specific Wall by ID
-  @Get('fetch/:id')
+  @Get(':id')
   @ApiOperation({ summary: 'Get a specific Wall by ID' })
   @ApiParam({ name: 'id', description: 'ID of the Wall', type: Number })
   @ApiResponse({ status: 200, description: 'Wall details retrieved' })
@@ -84,7 +84,7 @@ export class WallController {
   }
 
   // Delete a Wall by ID
-  @Delete('remove/:id')
+  @Delete(':id')
   @ApiOperation({ summary: 'Delete a Wall by ID' })
   @ApiParam({ name: 'id', description: 'ID of the Wall', type: Number })
   @ApiResponse({ status: 200, description: 'Wall deleted successfully' })
@@ -94,7 +94,7 @@ export class WallController {
   }
 
   //Update a wall by ID
-  @Put('update/:id')
+  @Put(':id')
   @ApiOperation({ summary: 'Update a Wall by ID' })
   @ApiParam({ name: 'id', description: 'ID of the Wall', type: Number })
   @ApiBody({ type: UpdateWallDto })

@@ -47,6 +47,7 @@ export class UserService {
 
       return await this.userRepository.save(newUser);
     } catch (error) {
+      console.log(error);
       if (error instanceof BadRequestException) throw error;
       throw new InternalServerErrorException('Signup failed');
     }
@@ -70,6 +71,7 @@ export class UserService {
         token,
       };
     } catch (error) {
+      console.log(error);
       if (
         error instanceof NotFoundException ||
         error instanceof UnauthorizedException
@@ -106,6 +108,7 @@ export class UserService {
 
       return await this.userRepository.save(existingUser);
     } catch (error) {
+      console.log(error);
       if (
         error instanceof UnauthorizedException ||
         error instanceof NotFoundException
@@ -131,6 +134,7 @@ export class UserService {
       await this.userRepository.delete(user.sub);
       return { id: user.sub };
     } catch (error) {
+      console.log(error);
       if (
         error instanceof UnauthorizedException ||
         error instanceof NotFoundException
@@ -163,6 +167,7 @@ export class UserService {
       await this.mailService.sendResetPassword(url, userEmail);
       return 'Email Sent Successfully';
     } catch (error) {
+      console.log(error);
       if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException(
         'Failed to send reset password email',
@@ -181,6 +186,7 @@ export class UserService {
       await this.userRepository.save(user);
       return 'Password Reset Successfully';
     } catch (error) {
+      console.log(error);
       if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException('Failed to reset password');
     }
@@ -203,6 +209,7 @@ export class UserService {
       await this.userRepository.save(existingUser);
       return token;
     } catch (error) {
+      console.log(error);
       if (
         error instanceof UnauthorizedException ||
         error instanceof NotFoundException

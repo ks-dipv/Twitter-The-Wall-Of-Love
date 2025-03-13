@@ -26,7 +26,7 @@ import {
 import { Auth } from '../common/decorator/auth.decorator';
 
 @ApiTags('Users')
-@Controller('api/user')
+@Controller('api')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -66,7 +66,7 @@ export class UserController {
     return { message: 'Logged out successfully' };
   }
 
-  @Put('update')
+  @Put('user/profile')
   @ApiOperation({ summary: 'Update user details' })
   @ApiBody({ type: UpdateDto })
   @ApiResponse({ status: 200, description: 'User updated successfully' })
@@ -81,7 +81,7 @@ export class UserController {
     return this.userService.update(req, updateDto, profileImage);
   }
 
-  @Delete('delete')
+  @Delete('user')
   @Auth(AuthType.Bearer)
   @ApiOperation({ summary: 'Delete user account' })
   @ApiResponse({ status: 200, description: 'User deleted successfully' })
