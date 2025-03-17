@@ -10,7 +10,7 @@ import ProtectedRoute from "./components/protectedRoute";
 import Home from "./pages/Home";
 import WallPage from "./pages/WallPage";
 import UpdateWallPage from "./pages/UpdateWallPage";
-
+import AdminDashboard from "./pages/AdminDashboard";
 function App() {
   return (
     <AuthProvider>
@@ -27,6 +27,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/admin/*" element={<AdminDashboard />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/walls/:id" element={<WallPage />} />
