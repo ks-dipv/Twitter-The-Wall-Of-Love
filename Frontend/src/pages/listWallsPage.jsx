@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { addWalls, getAllWalls, logoutUser } from "../services/api";
 
 const WallsPage = () => {
   const [showCreateWall, setShowCreateWall] = useState(false);
@@ -20,9 +21,7 @@ const WallsPage = () => {
   // Fetch walls for the logged-in user
   const fetchUserWalls = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/walls/list", {
-        withCredentials: true, // Send cookies for authentication
-      });
+      const response = await getAllWalls();
       setWalls(response.data); // Store walls in state
     } catch (error) {
       console.error(
@@ -73,16 +72,7 @@ const WallsPage = () => {
         socialLinks: wallData.socialLinks,
       };
 
-      const response = await axios.post(
-        "http://localhost:3000/api/walls/entry",
-        requestBody,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-          withCredentials: true,
-        }
-      );
+      const response = await addWalls(requestBody);
 
       if (response.status === 201) {
         console.log("Wall Created:", response.data);
@@ -100,11 +90,7 @@ const WallsPage = () => {
   // Handle Logout
   const handleLogout = async () => {
     try {
-      await axios.post(
-        "http://localhost:3000/api/user/auth/logout",
-        {},
-        { withCredentials: true }
-      );
+      await logoutUser();
       console.log("User logged out successfully");
       window.location.href = "/signin"; // Redirect to login page
     } catch (error) {
@@ -115,7 +101,7 @@ const WallsPage = () => {
   // Handle wall deletion
   const handleDeleteWall = async (id) => {
     try {
-      await axios.delete(`http://localhost:3000/api/walls/remove/${id}`, {
+      await axios.delete(`http://localhost:3000/api/walls/${id}`, {
         withCredentials: true,
       });
       setWalls(walls.filter((wall) => wall.id !== id)); // Remove deleted wall from UI
@@ -136,7 +122,7 @@ const WallsPage = () => {
           "url('https://img.freepik.com/free-vector/realistic-luxury-background_23-2149354608.jpg')",
       }}
     >
-    {/* <div className="min-h-screen bg-black bg-opacity-60 p-6"> */}
+      {/* <div className="min-h-screen bg-black bg-opacity-60 p-6"> */}
       {/* Navbar */}
       <div className="flex justify-between items-center bg-white p-4 rounded shadow-md">
         <h2 className="text-2xl font-bold">Wall Management</h2>
