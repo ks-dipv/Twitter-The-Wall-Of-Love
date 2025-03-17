@@ -20,14 +20,24 @@ const SignUp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+  
+    // Ensure all fields are present
+    if (!formData.name || !formData.email || !formData.password) {
+      setError("All fields are required.");
+      return;
+    }
+  
     try {
+      console.log("Submitting form data:", formData);
       const response = await registerUser(formData);
-      signup(response.data)
+      signup(response.data);
       navigate("/signin");
     } catch (err) {
+      console.error("Signup failed:", err.response?.data || err.message);
       setError(err.response?.data?.message || "Signup failed, try again.");
     }
   };
+  
 
   return (
     <div

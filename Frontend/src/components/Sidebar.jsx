@@ -1,15 +1,28 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { User, PlusCircle, List, Share2, LogOut, Twitter } from "lucide-react";
+import { User, PlusCircle, List, Share2, LogOut, Menu } from "lucide-react";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
     <div className={`h-screen bg-gray-800 text-white transition-all ${isOpen ? "w-64" : "w-20"}`}>
-      <button onClick={() => setIsOpen(!isOpen)} className="p-4 text-white">
-        {isOpen ? "<<" : ">>"}
-      </button>
+      {/* Logo & Toggle Button */}
+      <div className="flex items-center justify-between p-4">
+        <div className="flex items-center space-x-3">
+          <img
+            src="https://cdn-icons-png.flaticon.com/128/2297/2297921.png"
+            alt="Wall of Love Logo"
+            className="h-10 w-auto"
+          />
+          {isOpen && <h1 className="text-white text-2xl font-bold">Wall of Love</h1>}
+        </div>
+
+        {/* Hamburger Icon for Toggle */}
+        <button onClick={() => setIsOpen(!isOpen)} className="text-white">
+          <Menu className="w-6 h-6" />
+        </button>
+      </div>
 
       <ul className="space-y-4 p-4">
         <li>
@@ -45,7 +58,7 @@ const Sidebar = () => {
             {isOpen && "List of Walls"}
           </Link>
         </li>
-    
+
         {/* Tweet Management */}
         <li className="font-bold mt-4">Tweet Management</li>
         <li>
