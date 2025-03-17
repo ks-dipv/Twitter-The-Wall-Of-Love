@@ -76,4 +76,17 @@ export class GenerateTokenProvider {
 
     return apiToken;
   }
+
+  public async generateVarificationToken(user: User) {
+    const varificationToken = await this.signToken<Partial<ActiveUserData>>(
+      user.id,
+      this.jwtConfiguration.resetPasswordTokenTtl,
+      this.jwtConfiguration.secret,
+      {
+        email: user.email,
+      },
+    );
+
+    return varificationToken;
+  }
 }

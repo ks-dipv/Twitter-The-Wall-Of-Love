@@ -9,6 +9,8 @@ import {
   UseInterceptors,
   Response,
   Request,
+  ClassSerializerInterceptor,
+  Query,
 } from '@nestjs/common';
 import { SignUpDto } from './dtos/signup.dto';
 import { UserService } from './services/user.service';
@@ -26,7 +28,7 @@ import {
 import { Auth } from '../common/decorator/auth.decorator';
 
 @ApiTags('Users')
-@Controller('api/user')
+@Controller('api')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -36,12 +38,18 @@ export class UserController {
   @ApiResponse({ status: 201, description: 'User signed up successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @Auth(AuthType.None)
-  @UseInterceptors(FileInterceptor('profileImage'))
+  @UseInterceptors(FileInterceptor('profileImage'), ClassSerializerInterceptor)
   public entry(
     @Body() signupDto: SignUpDto,
     @UploadedFile() profileImage?: Express.Multer.File,
   ) {
     return this.userService.signup(signupDto, profileImage);
+  }
+
+  @Post('auth/verify-email')
+  @UseInterceptors(ClassSerializerInterceptor)
+  async verifyEmail(@Query('token') token: string) {
+    return this.userService.verifyEmail(token);
   }
 
   @Post('auth/signin')
@@ -66,13 +74,13 @@ export class UserController {
     return { message: 'Logged out successfully' };
   }
 
-  @Put('update')
+  @Put('user/profile')
   @ApiOperation({ summary: 'Update user details' })
   @ApiBody({ type: UpdateDto })
   @ApiResponse({ status: 200, description: 'User updated successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @Auth(AuthType.Bearer)
-  @UseInterceptors(FileInterceptor('profileImage'))
+  @UseInterceptors(FileInterceptor('profileImage'), ClassSerializerInterceptor)
   public update(
     @Request() req,
     @Body() updateDto: UpdateDto,
@@ -81,7 +89,7 @@ export class UserController {
     return this.userService.update(req, updateDto, profileImage);
   }
 
-  @Delete('delete')
+  @Delete('user')
   @Auth(AuthType.Bearer)
   @ApiOperation({ summary: 'Delete user account' })
   @ApiResponse({ status: 200, description: 'User deleted successfully' })

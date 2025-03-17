@@ -43,19 +43,57 @@ export class UserService {
         ...signupDto,
         password: await this.hashingProvider.hashPassword(signupDto.password),
         profile_pic: profilePicUrl,
+        is_email_verified: false,
       });
 
-      return await this.userRepository.save(newUser);
+      newUser.email_verification_token =
+        await this.generateTokenProvider.generateVarificationToken(newUser);
+      const verificationToken = newUser.email_verification_token;
+
+      await this.userRepository.save(newUser);
+
+      // Send Verification Email
+      const verificationUrl = `http://localhost:3000/api/auth/verify-email?token=${verificationToken}`;
+      await this.mailService.sendVerificationEmail(
+        verificationUrl,
+        signupDto.email,
+      );
+
+      return {
+        message:
+          'Signup successful. Please check your email to verify your account.',
+      };
     } catch (error) {
+      console.log(error);
       if (error instanceof BadRequestException) throw error;
       throw new InternalServerErrorException('Signup failed');
     }
+  }
+
+  public async verifyEmail(token: string) {
+    const user = await this.userRepository.findOne({
+      where: { email_verification_token: token },
+    });
+    if (!user)
+      throw new BadRequestException('Invalid or expired verification token');
+
+    user.is_email_verified = true;
+    user.email_verification_token = null;
+    await this.userRepository.save(user);
+
+    return user;
   }
 
   public async signIn(signInDto: SignInDto, res) {
     try {
       const user = await this.userRepository.getByEmail(signInDto.email);
       if (!user) throw new NotFoundException('User not found');
+
+      if (!user.is_email_verified) {
+        throw new UnauthorizedException(
+          'Email is not verified. Please check your email.',
+        );
+      }
 
       const isEqual = await this.hashingProvider.comparePassword(
         signInDto.password,
@@ -70,6 +108,7 @@ export class UserService {
         token,
       };
     } catch (error) {
+      console.log(error);
       if (
         error instanceof NotFoundException ||
         error instanceof UnauthorizedException
@@ -106,6 +145,7 @@ export class UserService {
 
       return await this.userRepository.save(existingUser);
     } catch (error) {
+      console.log(error);
       if (
         error instanceof UnauthorizedException ||
         error instanceof NotFoundException
@@ -131,6 +171,7 @@ export class UserService {
       await this.userRepository.delete(user.sub);
       return { id: user.sub };
     } catch (error) {
+      console.log(error);
       if (
         error instanceof UnauthorizedException ||
         error instanceof NotFoundException
@@ -163,6 +204,7 @@ export class UserService {
       await this.mailService.sendResetPassword(url, userEmail);
       return 'Email Sent Successfully';
     } catch (error) {
+      console.log(error);
       if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException(
         'Failed to send reset password email',
@@ -181,6 +223,7 @@ export class UserService {
       await this.userRepository.save(user);
       return 'Password Reset Successfully';
     } catch (error) {
+      console.log(error);
       if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException('Failed to reset password');
     }
@@ -203,6 +246,7 @@ export class UserService {
       await this.userRepository.save(existingUser);
       return token;
     } catch (error) {
+      console.log(error);
       if (
         error instanceof UnauthorizedException ||
         error instanceof NotFoundException

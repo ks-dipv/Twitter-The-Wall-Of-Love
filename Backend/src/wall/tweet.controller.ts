@@ -7,6 +7,8 @@ import {
   Body,
   Delete,
   Request,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { TweetService } from './service/tweet.service';
 import {
@@ -23,6 +25,7 @@ export class TweetController {
   constructor(private readonly tweetService: TweetService) {}
 
   @Post(':wallId/tweets')
+  @UseInterceptors(ClassSerializerInterceptor)
   @ApiOperation({ summary: 'Add a tweet to a wall' })
   @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
   @ApiBody({
@@ -47,7 +50,7 @@ export class TweetController {
     return await this.tweetService.addTweetToWall(tweetUrl, wallId, req);
   }
 
-  @Get(':wallId/tweets/list')
+  @Get(':wallId/tweets')
   @ApiOperation({ summary: 'Get all tweets for a specific wall' })
   @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
   @ApiResponse({ status: 200, description: 'List of tweets retrieved' })

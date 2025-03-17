@@ -13,7 +13,7 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 100, nullable: false, unique: true })
+  @Column({ type: 'varchar', length: 100, nullable: false })
   name: string;
 
   @Column({ type: 'varchar', length: 100, nullable: false, unique: true })
@@ -26,10 +26,19 @@ export class User {
   @Column({ type: 'varchar', nullable: true })
   profile_pic?: string;
 
+  @Column({ type: 'boolean', default: false })
+  is_email_verified: boolean;
+
   @Column({ type: 'varchar', nullable: true })
+  @Exclude()
+  email_verification_token?: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  @Exclude()
   reset_password_token?: string;
 
   @Column({ nullable: true, unique: true })
+  @Exclude()
   api_token?: string;
 
   @CreateDateColumn()
