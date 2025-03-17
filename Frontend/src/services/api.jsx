@@ -49,6 +49,10 @@ export const addWalls = async (data) => {
   return api.post("/walls", data);
 };
 
+export const deleteWall = async (id) => {
+  return api.delete(`/walls/${id}`)
+}
+
 // Fetch Tweets for a Wall
 export const getTweetsByWall = async (wallId) => {
   return api.get(`/walls/${wallId}/tweets`);

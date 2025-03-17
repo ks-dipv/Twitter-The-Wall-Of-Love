@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { addWalls, getAllWalls, logoutUser } from "../services/api";
+import { addWalls, deleteWall, getAllWalls, logoutUser } from "../services/api";
 
 const WallsPage = () => {
   const [showCreateWall, setShowCreateWall] = useState(false);
@@ -101,9 +101,7 @@ const WallsPage = () => {
   // Handle wall deletion
   const handleDeleteWall = async (id) => {
     try {
-      await axios.delete(`http://localhost:3000/api/walls/${id}`, {
-        withCredentials: true,
-      });
+      await deleteWall(id);
       setWalls(walls.filter((wall) => wall.id !== id)); // Remove deleted wall from UI
       console.log(`Wall ${id} deleted successfully`);
     } catch (error) {
