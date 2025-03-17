@@ -118,6 +118,26 @@ export class UserService {
     }
   }
 
+  public async getUserById(req: Request) {
+    try {
+      const user = req[REQUEST_USER_KEY];
+      if (!user) throw new UnauthorizedException('User not authenticated');
+
+      const existUser = await this.userRepository.getById(user.sub);
+      if (!existUser) throw new NotFoundException("User doesn't exist");
+
+      return existUser;
+    } catch (error) {
+      console.log(error);
+      if (
+        error instanceof UnauthorizedException ||
+        error instanceof NotFoundException
+      )
+        throw error;
+      throw new InternalServerErrorException('Failed to delete user');
+    }
+  }
+
   public async update(
     req: Request,
     updateDto: UpdateDto,

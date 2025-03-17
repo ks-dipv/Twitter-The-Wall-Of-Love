@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { addWalls, deleteWall, getAllWalls, logoutUser } from "../services/api";
 
 const WallsPage = () => {

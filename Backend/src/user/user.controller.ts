@@ -11,6 +11,7 @@ import {
   Request,
   ClassSerializerInterceptor,
   Query,
+  Get,
 } from '@nestjs/common';
 import { SignUpDto } from './dtos/signup.dto';
 import { UserService } from './services/user.service';
@@ -63,6 +64,14 @@ export class UserController {
     @Response({ passthrough: true }) res,
   ) {
     return this.userService.signIn(signInDto, res);
+  }
+
+  @Get('user')
+  @ApiOperation({ summary: 'fetch login user data' })
+  @ApiResponse({ status: 200, description: 'get user data successfully' })
+  @UseInterceptors(ClassSerializerInterceptor)
+  public getUser(@Request() req) {
+    return this.userService.getUserById(req);
   }
 
   @Post('auth/logout')
