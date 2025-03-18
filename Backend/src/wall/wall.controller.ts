@@ -63,6 +63,7 @@ export class WallController {
   }
 
   @Post(':wallId/generate-link')
+  @UseInterceptors(ClassSerializerInterceptor)
   @ApiOperation({ summary: 'Generate a shareable link for a Wall' })
   @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
   @ApiResponse({ status: 200, description: 'Shareable link generated' })
@@ -73,6 +74,7 @@ export class WallController {
 
   // Get Wall by sharable link
   @Get(':wallId/link/:uuid')
+  @UseInterceptors(ClassSerializerInterceptor)
   @ApiOperation({ summary: 'Get a Wall by shareable link' })
   @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
   @ApiParam({

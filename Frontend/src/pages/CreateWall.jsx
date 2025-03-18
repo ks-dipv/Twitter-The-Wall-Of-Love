@@ -46,27 +46,29 @@ const CreateWall = () => {
   // Handle form submission for creating a wall
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     try {
-      const requestBody = {
-        title: wallData.title,
-        description: wallData.description,
-        visibility: wallData.visibility,
-        socialLinks: wallData.socialLinks,
-      };
-
-      const response = await addWalls(requestBody);
-
+      const formData = new FormData();
+      formData.append("title", wallData.title);
+      formData.append("description", wallData.description);
+      formData.append("visibility", wallData.visibility);
+      if (wallData.logo) {
+        formData.append("logo", wallData.logo); // Append logo file
+      }
+  
+      // Convert socialLinks array into a JSON string
+      formData.append("socialLinks", JSON.stringify(wallData.socialLinks));
+  
+      const response = await addWalls(formData);
+  
       if (response.status === 201) {
         setWalls([...walls, response.data]);
       }
     } catch (error) {
-      console.error(
-        "Error creating wall:",
-        error.response?.data || error.message
-      );
+      console.error("Error creating wall:", error.response?.data || error.message);
     }
   };
+  
 
   return (
     <div

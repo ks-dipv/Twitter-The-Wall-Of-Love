@@ -1,9 +1,13 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { User, PlusCircle, List, Share2, LogOut, Menu } from "lucide-react";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
+  const location = useLocation(); // Get current route
+
+  // Function to check if link is active
+  const isActive = (path) => location.pathname === path;
 
   return (
     <div className={`h-screen bg-gray-800 text-white transition-all ${isOpen ? "w-64" : "w-20"}`}>
@@ -26,7 +30,12 @@ const Sidebar = () => {
 
       <ul className="space-y-4 p-4">
         <li>
-          <Link to="/admin/profile" className="flex items-center gap-2 hover:bg-gray-700 p-2 rounded">
+          <Link
+            to="/admin/profile"
+            className={`flex items-center gap-2 p-2 rounded ${
+              isActive("/admin/profile") ? "bg-gray-400" : "hover:bg-gray-700"
+            }`}
+          >
             <User className="w-5 h-5" />
             {isOpen && "Profile"}
           </Link>
@@ -35,25 +44,45 @@ const Sidebar = () => {
         {/* Wall Management */}
         <li className="font-bold mt-4">Wall Management</li>
         <li>
-          <Link to="/admin/create-wall" className="flex items-center gap-2 hover:bg-gray-700 p-2 rounded">
+          <Link
+            to="/admin/create-wall"
+            className={`flex items-center gap-2 p-2 rounded ${
+              isActive("/admin/create-wall") ? "bg-gray-400" : "hover:bg-gray-700"
+            }`}
+          >
             <PlusCircle className="w-5 h-5" />
             {isOpen && "Create Wall"}
           </Link>
         </li>
         <li>
-          <Link to="/admin/update-wall" className="flex items-center gap-2 hover:bg-gray-700 p-2 rounded">
+          <Link
+            to="/admin/update-wall"
+            className={`flex items-center gap-2 p-2 rounded ${
+              isActive("/admin/update-wall") ? "bg-gray-400" : "hover:bg-gray-700"
+            }`}
+          >
             <List className="w-5 h-5" />
             {isOpen && "Update Wall"}
           </Link>
         </li>
         <li>
-          <Link to="/admin/share-wall" className="flex items-center gap-2 hover:bg-gray-700 p-2 rounded">
+          <Link
+            to="/admin/share-wall"
+            className={`flex items-center gap-2 p-2 rounded ${
+              isActive("/admin/share-wall") ? "bg-gray-400" : "hover:bg-gray-700"
+            }`}
+          >
             <Share2 className="w-5 h-5" />
             {isOpen && "Share Wall"}
           </Link>
         </li>
         <li>
-          <Link to="/admin/list-walls" className="flex items-center gap-2 hover:bg-gray-700 p-2 rounded">
+          <Link
+            to="/admin/list-walls"
+            className={`flex items-center gap-2 p-2 rounded ${
+              isActive("/admin/list-walls") ? "bg-gray-400" : "hover:bg-gray-700"
+            }`}
+          >
             <List className="w-5 h-5" />
             {isOpen && "List of Walls"}
           </Link>
@@ -62,13 +91,23 @@ const Sidebar = () => {
         {/* Tweet Management */}
         <li className="font-bold mt-4">Tweet Management</li>
         <li>
-          <Link to="/admin/add-tweet" className="flex items-center gap-2 hover:bg-gray-700 p-2 rounded">
+          <Link
+            to="/admin/add-tweet"
+            className={`flex items-center gap-2 p-2 rounded ${
+              isActive("/admin/add-tweet") ? "bg-gray-400" : "hover:bg-gray-700"
+            }`}
+          >
             <PlusCircle className="w-5 h-5" />
             {isOpen && "Add Tweet"}
           </Link>
         </li>
         <li>
-          <Link to="/admin/list-tweets" className="flex items-center gap-2 hover:bg-gray-700 p-2 rounded">
+          <Link
+            to="/admin/list-tweets"
+            className={`flex items-center gap-2 p-2 rounded ${
+              isActive("/admin/list-tweets") ? "bg-gray-400" : "hover:bg-gray-700"
+            }`}
+          >
             <List className="w-5 h-5" />
             {isOpen && "List of Tweets"}
           </Link>
@@ -76,7 +115,10 @@ const Sidebar = () => {
 
         {/* Sign Out */}
         <li className="mt-10">
-          <button onClick={() => alert("Logged Out")} className="flex items-center gap-2 hover:bg-red-700 p-2 rounded">
+          <button
+            onClick={() => alert("Logged Out")}
+            className="flex items-center gap-2 p-2 rounded hover:bg-red-700"
+          >
             <LogOut className="w-5 h-5" />
             {isOpen && "Sign Out"}
           </button>

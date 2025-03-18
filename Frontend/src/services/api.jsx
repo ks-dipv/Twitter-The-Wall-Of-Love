@@ -5,25 +5,51 @@ const API_URL = "http://localhost:3000/api";
 const api = axios.create({
   baseURL: API_URL,
   headers: {
-    "Content-Type": "application/json",
+    "Content-Type": "multipart/form-data",
   },
   withCredentials: true,
 });
 
+// Register User (Sign Up)
 export const registerUser = async (userData) => {
-  return api.post("/auth/signup", userData);
+  return api.post("/auth/signup", JSON.stringify(userData), {
+    headers: { "Content-Type": "application/json" },
+  });
 };
 
-// Login request
+// Login Request (Sign In)
 export const loginUser = async (userData) => {
-  return api.post("/auth/signin", userData);
+  return api.post("/auth/signin", JSON.stringify(userData), {
+    headers: { "Content-Type": "application/json" },
+  });
 };
 
-// Logout request (clears cookies)
+// Logout Request
 export const logoutUser = async () => {
-  return api.post("/auth/logout");
+  return api.post("/auth/logout", {}, {
+    headers: { "Content-Type": "application/json" },
+  });
 };
 
+export const generateSharableLink = async (wallId) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/walls/${wallId}/generate-link`);
+    return response.data.sharableLink;
+  } catch (error) {
+    console.error("Error generating sharable link:", error);
+    throw error;
+  }
+};
+
+// export const getSharableWall = async (wallId, uuid) => {
+//   try {
+//     const response = await axios.get(`${API_BASE_URL}/walls/${wallId}/link/${uuid}`);
+//     return response.data;
+//   } catch (error) {
+//     console.error("Invalid or expired link.");
+//     throw error;
+//   }
+// };
 export const getWalls = async () => {
   return api.get("/walls");
 };
