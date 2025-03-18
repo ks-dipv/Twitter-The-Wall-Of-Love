@@ -5,35 +5,31 @@ const API_URL = "http://localhost:3000/api";
 const api = axios.create({
   baseURL: API_URL,
   headers: {
-    "Content-Type": "multipart/form-data",
+    "Content-Type": "application/json",
   },
   withCredentials: true,
 });
 
 // Register User (Sign Up)
 export const registerUser = async (userData) => {
-  return api.post("/auth/signup", JSON.stringify(userData), {
-    headers: { "Content-Type": "application/json" },
-  });
+  return api.post("/auth/signup", JSON.stringify(userData));
 };
 
 // Login Request (Sign In)
 export const loginUser = async (userData) => {
-  return api.post("/auth/signin", JSON.stringify(userData), {
-    headers: { "Content-Type": "application/json" },
-  });
+  return api.post("/auth/signin", JSON.stringify(userData));
 };
 
 // Logout Request
 export const logoutUser = async () => {
-  return api.post("/auth/logout", {}, {
-    headers: { "Content-Type": "application/json" },
-  });
+  return api.post("/auth/logout");
 };
 
 export const generateSharableLink = async (wallId) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/walls/${wallId}/generate-link`);
+    const response = await axios.post(
+      `${API_URL}/walls/${wallId}/generate-link`
+    );
     return response.data.sharableLink;
   } catch (error) {
     console.error("Error generating sharable link:", error);
@@ -76,8 +72,8 @@ export const addWalls = async (data) => {
 };
 
 export const deleteWall = async (id) => {
-  return api.delete(`/walls/${id}`)
-}
+  return api.delete(`/walls/${id}`);
+};
 
 // Fetch Tweets for a Wall
 export const getTweetsByWall = async (wallId) => {
@@ -95,7 +91,6 @@ export const updateWall = async (wallId, formData) => {
     },
   });
 };
-
 
 export const addTweetToWall = async (wallId, tweetUrl) => {
   return api.post(`/walls/${wallId}/tweets`, { tweetUrl });
