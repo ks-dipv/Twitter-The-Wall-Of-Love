@@ -10,26 +10,36 @@ const Navbar = ({ logo, wallId }) => {
       {/* Logo */}
       <img src={logo} alt="Wall Logo" className="h-10" />
 
-      {/* Wall Settings Button */}
-      <div className="relative">
+      <div className="flex gap-4">
+        {/* Add Tweet Button */}
         <button
-          className="px-4 py-2 bg-blue-500 text-white rounded"
-          onClick={() => setDropdownOpen(!dropdownOpen)}
+          className="px-4 py-2 bg-green-500 text-white rounded"
+          onClick={() => navigate(`/wall/${wallId}/add-tweet`)}
         >
-          Wall Settings
+          Add Tweet
         </button>
 
-        {/* Dropdown Menu */}
-        {dropdownOpen && (
-          <div className="absolute right-0 mt-2 w-48 bg-white shadow-md rounded">
-            <button
-              onClick={() => navigate(`/wall/${wallId}/update`)}
-              className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-            >
-              Update Wall
-            </button>
-          </div>
-        )}
+        {/* Wall Settings Button */}
+        <div className="relative">
+          <button
+            className="px-4 py-2 bg-blue-500 text-white rounded"
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+          >
+            Wall Settings
+          </button>
+
+          {/* Dropdown Menu */}
+          {dropdownOpen && (
+            <div className="absolute right-0 mt-2 w-48 bg-white shadow-md rounded">
+              <button
+                onClick={() => navigate(`/wall/${wallId}/update`)}
+                className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+              >
+                Update Wall
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </nav>
   );

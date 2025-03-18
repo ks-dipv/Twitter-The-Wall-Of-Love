@@ -245,9 +245,11 @@ export class WallService {
         );
       }
 
+      // 🔹 Handle Logo Update
       let logoUrl: string | null = wall.logo;
 
       if (logo) {
+        // Delete old logo if exists
         if (wall.logo) {
           const fileName = wall.logo.split('/').pop();
           if (fileName) {
@@ -255,6 +257,7 @@ export class WallService {
           }
         }
 
+        // Upload new logo
         logoUrl = await this.uploadService.logo(logo);
       }
 
@@ -264,20 +267,32 @@ export class WallService {
       wall.visibility = updateWallDto.visibility ?? wall.visibility;
       wall.logo = logoUrl;
 
-      // Update Social Links (Replace old ones)
-      if (updateWallDto.social_links && updateWallDto.social_links.length > 0) {
+      // 🔹 Handle Social Links (Update, Add, Delete)
+      if (updateWallDto.social_links) {
+        const updatedLinks = updateWallDto.social_links.map(
+          (linkDto) => linkDto.platform,
+        );
+
+        // **DELETE** removed social links
+        wall.social_links = await this.socialLinkRepository.find({
+          where: { wall: { id: wall.id } },
+        });
+        for (const existingLink of wall.social_links) {
+          if (!updatedLinks.includes(existingLink.platform)) {
+            await this.socialLinkRepository.delete({ id: existingLink.id });
+          }
+        }
+
+        // **UPDATE or ADD** new social links
         for (const linkDto of updateWallDto.social_links) {
-          // Find the existing social link by platform
           const existingLink = wall.social_links.find(
             (link) => link.platform === linkDto.platform,
           );
 
           if (existingLink) {
-            // Update the existing social link
             existingLink.url = linkDto.url;
             await this.socialLinkRepository.save(existingLink);
           } else {
-            // If no existing link is found, create a new one
             const newSocialLink = this.socialLinkRepository.create({
               platform: linkDto.platform,
               url: linkDto.url,
@@ -291,6 +306,7 @@ export class WallService {
 
       return await this.wallRepository.save(wall);
     } catch (error) {
+      console.error('Error updating wall:', error.message); // Debugging log
       throw new BadRequestException(error.message || 'Failed to update wall');
     }
   }
