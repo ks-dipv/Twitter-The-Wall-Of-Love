@@ -22,9 +22,9 @@ function App() {
           <Route path="/admin/*" element={<AdminDashboard />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
-          <Route path="/walls/:id" element={<WallPage />} />
+          {/* <Route path="/walls/:id" element={<WallPage />} />
           <Route path="/wall/:id/update" element={<UpdateWallPage />} />
-          <Route path="/wall/:wallId/add-tweet" element={<AddTweet />} />
+          <Route path="/wall/:wallId/add-tweet" element={<AddTweet />} /> */}
         </Routes>
       </BrowserRouter>
     </AuthProvider>

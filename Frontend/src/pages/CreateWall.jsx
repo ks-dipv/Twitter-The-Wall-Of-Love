@@ -5,6 +5,7 @@ import { FaUserCircle, FaMoon, FaSun, FaBell, FaCog } from "react-icons/fa";
 const CreateWall = () => {
   const [walls, setWalls] = useState([]);
   const [darkMode, setDarkMode] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false); // Dropdown state
   const [wallData, setWallData] = useState({
     title: "",
     logo: null,
@@ -53,10 +54,8 @@ const CreateWall = () => {
       formData.append("description", wallData.description);
       formData.append("visibility", wallData.visibility);
       if (wallData.logo) {
-        formData.append("logo", wallData.logo); // Append logo file
+        formData.append("logo", wallData.logo);
       }
-  
-      // Convert socialLinks array into a JSON string
       formData.append("socialLinks", JSON.stringify(wallData.socialLinks));
   
       const response = await addWalls(formData);
@@ -68,30 +67,41 @@ const CreateWall = () => {
       console.error("Error creating wall:", error.response?.data || error.message);
     }
   };
-  
 
   return (
-    <div
-      className={`min-h-screen ${darkMode ? "bg-gray-900 text-white" : "bg-white text-black"}`}
-    >
+    <div className={`min-h-screen ${darkMode ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
       {/* Navbar */}
-      <nav className="flex items-center justify-between bg-gray-300 p-4 shadow-md">
+      <nav className="flex items-center justify-between bg-gray-300 p-4 shadow-md relative">
         <h1 className="text-xl font-bold">Wall Creator</h1>
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 relative">
           <button onClick={() => setDarkMode(!darkMode)}>
             {darkMode ? <FaSun size={22} /> : <FaMoon size={22} />}
           </button>
           <FaBell size={22} className="cursor-pointer" />
           <FaCog size={22} className="cursor-pointer" />
-          <FaUserCircle size={28} className="cursor-pointer" />
+
+          {/* Profile Dropdown */}
+          <div className="relative">
+            <FaUserCircle 
+              size={28} 
+              className="cursor-pointer" 
+              onClick={() => setShowDropdown(!showDropdown)} 
+            />
+
+            {showDropdown && (
+              <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg text-black">
+                <button className="block w-full px-4 py-2 hover:bg-gray-100 text-left">Profile</button>
+                <button className="block w-full px-4 py-2 hover:bg-gray-100 text-left">Update Profile</button>
+                <button className="block w-full px-4 py-2 hover:bg-red-100 text-left">Logout</button>
+              </div>
+            )}
+          </div>
         </div>
       </nav>
 
       {/* Create Wall Form - Full Width */}
       <div className="w-full p-6">
-        <h5 className="text-4xl font-extrabold text-center mb-5 relative">
-          Create Your Wall
-        </h5>
+        <h5 className="text-4xl font-extrabold text-center mb-5 relative">Create Your Wall</h5>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -107,11 +117,7 @@ const CreateWall = () => {
           </div>
           <div>
             <label className="block">Logo:</label>
-            <input
-              type="file"
-              onChange={handleFileChange}
-              className="w-full p-2 border rounded"
-            />
+            <input type="file" onChange={handleFileChange} className="w-full p-2 border rounded" />
           </div>
           <div>
             <label className="block">Description:</label>
@@ -163,19 +169,12 @@ const CreateWall = () => {
                 />
               </div>
             ))}
-            <button
-              type="button"
-              onClick={addSocialLink}
-              className="text-blue-500 hover:underline mt-2"
-            >
+            <button type="button" onClick={addSocialLink} className="text-blue-500 hover:underline mt-2">
               + Add Social Link
             </button>
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white p-3 rounded hover:bg-blue-600"
-          >
+          <button type="submit" className="w-full bg-blue-500 text-white p-3 rounded hover:bg-blue-600">
             Create Wall
           </button>
         </form>

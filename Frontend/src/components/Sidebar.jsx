@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { User, PlusCircle, List, Share2, LogOut, Menu } from "lucide-react";
+import { User, PlusCircle, List, Share2, LogOut, Menu, LayoutDashboard } from "lucide-react";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -31,13 +31,13 @@ const Sidebar = () => {
       <ul className="space-y-4 p-4">
         <li>
           <Link
-            to="/admin/profile"
+            to="/admin/dashboard"
             className={`flex items-center gap-2 p-2 rounded ${
-              isActive("/admin/profile") ? "bg-gray-400" : "hover:bg-gray-700"
+              isActive("/admin/dashboard") ? "bg-gray-400" : "hover:bg-gray-700"
             }`}
           >
-            <User className="w-5 h-5" />
-            {isOpen && "Profile"}
+            <LayoutDashboard className="w-5 h-5" />
+            {isOpen && "Dashboard"}
           </Link>
         </li>
 
@@ -113,6 +113,19 @@ const Sidebar = () => {
           </Link>
         </li>
 
+        {/* Profile */}
+        <li className="mt-4">
+          <Link
+            to="/admin/profile"
+            className={`flex items-center gap-2 p-2 rounded ${
+              isActive("/admin/profile") ? "bg-gray-400" : "hover:bg-gray-700"
+            }`}
+          >
+            <User className="w-5 h-5" />
+            {isOpen && "Profile"}
+          </Link>
+        </li>
+
         {/* Sign Out */}
         <li className="mt-10">
           <button
@@ -120,7 +133,7 @@ const Sidebar = () => {
             className="flex items-center gap-2 p-2 rounded hover:bg-red-700"
           >
             <LogOut className="w-5 h-5" />
-            {isOpen && "Sign Out"}
+            {isOpen && "LogOut"}
           </button>
         </li>
       </ul>
