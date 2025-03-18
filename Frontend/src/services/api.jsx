@@ -26,26 +26,16 @@ export const logoutUser = async () => {
 };
 
 export const generateSharableLink = async (wallId) => {
-  try {
-    const response = await axios.post(
-      `${API_URL}/walls/${wallId}/generate-link`
-    );
-    return response.data.sharableLink;
-  } catch (error) {
-    console.error("Error generating sharable link:", error);
-    throw error;
-  }
+  return api.post(`/walls/${wallId}/generate-link`, {}); // Send an empty object to match backend expectations
 };
 
-// export const getSharableWall = async (wallId, uuid) => {
-//   try {
-//     const response = await axios.get(`${API_BASE_URL}/walls/${wallId}/link/${uuid}`);
-//     return response.data;
-//   } catch (error) {
-//     console.error("Invalid or expired link.");
-//     throw error;
-//   }
-// };
+export const getSharableLink = async (wallId) => {
+  return api.get(`/walls/${wallId}/link`);
+};
+
+export const getWallDetails = async (wallId) => {
+  return await axios.get(`/api/walls/${wallId}`);
+};
 export const getWalls = async () => {
   return api.get("/walls");
 };
@@ -68,7 +58,9 @@ export const getWallById = async (wallId) => {
 };
 
 export const addWalls = async (data) => {
-  return api.post("/walls", data);
+  return api.post("/walls", data, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
 };
 
 export const deleteWall = async (id) => {

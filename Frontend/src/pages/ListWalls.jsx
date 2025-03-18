@@ -10,15 +10,17 @@ const ListWalls = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-
   useEffect(() => {
     const fetchWalls = async () => {
       try {
         const response = await getWalls();
+        if (!response || !response.data)
+          throw new Error("Invalid API response");
         setWalls(response.data);
       } catch (err) {
         setError("Failed to fetch walls.");
-        console.error(err);
+        console.error("API Error:", err);
+        setWalls([]); // Ensure walls is always an array
       } finally {
         setLoading(false);
       }
@@ -43,17 +45,11 @@ const ListWalls = () => {
     return <div className="text-center text-red-500 mt-10">{error}</div>;
 
   return (
-    <div
-      className={"min-h-screen"}
-    >
+    <div className={"min-h-screen"}>
       <div className="p-6">
         <h1 className="text-3xl font-bold text-center mb-6">Your Walls</h1>
 
-        {walls.length === 0 ? (
-          <div className="text-center text-gray-500">
-            No walls found. Create a new one!
-          </div>
-        ) : (
+        {Array.isArray(walls) && walls.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {walls.map((wall) => (
               <motion.div
@@ -97,10 +93,7 @@ const ListWalls = () => {
                   </Link>
 
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevents navigation on delete
-                      handleDelete(wall.id);
-                    }}
+                    onClick={() => handleDelete(wall.id)}
                     className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-md shadow hover:bg-red-600 transition"
                   >
                     <FiTrash2 /> Delete
@@ -108,6 +101,10 @@ const ListWalls = () => {
                 </div>
               </motion.div>
             ))}
+          </div>
+        ) : (
+          <div className="text-center text-gray-500">
+            No walls found. Create a new one!
           </div>
         )}
       </div>
