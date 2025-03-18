@@ -22,13 +22,7 @@ export const loginUser = async (userData) => {
 
 // Logout Request
 export const logoutUser = async () => {
-  return api.post(
-    "/auth/logout",
-    {},
-    {
-      headers: { "Content-Type": "application/json" },
-    }
-  );
+  return api.post("/auth/logout");
 };
 
 export const generateSharableLink = async (wallId) => {
@@ -65,8 +59,7 @@ export const getWallById = async (wallId) => {
 
 export const addWalls = async (data) => {
   return api.post("/walls", data, {
-    headers:
-    {"Content-Type": "multipart/form-data"},
+    headers: { "Content-Type": "multipart/form-data" },
   });
 };
 
@@ -83,8 +76,16 @@ export const deleteTweet = async (wallId, tweetId) => {
   return api.delete(`/walls/${wallId}/tweets/${tweetId}`);
 };
 
-export const updateWall = async (wallId, wallData) => {
-  return api.put(`/walls/${wallId}`, wallData);
+export const updateWall = async (wallId, formData) => {
+  return api.put(`/walls/${wallId}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+export const addTweetToWall = async (wallId, tweetUrl) => {
+  return api.post(`/walls/${wallId}/tweets`, { tweetUrl });
 };
 
 export default api;
