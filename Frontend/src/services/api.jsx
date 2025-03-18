@@ -5,51 +5,43 @@ const API_URL = "http://localhost:3000/api";
 const api = axios.create({
   baseURL: API_URL,
   headers: {
-    "Content-Type": "multipart/form-data",
+    "Content-Type": "application/json",
   },
   withCredentials: true,
 });
 
 // Register User (Sign Up)
 export const registerUser = async (userData) => {
-  return api.post("/auth/signup", JSON.stringify(userData), {
-    headers: { "Content-Type": "application/json" },
-  });
+  return api.post("/auth/signup", JSON.stringify(userData));
 };
 
 // Login Request (Sign In)
 export const loginUser = async (userData) => {
-  return api.post("/auth/signin", JSON.stringify(userData), {
-    headers: { "Content-Type": "application/json" },
-  });
+  return api.post("/auth/signin", JSON.stringify(userData));
 };
 
 // Logout Request
 export const logoutUser = async () => {
-  return api.post("/auth/logout", {}, {
-    headers: { "Content-Type": "application/json" },
-  });
+  return api.post(
+    "/auth/logout",
+    {},
+    {
+      headers: { "Content-Type": "application/json" },
+    }
+  );
 };
 
 export const generateSharableLink = async (wallId) => {
-  try {
-    const response = await axios.post(`${API_BASE_URL}/walls/${wallId}/generate-link`);
-    return response.data.sharableLink;
-  } catch (error) {
-    console.error("Error generating sharable link:", error);
-    throw error;
-  }
+  return api.post(`/walls/${wallId}/generate-link`, {}); // Send an empty object to match backend expectations
 };
 
-// export const getSharableWall = async (wallId, uuid) => {
-//   try {
-//     const response = await axios.get(`${API_BASE_URL}/walls/${wallId}/link/${uuid}`);
-//     return response.data;
-//   } catch (error) {
-//     console.error("Invalid or expired link.");
-//     throw error;
-//   }
-// };
+export const getSharableLink = async (wallId) => {
+  return api.get(`/walls/${wallId}/link`);
+};
+
+export const getWallDetails = async (wallId) => {
+  return await axios.get(`/api/walls/${wallId}`);
+};
 export const getWalls = async () => {
   return api.get("/walls");
 };
@@ -72,12 +64,15 @@ export const getWallById = async (wallId) => {
 };
 
 export const addWalls = async (data) => {
-  return api.post("/walls", data);
+  return api.post("/walls", data, {
+    headers:
+    {"Content-Type": "multipart/form-data"},
+  });
 };
 
 export const deleteWall = async (id) => {
-  return api.delete(`/walls/${id}`)
-}
+  return api.delete(`/walls/${id}`);
+};
 
 // Fetch Tweets for a Wall
 export const getTweetsByWall = async (wallId) => {

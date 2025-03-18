@@ -16,21 +16,40 @@ const ListWalls = () => {
     document.documentElement.classList.toggle("dark", darkMode);
   }, [darkMode]);
 
+  // useEffect(() => {
+  //   const fetchWalls = async () => {
+  //     try {
+  //       const response = await getWalls();
+  //       setWalls(response.data);
+  //     } catch (err) {
+  //       setError("Failed to fetch walls.");
+  //       console.error(err);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchWalls();
+  // }, []);
+
   useEffect(() => {
     const fetchWalls = async () => {
       try {
         const response = await getWalls();
+        if (!response || !response.data) throw new Error("Invalid API response");
         setWalls(response.data);
       } catch (err) {
         setError("Failed to fetch walls.");
-        console.error(err);
+        console.error("API Error:", err);
+        setWalls([]); // Ensure walls is always an array
       } finally {
         setLoading(false);
       }
     };
-
+  
     fetchWalls();
   }, []);
+  
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this wall?")) return;
@@ -46,6 +65,7 @@ const ListWalls = () => {
   if (loading) return <div className="text-center mt-10">Loading walls...</div>;
   if (error) return <div className="text-center text-red-500 mt-10">{error}</div>;
 
+  
   return (
     <div className={`min-h-screen ${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}>
       {/* Navbar */}
@@ -60,13 +80,11 @@ const ListWalls = () => {
           <FaUserCircle size={28} className="cursor-pointer" />
         </div>
       </nav>
-
+  
       <div className="p-6">
         <h1 className="text-3xl font-bold text-center mb-6">Your Walls</h1>
-
-        {walls.length === 0 ? (
-          <div className="text-center text-gray-500">No walls found. Create a new one!</div>
-        ) : (
+  
+        {Array.isArray(walls) && walls.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {walls.map((wall) => (
               <motion.div
@@ -84,7 +102,7 @@ const ListWalls = () => {
                   alt={wall.title} 
                   className="w-full h-32 object-cover rounded-md mb-3"
                 />
-
+  
                 {/* Content Section */}
                 <div className="relative flex-1">
                   <h2 className="text-xl font-semibold">{wall.title}</h2>
@@ -92,7 +110,7 @@ const ListWalls = () => {
                     {wall.description}
                   </p>
                 </div>
-
+  
                 {/* Action Buttons */}
                 <div className="absolute bottom-4 left-4 right-4 flex justify-between">
                   <Link 
@@ -108,7 +126,7 @@ const ListWalls = () => {
                   >
                     <FiShare2 /> Share
                   </Link>
-
+  
                   <button 
                     onClick={() => handleDelete(wall.id)} 
                     className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-md shadow hover:bg-red-600 transition"
@@ -119,10 +137,12 @@ const ListWalls = () => {
               </motion.div>
             ))}
           </div>
+        ) : (
+          <div className="text-center text-gray-500">No walls found. Create a new one!</div>
         )}
       </div>
     </div>
   );
-};
+}  
 
 export default ListWalls;
