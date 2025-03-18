@@ -1,20 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { getWalls, deleteWall } from "../services/api";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FiEdit, FiShare2, FiTrash2 } from "react-icons/fi";
-import { FaUserCircle, FaMoon, FaSun, FaBell, FaCog } from "react-icons/fa";
 import { motion } from "framer-motion";
 
 const ListWalls = () => {
   const [walls, setWalls] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [darkMode, setDarkMode] = useState(false);
-  const [selectedWall, setSelectedWall] = useState(null);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", darkMode);
-  }, [darkMode]);
 
   useEffect(() => {
     const fetchWalls = async () => {
@@ -44,44 +39,34 @@ const ListWalls = () => {
   };
 
   if (loading) return <div className="text-center mt-10">Loading walls...</div>;
-  if (error) return <div className="text-center text-red-500 mt-10">{error}</div>;
+  if (error)
+    return <div className="text-center text-red-500 mt-10">{error}</div>;
 
   return (
-    <div className={`min-h-screen ${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}>
-      {/* Navbar */}
-      <nav className="flex items-center justify-between bg-gray-300 p-4 shadow-md">
-        <h1 className="text-xl font-bold">Wall Manager</h1>
-        <div className="flex items-center space-x-4">
-          <button onClick={() => setDarkMode(!darkMode)}>
-            {darkMode ? <FaSun size={22} /> : <FaMoon size={22} />}
-          </button>
-          <FaBell size={22} className="cursor-pointer" />
-          <FaCog size={22} className="cursor-pointer" />
-          <FaUserCircle size={28} className="cursor-pointer" />
-        </div>
-      </nav>
-
+    <div
+      className={"min-h-screen"}
+    >
       <div className="p-6">
         <h1 className="text-3xl font-bold text-center mb-6">Your Walls</h1>
 
         {walls.length === 0 ? (
-          <div className="text-center text-gray-500">No walls found. Create a new one!</div>
+          <div className="text-center text-gray-500">
+            No walls found. Create a new one!
+          </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {walls.map((wall) => (
               <motion.div
                 key={wall.id}
-                className={`bg-white p-4 rounded-lg shadow-md relative min-h-[350px] flex flex-col transition-all ${
-                  selectedWall === wall.id ? "scale-105 shadow-xl" : ""
-                }`}
+                className="bg-white p-4 rounded-lg shadow-md relative min-h-[350px] flex flex-col transition-all cursor-pointer hover:scale-105"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 1.1 }}
-                onClick={() => setSelectedWall(wall.id)}
+                onClick={() => navigate(`/walls/${wall.id}`)} // Navigate to wall page
               >
                 {/* Logo */}
-                <img 
-                  src={wall.logo} 
-                  alt={wall.title} 
+                <img
+                  src={wall.logo}
+                  alt={wall.title}
                   className="w-full h-32 object-cover rounded-md mb-3"
                 />
 
@@ -95,22 +80,27 @@ const ListWalls = () => {
 
                 {/* Action Buttons */}
                 <div className="absolute bottom-4 left-4 right-4 flex justify-between">
-                  <Link 
-                    to={`/admin/update-wall/${wall.id}`} 
+                  <Link
+                    to={`/admin/update-wall/${wall.id}`}
                     className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600 transition"
+                    onClick={(e) => e.stopPropagation()} // Prevents card click event
                   >
                     <FiEdit /> Edit
                   </Link>
-                  
-                  <Link 
-                    to={`/admin/share-wall/${wall.id}`} 
+
+                  <Link
+                    to={`/admin/share-wall/${wall.id}`}
                     className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600 transition"
+                    onClick={(e) => e.stopPropagation()}
                   >
                     <FiShare2 /> Share
                   </Link>
 
-                  <button 
-                    onClick={() => handleDelete(wall.id)} 
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevents navigation on delete
+                      handleDelete(wall.id);
+                    }}
                     className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-md shadow hover:bg-red-600 transition"
                   >
                     <FiTrash2 /> Delete

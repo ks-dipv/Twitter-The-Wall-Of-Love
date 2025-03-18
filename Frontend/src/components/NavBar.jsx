@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { deleteWall } from "../services/api"; // Import delete API function
+import { deleteWall } from "../services/api"; 
 
 const Navbar = ({ logo, wallId }) => {
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   // Handle Wall Deletion
   const handleDelete = async () => {
@@ -21,6 +22,18 @@ const Navbar = ({ logo, wallId }) => {
     }
   };
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <nav className="bg-white shadow p-4 flex justify-between items-center">
       {/* Logo */}
@@ -36,19 +49,22 @@ const Navbar = ({ logo, wallId }) => {
         </button>
 
         {/* Wall Settings Button */}
-        <div className="relative">
+        <div className="relative" ref={dropdownRef}>
           <button
             className="px-4 py-2 bg-blue-500 text-white rounded"
-            onClick={() => setDropdownOpen(!dropdownOpen)}
+            onClick={() => setDropdownOpen((prev) => !prev)}
           >
             Wall Settings
           </button>
 
           {/* Dropdown Menu */}
           {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white shadow-md rounded">
+            <div className="absolute right-0 mt-2 w-48 bg-white shadow-md rounded border">
               <button
-                onClick={() => navigate(`/wall/${wallId}/update`)}
+                onClick={() => {
+                  navigate(`/wall/${wallId}/update`);
+                  setDropdownOpen(false); 
+                }}
                 className="block w-full text-left px-4 py-2 hover:bg-gray-100"
               >
                 Update Wall
