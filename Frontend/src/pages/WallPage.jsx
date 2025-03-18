@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getWallById, getTweetsByWall } from "../services/api";
+import { getWallById, getTweetsByWall, deleteTweet } from "../services/api";
 import TweetList from "../components/TweetList";
 import Footer from "../components/Footer";
 import Navbar from "../components/NavBar";
@@ -29,6 +29,20 @@ const WallPage = () => {
     fetchWallData();
   }, [id]);
 
+  const handleDelete = async (tweetId) => {
+    if (!tweetId) {
+      return;
+    }
+  
+    try {
+      await deleteTweet(wall.id, tweetId);
+      setTweets((prevTweets) => prevTweets.filter((tweet) => tweet.id !== tweetId));
+    } catch (error) {
+      console.error("Error deleting tweet:", error);
+    }
+  };
+  
+
   if (loading) return <p className="text-center mt-10">Loading...</p>;
   if (!wall)
     return <p className="text-center mt-10 text-red-500">Wall not found.</p>;
@@ -36,10 +50,16 @@ const WallPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar logo={wall.logo} wallId={wall.id} />
-      <main className="flex-grow p-4">
-        <h1 className="text-2xl font-bold">{wall.title}</h1>
-        <p className="text-gray-600">{wall.description}</p>
-        <TweetList tweets={tweets} />
+      <main className="flex-grow flex flex-col items-center justify-center text-center p-6">
+        <h1 className="text-4xl font-extrabold text-gray-900 md:text-5xl">
+          {wall.title}
+        </h1>
+        <p className="text-lg text-gray-700 mt-4 max-w-2xl">
+          {wall.description}
+        </p>
+        <div className="w-full mt-6">
+          <TweetList tweets={tweets} onDelete={handleDelete} />
+        </div>
       </main>
       <Footer socialLinks={wall.social_links} />
     </div>
