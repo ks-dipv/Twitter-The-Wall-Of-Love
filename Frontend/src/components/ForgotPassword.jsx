@@ -22,9 +22,17 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-6">Reset Password</h2>
+    <div
+      className="min-h-screen flex items-center justify-center bg-cover bg-center"
+      style={{
+        backgroundImage:
+          "url('https://img.freepik.com/free-vector/realistic-luxury-background_23-2149354608.jpg')",
+      }}
+    >
+      <div className="bg-gradient-to-br from-white to-gray-100 dark:from-gray-900 dark:to-gray-800 p-8 rounded-xl shadow-2xl border border-gray-300 dark:border-gray-700 w-full max-w-md">
+        <h2 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">
+          Reset Password
+        </h2>
 
         {message && (
           <div className="bg-green-100 text-green-700 p-2 rounded mb-4">
@@ -32,24 +40,21 @@ const ForgotPassword = () => {
           </div>
         )}
         {error && (
-          <div className="bg-red-100 text-red-700 p-2 rounded mb-4">
-            {error}
-          </div>
+          <div className="bg-red-100 text-red-700 p-2 rounded mb-4">{error}</div>
         )}
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-700 mb-2">
+            <label className="block text-gray-700 dark:text-gray-300 mb-2">
               Email Address
             </label>
             <input
               type="email"
-              id="email"
               name="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
               placeholder="Enter your email"
             />
           </div>

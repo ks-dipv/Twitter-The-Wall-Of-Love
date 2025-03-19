@@ -21,7 +21,7 @@ function App() {
           <Route path="/reset-password/:token" element={<ResetPassword />} />
         </Routes>
       </BrowserRouter>
-      ``
+    
     </AuthProvider>
   );
 }
