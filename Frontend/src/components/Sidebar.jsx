@@ -88,31 +88,7 @@ const Sidebar = () => {
           </Link>
         </li>
 
-        {/* Tweet Management */}
-        <li className="font-bold mt-4">Tweet Management</li>
-        <li>
-          <Link
-            to="/admin/add-tweet"
-            className={`flex items-center gap-2 p-2 rounded ${
-              isActive("/admin/add-tweet") ? "bg-gray-400" : "hover:bg-gray-700"
-            }`}
-          >
-            <PlusCircle className="w-5 h-5" />
-            {isOpen && "Add Tweet"}
-          </Link>
-        </li>
-        <li>
-          <Link
-            to="/admin/list-tweets"
-            className={`flex items-center gap-2 p-2 rounded ${
-              isActive("/admin/list-tweets") ? "bg-gray-400" : "hover:bg-gray-700"
-            }`}
-          >
-            <List className="w-5 h-5" />
-            {isOpen && "List of Tweets"}
-          </Link>
-        </li>
-
+        
         {/* Profile */}
         <li className="mt-4">
           <Link
