@@ -88,4 +88,8 @@ export const addTweetToWall = async (wallId, tweetUrl) => {
   return api.post(`/walls/${wallId}/tweets`, { tweetUrl });
 };
 
+export const reorderTweets = async (wallId, orderedTweetIds) => {
+  return api.put(`/walls/${wallId}/tweets/reorder`, { orderedTweetIds });
+};
+
 export default api;
