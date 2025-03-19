@@ -1,107 +1,113 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { addWalls } from "../services/api";
-import { FaUserCircle, FaMoon, FaSun, FaBell, FaCog } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
-const CreateWall = () => {
-  const [walls, setWalls] = useState([]);
-  const [darkMode, setDarkMode] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false); // Dropdown state
+const CreateWallPage = () => {
+  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
   const [wallData, setWallData] = useState({
     title: "",
-    logo: null,
     description: "",
     visibility: "public",
-    socialLinks: [{ platform: "", url: "" }],
+    socialLinks: [{ platform: "", url: "" }], // Initialize with one empty social link
+    logo: null,
   });
 
-  // Dark mode toggle
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", darkMode);
-  }, [darkMode]);
-
-  // Handle input change for creating a wall
   const handleChange = (e) => {
     setWallData({ ...wallData, [e.target.name]: e.target.value });
   };
 
-  // Handle file upload for wall logo
   const handleFileChange = (e) => {
     setWallData({ ...wallData, logo: e.target.files[0] });
   };
 
-  // Handle social links change
   const handleSocialChange = (index, e) => {
-    const newSocialLinks = [...wallData.socialLinks];
-    newSocialLinks[index][e.target.name] = e.target.value;
-    setWallData({ ...wallData, socialLinks: newSocialLinks });
-  };
-
-  // Add new social link field
-  const addSocialLink = () => {
-    setWallData({
-      ...wallData,
-      socialLinks: [...wallData.socialLinks, { platform: "", url: "" }],
+    setWallData((prevState) => {
+      const newSocialLinks = [...prevState.socialLinks];
+      newSocialLinks[index][e.target.name] = e.target.value;
+      return { ...prevState, socialLinks: newSocialLinks };
     });
   };
 
-  // Handle form submission for creating a wall
+  const addSocialLink = () => {
+    setWallData((prevState) => ({
+      ...prevState,
+      socialLinks: [...prevState.socialLinks, { platform: "", url: "" }],
+    }));
+  };
+
+  const removeSocialLink = (index) => {
+    setWallData((prevState) => {
+      const newSocialLinks = prevState.socialLinks.filter(
+        (_, i) => i !== index
+      );
+      return { ...prevState, socialLinks: newSocialLinks };
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+    setIsSubmitting(true);
+    setError("");
+
     try {
-      const formData = new FormData();
-      formData.append("title", wallData.title);
-      formData.append("description", wallData.description);
-      formData.append("visibility", wallData.visibility);
-      if (wallData.logo) {
-        formData.append("logo", wallData.logo);
-      }
-      formData.append("socialLinks", JSON.stringify(wallData.socialLinks));
-  
-      const response = await addWalls(formData);
-  
-      if (response.status === 201) {
-        setWalls([...walls, response.data]);
+      const requestBody = {
+        title: wallData.title,
+        description: wallData.description,
+        visibility: wallData.visibility,
+        social_links: wallData.socialLinks.filter(
+          (link) => link.platform && link.url
+        ), // Filter out empty links
+        logo: wallData.logo,
+      };
+
+      const response = await addWalls(requestBody);
+
+      if (response && (response.status === 200 || response.status === 201)) {
+        // Force navigation with window.location as a fallback
+        try {
+          navigate("/admin/list-walls", { replace: true });
+        } catch (navError) {
+          console.error("Navigation failed, using fallback:", navError);
+          window.location.href = "/admin/list-walls";
+        }
+      } else {
+        throw new Error(
+          "Failed to create wall. Server returned unexpected response."
+        );
       }
     } catch (error) {
-      console.error("Error creating wall:", error.response?.data || error.message);
+      console.error(
+        "Failed to create wall:",
+        error.response?.data || error.message
+      );
+      setError(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to create wall. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className={`min-h-screen ${darkMode ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
-      {/* Navbar */}
-      <nav className="flex items-center justify-between bg-gray-300 p-4 shadow-md relative">
-        <h1 className="text-xl font-bold">Wall Creator</h1>
-        <div className="flex items-center space-x-4 relative">
-          <button onClick={() => setDarkMode(!darkMode)}>
-            {darkMode ? <FaSun size={22} /> : <FaMoon size={22} />}
-          </button>
-          <FaBell size={22} className="cursor-pointer" />
-          <FaCog size={22} className="cursor-pointer" />
-
-          {/* Profile Dropdown */}
-          <div className="relative">
-            <FaUserCircle 
-              size={28} 
-              className="cursor-pointer" 
-              onClick={() => setShowDropdown(!showDropdown)} 
-            />
-
-            {showDropdown && (
-              <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg text-black">
-                <button className="block w-full px-4 py-2 hover:bg-gray-100 text-left">Profile</button>
-                <button className="block w-full px-4 py-2 hover:bg-gray-100 text-left">Update Profile</button>
-                <button className="block w-full px-4 py-2 hover:bg-red-100 text-left">Logout</button>
-              </div>
-            )}
-          </div>
-        </div>
-      </nav>
-
-      {/* Create Wall Form - Full Width */}
+    <div className="min-h-screen bg-white text-black">
       <div className="w-full p-6">
-        <h5 className="text-4xl font-extrabold text-center mb-5 relative">Create Your Wall</h5>
+        <h5 className="text-4xl font-extrabold text-center mb-5">
+          Create Your Wall
+        </h5>
+
+        {error && (
+          <div
+            className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4"
+            role="alert"
+          >
+            <p>{error}</p>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -113,11 +119,17 @@ const CreateWall = () => {
               onChange={handleChange}
               required
               className="w-full p-3 border rounded"
+              placeholder="Enter wall title"
             />
           </div>
           <div>
             <label className="block">Logo:</label>
-            <input type="file" onChange={handleFileChange} className="w-full p-2 border rounded" />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full p-2 border rounded"
+            />
           </div>
           <div>
             <label className="block">Description:</label>
@@ -126,7 +138,9 @@ const CreateWall = () => {
               value={wallData.description}
               onChange={handleChange}
               required
+              rows="4"
               className="w-full p-3 border rounded"
+              placeholder="Describe what this wall is about"
             />
           </div>
           <div>
@@ -140,6 +154,11 @@ const CreateWall = () => {
               <option value="public">Public</option>
               <option value="private">Private</option>
             </select>
+            <p className="text-sm text-gray-500 mt-1">
+              {wallData.visibility === "public"
+                ? "Public walls can be viewed by anyone with the link"
+                : "Private walls can only be viewed by you"}
+            </p>
           </div>
 
           {/* Social Links */}
@@ -158,6 +177,7 @@ const CreateWall = () => {
                   <option value="LinkedIn">LinkedIn</option>
                   <option value="YouTube">YouTube</option>
                   <option value="Facebook">Facebook</option>
+                  <option value="Instagram">Instagram</option>
                 </select>
                 <input
                   type="text"
@@ -167,20 +187,39 @@ const CreateWall = () => {
                   placeholder="URL"
                   className="w-2/3 p-3 border rounded"
                 />
+                {wallData.socialLinks.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeSocialLink(index)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    ❌
+                  </button>
+                )}
               </div>
             ))}
-            <button type="button" onClick={addSocialLink} className="text-blue-500 hover:underline mt-2">
+            <button
+              type="button"
+              onClick={addSocialLink}
+              className="text-blue-500 hover:underline mt-2"
+            >
               + Add Social Link
             </button>
           </div>
 
-          <button type="submit" className="w-full bg-blue-500 text-white p-3 rounded hover:bg-blue-600">
-            Create Wall
-          </button>
+          <div className="flex space-x-4 pt-4">
+            <button
+              type="submit"
+              className="w-full bg-blue-500 text-white p-3 rounded hover:bg-blue-600"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Creating..." : "Create Wall"}
+            </button>
+          </div>
         </form>
       </div>
     </div>
   );
 };
 
-export default CreateWall;
+export default CreateWallPage;
