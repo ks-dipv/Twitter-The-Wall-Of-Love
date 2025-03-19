@@ -9,6 +9,7 @@ import {
 import TweetList from "../components/TweetList";
 import Footer from "../components/Footer";
 import Navbar from "../components/NavBar";
+import { motion } from "framer-motion";
 
 const WallPage = () => {
   const { id } = useParams();
@@ -111,18 +112,28 @@ const WallPage = () => {
     return <p className="text-center mt-10 text-red-500">Wall not found.</p>;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar logo={wall.logo} wallId={wall.id} />
       <main className="flex-grow flex flex-col items-center p-6">
-        {/* Header Section with Title and Description */}
-        <div className="text-center mb-6 w-full">
-          <h1 className="text-4xl font-extrabold text-gray-900 md:text-5xl">
+        {/* Header Section with Title and Animated Description */}
+        <motion.div
+          className="text-center mb-6 w-full"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
+          <h1 className="text-4xl font-extrabold text-gray-900 md:text-5xl tracking-wide">
             {wall.title}
           </h1>
-          <p className="text-lg text-gray-700 mt-4 max-w-2xl mx-auto">
+          <motion.p
+            className="text-lg mt-4 max-w-2xl mx-auto text-gray-700 font-medium leading-relaxed"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.8, ease: "easeOut" }}
+          >
             {wall.description}
-          </p>
-        </div>
+          </motion.p>
+        </motion.div>
 
         {/* Action Section with Shuffle Button aligned to the right */}
         <div className="w-full flex justify-end mb-4">
@@ -133,7 +144,7 @@ const WallPage = () => {
               isSaving ? "opacity-50 cursor-not-allowed" : ""
             }`}
           >
-            {isSaving ? "Updating..." : "🔀Shuffle Tweets"}
+            {isSaving ? "Updating..." : "🔀 Shuffle Tweets"}
           </button>
         </div>
 
@@ -146,12 +157,17 @@ const WallPage = () => {
               onReorder={handleReorder}
             />
           ) : (
-            <div className="text-center py-12 bg-gray-50 rounded-lg shadow-inner">
+            <motion.div
+              className="text-center py-12 bg-gray-50 rounded-lg shadow-inner"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1 }}
+            >
               <p className="text-xl text-gray-500">No tweets available</p>
               <p className="text-gray-400 mt-2">
                 Tweets added to this wall will appear here
               </p>
-            </div>
+            </motion.div>
           )}
         </div>
       </main>

@@ -53,7 +53,6 @@ export default function ProfilePage() {
       <nav className="bg-white-600 p-4 shadow-md">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <h1 className="text-black text-xl font-bold">Your Profile</h1>
-          {/* <button className="text-white font-semibold">Logout</button> */}
         </div>
       </nav>
 
