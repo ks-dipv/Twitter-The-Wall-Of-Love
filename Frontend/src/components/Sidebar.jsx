@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   User,
   PlusCircle,
@@ -8,13 +8,23 @@ import {
   Menu,
   LayoutDashboard,
 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
   const location = useLocation(); // Get current route
+  const navigate = useNavigate();
+  const { logout } = useAuth();
 
   // Function to check if link is active
   const isActive = (path) => location.pathname === path;
+
+  const handleLogout = async () => {
+    alert("Logout");
+    await logout();
+    setIsOpen(false);
+    navigate("/");
+  };
 
   return (
     <div
@@ -99,7 +109,7 @@ const Sidebar = () => {
         {/* Sign Out */}
         <li className="mt-10">
           <button
-            onClick={() => alert("Logged Out")}
+            onClick={handleLogout}
             className="flex items-center gap-2 p-2 rounded hover:bg-red-700"
           >
             <LogOut className="w-5 h-5" />

@@ -18,7 +18,7 @@ const SignIn = () => {
     setError("");
     try {
       await login(credentials);
-      navigate("/admin/*");
+      navigate("/admin/list-walls");
     } catch (err) {
       setError(err.response?.data?.message || "Login failed, try again.");
     }
