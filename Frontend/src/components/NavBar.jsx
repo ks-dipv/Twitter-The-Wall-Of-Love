@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { deleteWall } from "../services/api"; 
+import { deleteWall } from "../services/api";
 
 const Navbar = ({ logo, wallId }) => {
   const navigate = useNavigate();
@@ -9,7 +9,9 @@ const Navbar = ({ logo, wallId }) => {
 
   // Handle Wall Deletion
   const handleDelete = async () => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this wall?");
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this wall?"
+    );
     if (!confirmDelete) return;
 
     try {
@@ -37,13 +39,19 @@ const Navbar = ({ logo, wallId }) => {
   return (
     <nav className="bg-gray-300 shadow-md p-4 flex justify-between items-center">
       {/* Logo */}
-      <img src={logo} alt="Wall Logo" className="h-12 w-12 rounded-full object-cover border-2 border-gray-400" />
+      {logo && (
+        <img
+          src={logo}
+          alt="Wall Logo"
+          className="h-12 w-12 rounded-full object-cover border-2 border-gray-400"
+        />
+      )}
 
       <div className="flex gap-4">
         {/* Add Tweet Button */}
         <button
-          className="px-6 py-2 bg-gradient-to-r from-green-400 to-green-600 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition transform hover:scale-105"
-          onClick={() => navigate(`/wall/${wallId}/add-tweet`)}
+          className="px-6 py-2 bg-green-500 text-white font-semibold rounded-lg"
+          onClick={() => navigate(`/admin/walls/${wallId}/add-tweet`)}
         >
           + Add Tweet
         </button>
@@ -63,7 +71,7 @@ const Navbar = ({ logo, wallId }) => {
               <button
                 onClick={() => {
                   navigate(`/wall/${wallId}/update`);
-                  setDropdownOpen(false); 
+                  setDropdownOpen(false);
                 }}
                 className="block w-full text-left px-4 py-3 font-medium hover:bg-gray-100 transition"
               >

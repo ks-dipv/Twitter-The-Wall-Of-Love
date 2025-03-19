@@ -6,11 +6,10 @@ import CreateWall from "./CreateWall";
 import Dashboard from "./Dashboard";
 import WallPage from "./WallPage";
 // import UpdateWall from "./UpdateWall";
-
 import ShareWall from "./ShareWall";
 import ListWalls from "./ListWalls";
 // import NewTweets from "./NewTweets";
-// import AddTweet from "./AddTweet";
+import AddTweet from "./AddTweet";
 // import ListTweets from "./ListTweets";
 
 const AdminDashboard = () => {
@@ -28,8 +27,9 @@ const AdminDashboard = () => {
           {/* <Route path="update-wall" element={<UpdateWall />} /> */}
           <Route path="share-wall" element={<ShareWall />} />
           <Route path="list-walls" element={<ListWalls />} />
+          <Route path="walls/:wallId/add-tweet" element={<AddTweet />} />
           {/* <Route path="new-tweets" element={<NewTweets />} />
-          <Route path="add-tweet" element={<AddTweet />} />
+         
           <Route path="list-tweets" element={<ListTweets />} /> */}
         </Routes>
       </div>
