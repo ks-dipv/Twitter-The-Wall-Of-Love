@@ -11,7 +11,7 @@ import ListWalls from "./ListWalls";
 // import NewTweets from "./NewTweets";
 import AddTweet from "./AddTweet";
 // import ListTweets from "./ListTweets";
-
+import UpdateWallPage from "./UpdateWallPage";
 const AdminDashboard = () => {
   return (
     <div className="flex">
@@ -24,10 +24,11 @@ const AdminDashboard = () => {
           <Route path="profile" element={<Profile />} />
           <Route path="create-wall" element={<CreateWall />} />
           <Route path="walls/:id" element={<WallPage />} />
-          {/* <Route path="update-wall" element={<UpdateWall />} /> */}
+          <Route path="walls/:id/update" element={<UpdateWallPage />} />
           <Route path="share-wall" element={<ShareWall />} />
           <Route path="list-walls" element={<ListWalls />} />
           <Route path="walls/:wallId/add-tweet" element={<AddTweet />} />
+          
           {/* <Route path="new-tweets" element={<NewTweets />} />
          
           <Route path="list-tweets" element={<ListTweets />} /> */}

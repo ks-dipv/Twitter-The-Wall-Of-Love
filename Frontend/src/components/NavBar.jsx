@@ -70,7 +70,7 @@ const Navbar = ({ logo, wallId }) => {
             <div className="absolute right-0 mt-2 w-52 bg-white shadow-md rounded-lg border">
               <button
                 onClick={() => {
-                  navigate(`/wall/${wallId}/update`);
+                  navigate(`/admin/walls/${wallId}/update`);
                   setDropdownOpen(false);
                 }}
                 className="block w-full text-left px-4 py-3 font-medium hover:bg-gray-100 transition"

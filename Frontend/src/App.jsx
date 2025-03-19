@@ -6,9 +6,7 @@ import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
 import { AuthProvider } from "./context/AuthContext";
 import Home from "./pages/Home";
-import UpdateWallPage from "./pages/UpdateWallPage";
 import AdminDashboard from "./pages/AdminDashboard";
-
 
 function App() {
   return (
@@ -21,10 +19,9 @@ function App() {
           <Route path="/admin/*" element={<AdminDashboard />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
-          <Route path="/wall/:id/update" element={<UpdateWallPage />} />
-         
         </Routes>
-      </BrowserRouter>``
+      </BrowserRouter>
+      ``
     </AuthProvider>
   );
 }
