@@ -129,11 +129,11 @@ const WallPage = () => {
           <button
             onClick={handleShuffle}
             disabled={isSaving}
-            className={`px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 ${
+            className={`px-5 py-2 bg-blue-600 text-white font-medium rounded-lg transition-all duration-300 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 ${
               isSaving ? "opacity-50 cursor-not-allowed" : ""
             }`}
           >
-            {isSaving ? "Updating..." : "🔀 Shuffle Tweets"}
+            {isSaving ? "Updating..." : "🔀Shuffle Tweets"}
           </button>
         </div>
 
