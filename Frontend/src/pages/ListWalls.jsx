@@ -57,7 +57,7 @@ const ListWalls = () => {
                 className="bg-white p-4 rounded-lg shadow-md relative min-h-[350px] flex flex-col transition-all cursor-pointer hover:scale-105"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 1.1 }}
-                onClick={() => navigate(`/walls/${wall.id}`)} // Navigate to wall page
+                onClick={() => navigate(`/admin/walls/${wall.id}`)} // Navigate to wall page
               >
                 {/* Logo */}
                 <img

@@ -90,7 +90,7 @@ const UpdateWallPage = () => {
       const response = await updateWall(id, requestBody);
 
       if (response.status === 200) {
-        navigate(`/walls/${id}`);
+        navigate(`/admin/walls/${id}`);
       }
     } catch (error) {
       console.error(

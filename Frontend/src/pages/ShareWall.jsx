@@ -119,22 +119,25 @@ const ShareWall = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {walls.map((wall) => (
               <motion.div
-                key={wall.id}
-                className="bg-white p-4 rounded-lg shadow-md relative flex flex-col transition-all"
-                whileHover={{ scale: 1.05 }}
-              >
-                <img
-                  src={wall.logo}
-                  alt={wall.title}
-                  className="w-16 h-16 rounded-full mx-auto mb-3 border-2 border-gray-300 shadow-md"
-                />
-
-                <h2 className="text-xl font-semibold">{wall.title}</h2>
-                <p className="text-gray-600 truncate">{wall.description}</p>
-
-                {/* Buttons for Share & Embed */}
-                {/* Buttons */}
-                <div className="mt-4 flex gap-3">
+              key={wall.id}
+              className="bg-white p-6 rounded-lg shadow-md relative flex flex-col items-center text-center transition-all"
+              whileHover={{ scale: 1.05 }}
+            >
+              {/* Wall Logo */}
+              <img
+                src={wall.logo}
+                alt={wall.title}
+                className="w-20 h-20 rounded-full border-4 border-gray-300 shadow-md"
+              />
+            
+              {/* Title and Description */}
+              <div className="mt-4">
+                <h2 className="text-xl font-semibold text-gray-800">{wall.title}</h2>
+                <p className="text-gray-600 mt-1">{wall.description}</p>
+              </div>
+            
+              {/* Buttons */}
+              <div className="mt-4 flex gap-3">
                   <motion.button
                     onClick={() => handleCopyShareLink(wall.id)}
                     className="flex items-center gap-2 bg-white text-blue-600 px-4 py-2 rounded-lg shadow-md hover:bg-gray-200 transition transform hover:scale-105"
@@ -150,7 +153,8 @@ const ShareWall = () => {
                     <FaCode /> Embed
                   </motion.button>
                 </div>
-              </motion.div>
+            </motion.div>
+            
             ))}
           </div>
         ) : (
