@@ -57,17 +57,20 @@ const ListWalls = () => {
                 className="bg-white p-4 rounded-lg shadow-md relative min-h-[350px] flex flex-col transition-all cursor-pointer hover:scale-105"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 1.1 }}
-                onClick={() => navigate(`/admin/walls/${wall.id}`)} // Navigate to wall page
               >
                 {/* Logo */}
                 <img
                   src={wall.logo}
                   alt={wall.title}
                   className="w-full h-32 object-cover rounded-md mb-3"
+                  onClick={() => navigate(`/admin/walls/${wall.id}`)}
                 />
 
                 {/* Content Section */}
-                <div className="relative flex-1">
+                <div
+                  className="relative flex-1"
+                  onClick={() => navigate(`/admin/walls/${wall.id}`)}
+                >
                   <h2 className="text-xl font-semibold">{wall.title}</h2>
                   <p className="text-gray-600 absolute top-10 left-0 right-0 h-[100px] overflow-hidden text-ellipsis p-2">
                     {wall.description}

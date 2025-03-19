@@ -1,6 +1,13 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { User, PlusCircle, List, Share2, LogOut, Menu, LayoutDashboard } from "lucide-react";
+import {
+  User,
+  PlusCircle,
+  List,
+  LogOut,
+  Menu,
+  LayoutDashboard,
+} from "lucide-react";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -10,7 +17,11 @@ const Sidebar = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div className={`h-screen bg-gray-800 text-white transition-all ${isOpen ? "w-64" : "w-20"}`}>
+    <div
+      className={`h-screen bg-gray-800 text-white transition-all ${
+        isOpen ? "w-64" : "w-20"
+      }`}
+    >
       {/* Logo & Toggle Button */}
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center space-x-3">
@@ -19,7 +30,9 @@ const Sidebar = () => {
             alt="Wall of Love Logo"
             className="h-10 w-auto"
           />
-          {isOpen && <h1 className="text-white text-2xl font-bold">Wall of Love</h1>}
+          {isOpen && (
+            <h1 className="text-white text-2xl font-bold">Wall of Love</h1>
+          )}
         </div>
 
         {/* Hamburger Icon for Toggle */}
@@ -47,7 +60,9 @@ const Sidebar = () => {
           <Link
             to="/admin/create-wall"
             className={`flex items-center gap-2 p-2 rounded ${
-              isActive("/admin/create-wall") ? "bg-gray-400" : "hover:bg-gray-700"
+              isActive("/admin/create-wall")
+                ? "bg-gray-400"
+                : "hover:bg-gray-700"
             }`}
           >
             <PlusCircle className="w-5 h-5" />
@@ -56,31 +71,11 @@ const Sidebar = () => {
         </li>
         <li>
           <Link
-            to="/admin/update-wall"
-            className={`flex items-center gap-2 p-2 rounded ${
-              isActive("/admin/update-wall") ? "bg-gray-400" : "hover:bg-gray-700"
-            }`}
-          >
-            <List className="w-5 h-5" />
-            {isOpen && "Update Wall"}
-          </Link>
-        </li>
-        <li>
-          <Link
-            to="/admin/share-wall"
-            className={`flex items-center gap-2 p-2 rounded ${
-              isActive("/admin/share-wall") ? "bg-gray-400" : "hover:bg-gray-700"
-            }`}
-          >
-            <Share2 className="w-5 h-5" />
-            {isOpen && "Share Wall"}
-          </Link>
-        </li>
-        <li>
-          <Link
             to="/admin/list-walls"
             className={`flex items-center gap-2 p-2 rounded ${
-              isActive("/admin/list-walls") ? "bg-gray-400" : "hover:bg-gray-700"
+              isActive("/admin/list-walls")
+                ? "bg-gray-400"
+                : "hover:bg-gray-700"
             }`}
           >
             <List className="w-5 h-5" />
@@ -88,7 +83,6 @@ const Sidebar = () => {
           </Link>
         </li>
 
-        
         {/* Profile */}
         <li className="mt-4">
           <Link
