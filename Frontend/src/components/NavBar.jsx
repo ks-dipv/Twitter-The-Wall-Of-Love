@@ -47,15 +47,15 @@ const Navbar = ({ logo, wallId }) => {
 
   return (
     <>
-      <nav className="bg-gray-300 shadow-md p-4 flex justify-between items-center">
-        {/* Logo */}
-        {logo && (
-          <img
-            src={logo}
-            alt="Wall Logo"
-            className="h-12 w-12 rounded-full object-cover border-2 border-gray-400"
-          />
-        )}
+    <nav className="bg-white-500 shadow-md p-4 flex justify-between items-center">
+      {/* Logo */}
+      {logo && (
+        <img
+          src={logo}
+          alt="Wall Logo"
+          className="h-12 w-12 rounded-full object-cover border-2 border-gray-400"
+        />
+      )}
 
         <div className="flex gap-4">
           {/* Add Tweet Button */}

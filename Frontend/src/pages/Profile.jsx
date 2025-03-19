@@ -1,64 +1,106 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { FaUserCircle } from 'react-icons/fa';
 
-const Profile = () => {
-  const navigate = useNavigate();
+export default function ProfilePage() {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [formData, setFormData] = useState({ name: '', email: '', profile_pic: '' });
+  const [file, setFile] = useState(null);
 
   useEffect(() => {
-    const fetchUser = async () => {
+    async function fetchUser() {
       try {
-        const response = await fetch("http://localhost:3000/api/user", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch user data");
-        }
-        const data = await response.json();
-        setUser(data);
+        const response = await axios.get('http://localhost:3000/api/user', { withCredentials: true });
+        setUser(response.data);
+        setFormData({ name: response.data.name, email: response.data.email, profile_pic: response.data.profile_pic });
       } catch (error) {
-        console.error("Error fetching user profile:", error);
-      } finally {
-        setLoading(false);
+        toast.error('Failed to load profile');
       }
-    };
-
+    }
     fetchUser();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">
-        <div className="p-6 bg-white rounded-lg shadow-lg animate-pulse w-96 h-60"></div>
-      </div>
-    );
-  }
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
+
+  const handleUpdate = async () => {
+    try {
+      const formDataObj = new FormData();
+      formDataObj.append('name', formData.name);
+      if (file) formDataObj.append('profileImage', file);
+      
+      await axios.put('http://localhost:3000/api/user/profile', formDataObj, {
+        withCredentials: true,
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      toast.success('Profile updated successfully');
+      setEditing(false);
+    } catch (error) {
+      toast.error('Failed to update profile');
+    }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-96 text-center transform transition-all hover:scale-105">
-        <div className="relative">
-          <img
-            src={user?.profilePic || "https://via.placeholder.com/150"}
-            alt="Profile"
-            className="w-24 h-24 mx-auto rounded-full border-4 border-pink-400 shadow-md"
-          />
-          <span className="absolute top-0 right-0 bg-green-500 w-4 h-4 rounded-full border-2 border-white"></span>
+    <div className="min-h-screen bg-gray-100">
+      {/* Navbar */}
+      <nav className="bg-white-600 p-4 shadow-md">
+        <div className="max-w-6xl mx-auto flex justify-between items-center">
+          <h1 className="text-black text-xl font-bold">Your Profile</h1>
+          {/* <button className="text-white font-semibold">Logout</button> */}
         </div>
-        <h2 className="text-2xl font-bold text-gray-800 mt-4">{user?.name}</h2>
-        <p className="text-gray-600">{user?.email}</p>
-        <button
-          onClick={() => navigate("/update-profile")}
-          className="mt-5 bg-pink-500 text-white px-6 py-2 rounded-lg shadow-md transition-all hover:bg-pink-600 hover:shadow-lg"
-        >
-          Update Profile
-        </button>
+      </nav>
+
+      {/* Profile Section */}
+      <div className="max-w-2xl mx-auto p-6 mt-10 bg-white shadow-lg rounded-lg">
+        {user ? (
+          <div className="flex flex-col items-center">
+            {formData.profile_pic ? (
+              <img
+                src={formData.profile_pic}
+                alt="Profile"
+                className="w-32 h-32 rounded-full object-cover mb-4 border-4 border-blue-500"
+              />
+            ) : (
+              <FaUserCircle className="text-gray-400 w-32 h-32 mb-4" />
+            )}
+            {editing ? (
+              <>
+                <input type="file" onChange={handleFileChange} className="mb-2 border p-2 rounded w-full" />
+                <input
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Name"
+                  className="border p-2 rounded w-full mb-2"
+                />
+                <input
+                  name="email"
+                  value={formData.email}
+                  placeholder="Email"
+                  className="border p-2 rounded w-full mb-2"
+                  disabled
+                />
+                <button onClick={handleUpdate} className="bg-green-500 text-white px-4 py-2 rounded mt-2">Save Changes</button>
+              </>
+            ) : (
+              <>
+                <h2 className="text-xl font-bold">{user.name}</h2>
+                <p className="text-gray-600">{user.email}</p>
+                <button onClick={() => setEditing(true)} className="bg-blue-500 text-white px-4 py-2 rounded mt-4">Edit Profile</button>
+              </>
+            )}
+          </div>
+        ) : (
+          <p className="text-center">Loading profile...</p>
+        )}
       </div>
     </div>
   );
-};
-
-export default Profile;
+}
