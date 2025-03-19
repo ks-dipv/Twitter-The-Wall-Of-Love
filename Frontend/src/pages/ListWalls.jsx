@@ -76,25 +76,9 @@ const ListWalls = () => {
 
                 {/* Action Buttons */}
                 <div className="absolute bottom-4 left-4 right-4 flex justify-between">
-                  <Link
-                    to={`/admin/update-wall/${wall.id}`}
-                    className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600 transition"
-                    onClick={(e) => e.stopPropagation()} // Prevents card click event
-                  >
-                    <FiEdit /> Edit
-                  </Link>
-
-                  <Link
-                    to={`/admin/share-wall/${wall.id}`}
-                    className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600 transition"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <FiShare2 /> Share
-                  </Link>
-
                   <button
                     onClick={() => handleDelete(wall.id)}
-                    className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-md shadow hover:bg-red-600 transition"
+                    className="flex items-center gap-2  text-black px-4 py-2 rounded-md shadow hover: transition"
                   >
                     <FiTrash2 /> Delete
                   </button>
