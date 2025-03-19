@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { registerUser } from "../services/api";
 import { Link } from "react-router-dom";
+
 const SignUp = () => {
   const { signup } = useAuth();
   const navigate = useNavigate();
@@ -110,6 +111,11 @@ const SignUp = () => {
           Already have an account?{" "}
           <Link to="/signin" className="text-blue-500 hover:underline">
             Sign In
+          </Link>
+        </p>
+        <p className="text-center mt-4">
+          <Link to="/" className="text-blue-500 hover:underline">
+            &larr; Back to Home
           </Link>
         </p>
       </div>

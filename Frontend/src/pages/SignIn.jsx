@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const SignIn = () => {
   const { login } = useAuth();
@@ -88,10 +87,13 @@ const SignIn = () => {
             Sign Up
           </Link>
         </p>
+        <p className="text-center mt-4">
+          <Link to="/" className="text-blue-500 hover:underline">
+            &larr; Back to Home
+          </Link>
+        </p>
       </div>
     </div>
-
-    // </div>
   );
 };
 
