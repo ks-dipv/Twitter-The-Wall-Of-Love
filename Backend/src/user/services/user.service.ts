@@ -53,7 +53,7 @@ export class UserService {
       await this.userRepository.save(newUser);
 
       // Send Verification Email
-      const verificationUrl = `http://localhost:3000/api/auth/verify-email?token=${verificationToken}`;
+      const verificationUrl = `http://localhost:5173/verify-email/${verificationToken}`;
       await this.mailService.sendVerificationEmail(
         verificationUrl,
         signupDto.email,

@@ -47,12 +47,12 @@ export class UserController {
     return this.userService.signup(signupDto, profileImage);
   }
 
-  @Post('auth/verify-email')
+  @Post('auth/verify-email/:token') 
   @UseInterceptors(ClassSerializerInterceptor)
-  async verifyEmail(@Query('token') token: string) {
+  async verifyEmail(@Param('token') token: string) { 
     return this.userService.verifyEmail(token);
   }
-
+  
   @Post('auth/signin')
   @ApiOperation({ summary: 'User sign-in' })
   @ApiBody({ type: SignInDto })
