@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 
-const API_URL = "http://localhost:3000/api"; 
+const API_URL = "http://localhost:3000/api";
 
 const VerifyEmail = () => {
-  const { verificationToken } = useParams(); // Extract token from the URL path
+  const { verificationToken } = useParams();
   const navigate = useNavigate();
   const [status, setStatus] = useState("pending");
   const [message, setMessage] = useState("");
@@ -25,10 +25,12 @@ const VerifyEmail = () => {
     }
 
     try {
-      const response = await axios.post(`${API_URL}/auth/verify-email/${verificationToken}`, { verificationToken});
+      const response = await axios.post(`${API_URL}/auth/verify-email/${verificationToken}`, {
+        verificationToken,
+      });
       setStatus("success");
       setMessage(response.data.message || "Email verified successfully!");
-      setTimeout(() => navigate("/signin"),3000); // Redirect to sign-in after 3 seconds
+      setTimeout(() => navigate("/signin"), 3000);
     } catch (error) {
       setStatus("error");
       setMessage(error.response?.data?.message || "Failed to verify email.");
@@ -36,16 +38,32 @@ const VerifyEmail = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-6 rounded-lg shadow-md text-center w-96">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Verify Your Email</h2>
+    <div
+      className="min-h-screen flex items-center justify-center bg-cover bg-center"
+      style={{
+        backgroundImage:
+          "url('https://img.freepik.com/free-vector/realistic-luxury-background_23-2149354608.jpg')",
+      }}
+    >
+      <div className="bg-gradient-to-br from-white to-gray-100 dark:from-gray-900 dark:to-gray-800 p-8 rounded-xl shadow-2xl border border-gray-300 dark:border-gray-700 w-full max-w-md">
+        <h2 className="text-2xl font-bold text-center mb-3 text-gray-900 dark:text-white">
+          Verify Your Email
+        </h2>
+
+        {/* Added a brief description for better UX */}
+        <p className="text-center text-gray-600 dark:text-gray-300 mb-6">
+          To activate your account, please verify your email by clicking the button below. 
+          If the verification link has expired, request a new one from your email.
+        </p>
 
         {status === "pending" && verificationToken && (
           <>
-            <p className="text-gray-600 mb-4">Click the button below to verify your email.</p>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
+              Click the button below to verify your email.
+            </p>
             <button
               onClick={handleVerify}
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+              className="w-full bg-blue-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-600 transition"
             >
               Verify Email
             </button>
@@ -54,22 +72,28 @@ const VerifyEmail = () => {
 
         {status === "success" && (
           <>
-            <p className="text-green-600 mb-4">{message}</p>
+            <p className="text-green-600 font-semibold mb-4">{message}</p>
             <p className="text-gray-500 text-sm">Redirecting to sign in...</p>
           </>
         )}
 
         {status === "error" && (
           <>
-            <p className="text-red-600 mb-4">{message}</p>
+            <p className="text-red-600 font-semibold mb-4">{message}</p>
             <button
               onClick={() => navigate("/")}
-              className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition"
+              className="w-full bg-gray-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-gray-600 transition"
             >
               Back to Home
             </button>
           </>
         )}
+
+        <p className="text-center mt-4">
+          <Link to="/" className="text-blue-500 hover:underline">
+            &larr; Back to Home
+          </Link>
+        </p>
       </div>
     </div>
   );
