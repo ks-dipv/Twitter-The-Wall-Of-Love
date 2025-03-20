@@ -8,6 +8,7 @@ import { AuthProvider } from "./context/AuthContext";
 import Home from "./pages/Home";
 import AdminDashboard from "./pages/AdminDashboard";
 import ShareableWallPage from "./pages/ShareableWallPage";
+import VerifyEmail from "./pages/VerifyEmail";
 
 function App() {
   return (
@@ -23,6 +24,10 @@ function App() {
           <Route
             path="/walls/:wallId/link/:uniqueId"
             element={<ShareableWallPage />}
+          />
+          <Route
+            path="/verify-email/:verificationToken"
+            element={<VerifyEmail />}
           />
         </Routes>
       </BrowserRouter>
