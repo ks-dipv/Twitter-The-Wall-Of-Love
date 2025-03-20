@@ -124,4 +124,9 @@ export class WallController {
   async deleteSocialLink(@Param('id') id: number, @Request() req) {
     return await this.wallService.deleteSocialLink(id, req);
   }
+
+  @Post('total-data')
+  async getTotaData(@Request() req) {
+    return await this.wallService.getTotalData(req);
+  }
 }

@@ -351,4 +351,22 @@ export class WallService {
       );
     }
   }
+
+  async getTotalData(req: Request) {
+    const user = req[REQUEST_USER_KEY];
+
+    if (!user) {
+      throw new UnauthorizedException('User not authenticated');
+    }
+
+    const existingUser = await this.userRepository.getByEmail(user.email);
+
+    if (!existingUser) {
+      throw new NotFoundException("User doesn't exist");
+    }
+
+    const result = await this.wallRepository.getTotalData(existingUser.id);
+
+    return result;
+  }
 }
