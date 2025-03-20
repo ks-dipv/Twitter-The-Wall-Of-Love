@@ -7,7 +7,7 @@ import ResetPassword from "./components/ResetPassword";
 import { AuthProvider } from "./context/AuthContext";
 import Home from "./pages/Home";
 import AdminDashboard from "./pages/AdminDashboard";
-
+import VerifyEmail from "./pages/VerifyEmail";
 function App() {
   return (
     <AuthProvider>
@@ -19,7 +19,8 @@ function App() {
           <Route path="/admin/*" element={<AdminDashboard />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
-        </Routes>
+          <Route path="/verify-email/:verificationToken" element={<VerifyEmail />} />
+          </Routes>
       </BrowserRouter>
     
     </AuthProvider>
