@@ -48,9 +48,9 @@ export class WallService {
       }
 
       const uniqueId = uuidv4();
-      const baseUrl = 'http://localhost:3000';
-      const shareable_link = `${baseUrl}/api/walls/${wallId}/link/${uniqueId}`;
-      const embed_link = `<iframe src="${baseUrl}/api/walls/${wallId}/link/${uniqueId}" width="600" height="400"></iframe>`;
+      const baseUrl = 'http://localhost:5173';
+      const shareable_link = `${baseUrl}/walls/${wallId}/link/${uniqueId}`;
+      const embed_link = `<iframe src="${baseUrl}/walls/${wallId}/link/${uniqueId}" width="600" height="400"></iframe>`;
 
       return {
         shareable_link,

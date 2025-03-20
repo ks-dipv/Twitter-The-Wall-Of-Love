@@ -7,6 +7,7 @@ import ResetPassword from "./components/ResetPassword";
 import { AuthProvider } from "./context/AuthContext";
 import Home from "./pages/Home";
 import AdminDashboard from "./pages/AdminDashboard";
+import ShareableWallPage from "./pages/ShareableWallPage";
 
 function App() {
   return (
@@ -19,9 +20,12 @@ function App() {
           <Route path="/admin/*" element={<AdminDashboard />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route
+            path="/walls/:wallId/link/:uniqueId"
+            element={<ShareableWallPage />}
+          />
         </Routes>
       </BrowserRouter>
-    
     </AuthProvider>
   );
 }

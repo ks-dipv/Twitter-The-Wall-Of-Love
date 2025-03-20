@@ -86,6 +86,7 @@ const SortableTweet = ({ tweet, onDelete }) => {
 };
 
 const TweetList = ({ tweets, onDelete, onReorder }) => {
+  const isShare = !location.pathname.includes("/link");
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -111,7 +112,7 @@ const TweetList = ({ tweets, onDelete, onReorder }) => {
     }
   };
 
-  return (
+  return isShare ? (
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
@@ -128,6 +129,12 @@ const TweetList = ({ tweets, onDelete, onReorder }) => {
         </div>
       </SortableContext>
     </DndContext>
+  ) : (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4">
+      {tweets.map((tweet) => (
+        <SortableTweet key={tweet.id} tweet={tweet} />
+      ))}
+    </div>
   );
 };
 

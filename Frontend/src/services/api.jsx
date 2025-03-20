@@ -12,12 +12,12 @@ const api = axios.create({
 
 // Register User (Sign Up)
 export const registerUser = async (userData) => {
-  return api.post("/auth/signup", JSON.stringify(userData));
+  return api.post("/auth/signup", userData);
 };
 
 // Login Request (Sign In)
 export const loginUser = async (userData) => {
-  return api.post("/auth/signin", JSON.stringify(userData));
+  return api.post("/auth/signin", userData);
 };
 
 // Logout Request
@@ -29,12 +29,12 @@ export const generateSharableLink = async (wallId) => {
   return api.post(`/walls/${wallId}/generate-link`, {}); // Send an empty object to match backend expectations
 };
 
-export const getSharableLink = async (wallId) => {
-  return api.get(`/walls/${wallId}/link`);
+export const getSharableLink = async (wallId, uniqueId) => {
+  return api.get(`/walls/${wallId}/link/${uniqueId}`);
 };
 
 export const getWallDetails = async (wallId) => {
-  return await axios.get(`/api/walls/${wallId}`);
+  return api.get(`/walls/${wallId}`);
 };
 export const getWalls = async () => {
   return api.get("/walls");
