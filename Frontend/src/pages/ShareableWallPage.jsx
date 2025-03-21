@@ -23,7 +23,7 @@ const ShareableWallPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <div className="mt-4 ml-5">
+      <div className="flex justify-center mt-4">
         {wall.logo && (
           <img
             src={wall.logo}

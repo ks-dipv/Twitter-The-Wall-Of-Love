@@ -13,6 +13,7 @@ const SignUp = () => {
     password: "",
   });
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(""); // New state for success message
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -21,18 +22,23 @@ const SignUp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
 
-    // Ensure all fields are present
     if (!formData.name || !formData.email || !formData.password) {
       setError("All fields are required.");
       return;
     }
 
     try {
-      console.log("Submitting form data:", formData);
       const response = await registerUser(formData);
       signup(response.data);
-      navigate("/signin");
+      setSuccess("Verification email sent successfully! Please check your inbox.");
+      
+      // Redirect after a short delay
+      setTimeout(() => {
+        navigate("/resend-email", { state: { email: formData.email } });
+      }, 1000);
+      
     } catch (err) {
       console.error("Signup failed:", err.response?.data || err.message);
       setError(err.response?.data?.message || "Signup failed, try again.");
@@ -51,11 +57,9 @@ const SignUp = () => {
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">
           Create an account
         </h2>
-        {error && (
-          <div className="bg-red-100 text-red-700 p-2 rounded mb-4">
-            {error}
-          </div>
-        )}
+
+        {error && <div className="bg-red-100 text-red-700 p-2 rounded mb-4">{error}</div>}
+        {success && <div className="bg-green-100 text-green-700 p-2 rounded mb-4">{success}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -107,6 +111,7 @@ const SignUp = () => {
             Sign Up
           </button>
         </form>
+
         <p className="mt-4 text-center text-gray-600 dark:text-gray-300">
           Already have an account?{" "}
           <Link to="/signin" className="text-blue-500 hover:underline">
