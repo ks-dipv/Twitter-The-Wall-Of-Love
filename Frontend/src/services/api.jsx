@@ -36,9 +36,6 @@ export const getSharableLink = async (wallId, uniqueId) => {
 export const getWallDetails = async (wallId) => {
   return api.get(`/walls/${wallId}`);
 };
-export const getWalls = async () => {
-  return api.get("/walls");
-};
 
 export const resetPassword = async (token, newPassword) => {
   return api.post(`/auth/reset-password/${token}`, { password: newPassword });
@@ -94,6 +91,14 @@ export const reorderTweets = async (wallId, orderedTweetIds) => {
 
 export const userVerify = async (token) => {
   return api.post(`/auth/verify-email/${token}`, { token });
+};
+
+export const totalData = async () => {
+  return api.post("/walls/total-data");
+};
+
+export const getUser = async () => {
+  return api.get("user");
 };
 
 export default api;

@@ -1,22 +1,31 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import { toast } from 'react-toastify';
-import { FaUserCircle } from 'react-icons/fa';
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { FaUserCircle } from "react-icons/fa";
+import { getUser } from "../services/api";
 
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
   const [editing, setEditing] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', profile_pic: '' });
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    profile_pic: "",
+  });
   const [file, setFile] = useState(null);
 
   useEffect(() => {
     async function fetchUser() {
       try {
-        const response = await axios.get('http://localhost:3000/api/user', { withCredentials: true });
+        const response = await getUser();
         setUser(response.data);
-        setFormData({ name: response.data.name, email: response.data.email, profile_pic: response.data.profile_pic });
+        setFormData({
+          name: response.data.name,
+          email: response.data.email,
+          profile_pic: response.data.profile_pic,
+        });
       } catch (error) {
-        toast.error('Failed to load profile');
+        toast.error("Failed to load profile");
       }
     }
     fetchUser();
@@ -33,17 +42,17 @@ export default function ProfilePage() {
   const handleUpdate = async () => {
     try {
       const formDataObj = new FormData();
-      formDataObj.append('name', formData.name);
-      if (file) formDataObj.append('profileImage', file);
-      
-      await axios.put('http://localhost:3000/api/user/profile', formDataObj, {
+      formDataObj.append("name", formData.name);
+      if (file) formDataObj.append("profileImage", file);
+
+      await axios.put("http://localhost:3000/api/user/profile", formDataObj, {
         withCredentials: true,
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: { "Content-Type": "multipart/form-data" },
       });
-      toast.success('Profile updated successfully');
+      toast.success("Profile updated successfully");
       setEditing(false);
     } catch (error) {
-      toast.error('Failed to update profile');
+      toast.error("Failed to update profile");
     }
   };
 
@@ -71,7 +80,11 @@ export default function ProfilePage() {
             )}
             {editing ? (
               <>
-                <input type="file" onChange={handleFileChange} className="mb-2 border p-2 rounded w-full" />
+                <input
+                  type="file"
+                  onChange={handleFileChange}
+                  className="mb-2 border p-2 rounded w-full"
+                />
                 <input
                   name="name"
                   value={formData.name}
@@ -86,13 +99,23 @@ export default function ProfilePage() {
                   className="border p-2 rounded w-full mb-2"
                   disabled
                 />
-                <button onClick={handleUpdate} className="bg-green-500 text-white px-4 py-2 rounded mt-2">Save Changes</button>
+                <button
+                  onClick={handleUpdate}
+                  className="bg-green-500 text-white px-4 py-2 rounded mt-2"
+                >
+                  Save Changes
+                </button>
               </>
             ) : (
               <>
                 <h2 className="text-xl font-bold">{user.name}</h2>
                 <p className="text-gray-600">{user.email}</p>
-                <button onClick={() => setEditing(true)} className="bg-blue-500 text-white px-4 py-2 rounded mt-4">Edit Profile</button>
+                <button
+                  onClick={() => setEditing(true)}
+                  className="bg-blue-500 text-white px-4 py-2 rounded mt-4"
+                >
+                  Edit Profile
+                </button>
               </>
             )}
           </div>
