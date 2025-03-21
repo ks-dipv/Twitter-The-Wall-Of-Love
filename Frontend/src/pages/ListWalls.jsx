@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { getWalls, deleteWall } from "../services/api";
-import { Link, useNavigate } from "react-router-dom";
-import { FiEdit, FiShare2, FiTrash2 } from "react-icons/fi";
+import { deleteWall, getAllWalls } from "../services/api";
+import { useNavigate } from "react-router-dom";
+import { FiTrash2 } from "react-icons/fi";
 import { motion } from "framer-motion";
 
 const ListWalls = () => {
@@ -13,7 +13,7 @@ const ListWalls = () => {
   useEffect(() => {
     const fetchWalls = async () => {
       try {
-        const response = await getWalls();
+        const response = await getAllWalls();
         if (!response || !response.data)
           throw new Error("Invalid API response");
         setWalls(response.data);
