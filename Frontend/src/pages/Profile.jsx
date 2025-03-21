@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { toast } from "react-toastify";
-import { FaUserCircle } from "react-icons/fa";
-import { getUser } from "../services/api";
+import { FaUserCircle, FaCopy, FaKey, FaCheck } from "react-icons/fa";
+import { getUser, updateProfile, getApiToken } from "../services/api";
 
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
@@ -13,6 +12,9 @@ export default function ProfilePage() {
     profile_pic: "",
   });
   const [file, setFile] = useState(null);
+  const [apiToken, setApiToken] = useState("");
+  const [isGeneratingToken, setIsGeneratingToken] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     async function fetchUser() {
@@ -24,6 +26,9 @@ export default function ProfilePage() {
           email: response.data.email,
           profile_pic: response.data.profile_pic,
         });
+        if (response.data.api_token) {
+          setApiToken(response.data.api_token);
+        }
       } catch (error) {
         toast.error("Failed to load profile");
       }
@@ -45,15 +50,57 @@ export default function ProfilePage() {
       formDataObj.append("name", formData.name);
       if (file) formDataObj.append("profileImage", file);
 
-      await axios.put("http://localhost:3000/api/user/profile", formDataObj, {
-        withCredentials: true,
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      await updateProfile(formDataObj);
       toast.success("Profile updated successfully");
       setEditing(false);
     } catch (error) {
       toast.error("Failed to update profile");
     }
+  };
+
+  const handleGenerateToken = async () => {
+    try {
+      setIsGeneratingToken(true);
+      const response = await getApiToken();
+
+      // Handle different response formats
+      if (
+        response.data &&
+        (response.data.token || typeof response.data === "string")
+      ) {
+        const token =
+          typeof response.data === "string"
+            ? response.data
+            : response.data.token;
+        setApiToken(token);
+        toast.success("API token generated successfully");
+      } else {
+        console.error("Unexpected response format:", response.data);
+        toast.error("Unexpected response format from server");
+      }
+    } catch (error) {
+      console.error("Generate token error:", error);
+      toast.error("Failed to generate API token");
+    } finally {
+      setIsGeneratingToken(false);
+    }
+  };
+
+  const handleCopyToken = () => {
+    navigator.clipboard
+      .writeText(apiToken)
+      .then(() => {
+        toast.success("API token copied to clipboard");
+        setCopied(true);
+
+        // Reset the copied state after 2 seconds
+        setTimeout(() => {
+          setCopied(false);
+        }, 2000);
+      })
+      .catch(() => {
+        toast.error("Failed to copy API token");
+      });
   };
 
   return (
@@ -118,6 +165,53 @@ export default function ProfilePage() {
                 </button>
               </>
             )}
+
+            {/* API Token Section */}
+            <div className="w-full mt-8 pt-6 border-t border-gray-200">
+              <h3 className="text-lg font-semibold mb-4 flex items-center">
+                <FaKey className="mr-2" /> API Token
+              </h3>
+              <div className="flex flex-col space-y-4">
+                {apiToken ? (
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={apiToken}
+                      className="w-full p-2 pr-10 border rounded bg-gray-50"
+                      readOnly
+                    />
+                    <button
+                      onClick={handleCopyToken}
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-blue-500 focus:outline-none"
+                      title="Copy to clipboard"
+                    >
+                      {copied ? (
+                        <FaCheck className="text-green-500" />
+                      ) : (
+                        <FaCopy />
+                      )}
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-gray-600 italic">
+                    No API token generated yet
+                  </p>
+                )}
+                <button
+                  onClick={handleGenerateToken}
+                  disabled={isGeneratingToken}
+                  className={`${
+                    apiToken ? "bg-gray-500" : "bg-blue-500"
+                  } text-white px-4 py-2 rounded flex items-center justify-center`}
+                >
+                  {isGeneratingToken
+                    ? "Generating..."
+                    : apiToken
+                    ? "Regenerate Token"
+                    : "Generate API Token"}
+                </button>
+              </div>
+            </div>
           </div>
         ) : (
           <p className="text-center">Loading profile...</p>

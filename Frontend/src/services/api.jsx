@@ -101,4 +101,16 @@ export const getUser = async () => {
   return api.get("user");
 };
 
+export const updateProfile = async (formDataObj) => {
+  return api.put("user/profile", formDataObj, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+export const getApiToken = async () => {
+  return api.post("/developer/api-token");
+};
+
 export default api;

@@ -307,7 +307,9 @@ export class UserService {
       existingUser.api_token = token;
 
       await this.userRepository.save(existingUser);
-      return token;
+      return {
+        token,
+      };
     } catch (error) {
       console.log(error);
       if (
