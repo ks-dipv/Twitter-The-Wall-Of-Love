@@ -92,4 +92,8 @@ export const reorderTweets = async (wallId, orderedTweetIds) => {
   return api.put(`/walls/${wallId}/tweets/reorder`, { orderedTweetIds });
 };
 
+export const userVerify = async (token) => {
+  return api.post(`/auth/verify-email/${token}`, { token });
+};
+
 export default api;

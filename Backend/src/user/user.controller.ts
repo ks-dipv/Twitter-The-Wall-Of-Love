@@ -10,7 +10,6 @@ import {
   Response,
   Request,
   ClassSerializerInterceptor,
-  Query,
   Get,
 } from '@nestjs/common';
 import { SignUpDto } from './dtos/signup.dto';
@@ -47,12 +46,19 @@ export class UserController {
     return this.userService.signup(signupDto, profileImage);
   }
 
-  @Post('auth/verify-email/:token') 
+  @Post('auth/verify-email/resend')
+  @Auth(AuthType.None)
+  async resendEmail(@Body('email') email: string) {
+    return this.userService.resendVerificationEmail(email);
+  }
+
+  @Post('auth/verify-email/:token')
+  @Auth(AuthType.None)
   @UseInterceptors(ClassSerializerInterceptor)
-  async verifyEmail(@Param('token') token: string) { 
+  async verifyEmail(@Param('token') token: string) {
     return this.userService.verifyEmail(token);
   }
-  
+
   @Post('auth/signin')
   @ApiOperation({ summary: 'User sign-in' })
   @ApiBody({ type: SignInDto })

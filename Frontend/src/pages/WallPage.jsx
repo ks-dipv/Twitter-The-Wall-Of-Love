@@ -8,7 +8,6 @@ import {
 } from "../services/api";
 import TweetList from "../components/TweetList";
 import Footer from "../components/Footer";
-import Navbar from "../components/NavBar";
 import { motion } from "framer-motion";
 
 const WallPage = () => {
@@ -113,7 +112,15 @@ const WallPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <Navbar logo={wall.logo} wallId={wall.id} />
+      <div className="mt-4 ml-5">
+        {wall.logo && (
+          <img
+            src={wall.logo}
+            alt="Wall Logo"
+            className="size-20 rounded-full object-cover border-2 border-gray-400"
+          />
+        )}
+      </div>
       <main className="flex-grow flex flex-col items-center p-6">
         {/* Header Section with Title and Animated Description */}
         <motion.div

@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import axios from "axios";
-
-const API_URL = "http://localhost:3000/api";
+import { userVerify } from "../services/api";
 
 const VerifyEmail = () => {
   const { verificationToken } = useParams();
@@ -25,9 +23,7 @@ const VerifyEmail = () => {
     }
 
     try {
-      const response = await axios.post(`${API_URL}/auth/verify-email/${verificationToken}`, {
-        verificationToken,
-      });
+      const response = await userVerify(verificationToken);
       setStatus("success");
       setMessage(response.data.message || "Email verified successfully!");
       setTimeout(() => navigate("/signin"), 3000);
@@ -52,8 +48,9 @@ const VerifyEmail = () => {
 
         {/* Added a brief description for better UX */}
         <p className="text-center text-gray-600 dark:text-gray-300 mb-6">
-          To activate your account, please verify your email by clicking the button below. 
-          If the verification link has expired, request a new one from your email.
+          To activate your account, please verify your email by clicking the
+          button below. If the verification link has expired, request a new one
+          from your email.
         </p>
 
         {status === "pending" && verificationToken && (

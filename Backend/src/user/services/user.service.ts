@@ -70,6 +70,49 @@ export class UserService {
     }
   }
 
+  public async resendVerificationEmail(email: string) {
+    try {
+      // Find the user by email
+      const user = await this.userRepository.getByEmail(email);
+
+      // Check if user exists
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      // Check if the email is already verified
+      if (user.is_email_verified) {
+        throw new BadRequestException('Email is already verified');
+      }
+
+      // Generate a new verification token
+      user.email_verification_token =
+        await this.generateTokenProvider.generateVarificationToken(user);
+      const verificationToken = user.email_verification_token;
+
+      // Save the updated user with new token
+      await this.userRepository.save(user);
+
+      // Send the verification email
+      const verificationUrl = `http://localhost:5173/verify-email/${verificationToken}`;
+      await this.mailService.sendVerificationEmail(verificationUrl, email);
+
+      return {
+        message: 'Verification email has been resent. Please check your inbox.',
+      };
+    } catch (error) {
+      console.log(error);
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      )
+        throw error;
+      throw new InternalServerErrorException(
+        'Failed to resend verification email',
+      );
+    }
+  }
+
   public async verifyEmail(token: string) {
     const user = await this.userRepository.findOne({
       where: { email_verification_token: token },

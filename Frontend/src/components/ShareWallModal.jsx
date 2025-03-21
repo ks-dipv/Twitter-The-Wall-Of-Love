@@ -135,7 +135,7 @@ const ShareWallModal = ({ wallId, isOpen, onClose }) => {
                 value={links.shareable_link}
                 readOnly
                 placeholder="Generate link to share this wall"
-                className="flex-grow border border-gray-300 rounded-l-lg p-2 text-sm bg-gray-50"
+                className="flex-grow text-black border border-gray-300 rounded-l-lg p-2 text-sm bg-gray-50"
               />
               {links.shareable_link ? (
                 <button
@@ -171,7 +171,7 @@ const ShareWallModal = ({ wallId, isOpen, onClose }) => {
                 value={links.embed_link}
                 readOnly
                 placeholder="Generate code to embed this wall"
-                className="flex-grow border border-gray-300 rounded-l-lg p-2 text-sm bg-gray-50"
+                className="flex-grow text-black border border-gray-300 rounded-l-lg p-2 text-sm bg-gray-50"
               />
               <div className="flex flex-col">
                 {links.embed_link ? (
