@@ -11,12 +11,17 @@ const SignUp = () => {
     name: "",
     email: "",
     password: "",
+    profile_pic: null,
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(""); // New state for success message
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleFileChange = (e) => {
+    setFormData({ ...formData, profile_pic: e.target.files[0] });
   };
 
   const handleSubmit = async (e) => {
@@ -30,15 +35,22 @@ const SignUp = () => {
     }
 
     try {
-      const response = await registerUser(formData);
+      const requestBody = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        profile_pic: formData.profile_pic,
+      };
+      const response = await registerUser(requestBody);
       signup(response.data);
-      setSuccess("Verification email sent successfully! Please check your inbox.");
-      
+      setSuccess(
+        "Verification email sent successfully! Please check your inbox."
+      );
+
       // Redirect after a short delay
       setTimeout(() => {
         navigate("/resend-email", { state: { email: formData.email } });
       }, 1000);
-      
     } catch (err) {
       console.error("Signup failed:", err.response?.data || err.message);
       setError(err.response?.data?.message || "Signup failed, try again.");
@@ -58,8 +70,16 @@ const SignUp = () => {
           Create an account
         </h2>
 
-        {error && <div className="bg-red-100 text-red-700 p-2 rounded mb-4">{error}</div>}
-        {success && <div className="bg-green-100 text-green-700 p-2 rounded mb-4">{success}</div>}
+        {error && (
+          <div className="bg-red-100 text-red-700 p-2 rounded mb-4">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="bg-green-100 text-green-700 p-2 rounded mb-4">
+            {success}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -104,9 +124,18 @@ const SignUp = () => {
               placeholder="Enter password"
             />
           </div>
+          <div>
+            <label className="block text-gray-700 dark:text-gray-300 mb-2">Profile Image</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full p-2 border text-white rounded"
+            />
+          </div>
           <button
             type="submit"
-            className="w-full bg-green-500 text-white p-3 rounded hover:bg-green-600 transition"
+            className="w-full bg-green-500 text-white p-3 mt-4 rounded hover:bg-green-600 transition"
           >
             Sign Up
           </button>

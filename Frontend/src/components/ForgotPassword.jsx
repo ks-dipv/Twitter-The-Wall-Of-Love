@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { requestPasswordReset } from "../services/api"; // Import API function
+import { requestPasswordReset } from "../services/api";
+import { Link } from "react-router-dom";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -40,7 +41,9 @@ const ForgotPassword = () => {
           </div>
         )}
         {error && (
-          <div className="bg-red-100 text-red-700 p-2 rounded mb-4">{error}</div>
+          <div className="bg-red-100 text-red-700 p-2 rounded mb-4">
+            {error}
+          </div>
         )}
 
         <form onSubmit={handleSubmit}>
@@ -65,6 +68,12 @@ const ForgotPassword = () => {
             Send Reset Link
           </button>
         </form>
+
+        <p className="mt-4 text-center text-gray-600 dark:text-gray-300">
+          <Link to="/signin" className="text-blue-500 hover:underline">
+            &larr; Back to Sign In
+          </Link>
+        </p>
       </div>
     </div>
   );
