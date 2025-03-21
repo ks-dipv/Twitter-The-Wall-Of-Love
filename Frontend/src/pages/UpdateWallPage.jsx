@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { getWallById, updateWall } from "../services/api";
 import { useParams, useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const UpdateWallPage = () => {
   const { id } = useParams();
@@ -10,7 +12,7 @@ const UpdateWallPage = () => {
     title: "",
     description: "",
     visibility: "public",
-    socialLinks: [], 
+    socialLinks: [],
     logo: null,
   });
 
@@ -37,6 +39,7 @@ const UpdateWallPage = () => {
         });
       } catch (error) {
         console.error("Failed to fetch wall:", error);
+        toast.error("Failed to load wall details.");
       }
     };
 
@@ -90,18 +93,21 @@ const UpdateWallPage = () => {
       const response = await updateWall(id, requestBody);
 
       if (response.status === 200) {
-        navigate(`/admin/walls/${id}`);
+        toast.success("Wall updated successfully! 🎉");
+        setTimeout(() => navigate(`/admin/walls/${id}`), 5000);
       }
     } catch (error) {
       console.error(
         "Failed to update wall:",
         error.response?.data || error.message
       );
+      toast.error(error.response?.data?.message || "Failed to update wall.");
     }
   };
 
   return (
     <div className="min-h-screen bg-white text-black">
+      <ToastContainer/>
       <div className="w-full p-6">
         <h5 className="text-4xl font-extrabold text-center mb-5">
           Update Your Wall

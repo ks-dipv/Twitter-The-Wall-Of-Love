@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { requestPasswordReset } from "../services/api"; // Import API function
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -13,11 +15,13 @@ const ForgotPassword = () => {
 
     try {
       const response = await requestPasswordReset(email);
-      setMessage(
-        response.data.message || "Check your email for the reset link."
-      );
+      const successMessage =
+        response.data.message || "Check your email for the reset link.";
+      toast.success(successMessage);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to send reset email.");
+      const errorMessage =
+        err.response?.data?.message || "Failed to send reset email.";
+      toast.error(errorMessage);
     }
   };
 
@@ -29,19 +33,11 @@ const ForgotPassword = () => {
           "url('https://img.freepik.com/free-vector/realistic-luxury-background_23-2149354608.jpg')",
       }}
     >
+      <ToastContainer/>
       <div className="bg-gradient-to-br from-white to-gray-100 dark:from-gray-900 dark:to-gray-800 p-8 rounded-xl shadow-2xl border border-gray-300 dark:border-gray-700 w-full max-w-md">
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">
           Reset Password
         </h2>
-
-        {message && (
-          <div className="bg-green-100 text-green-700 p-2 rounded mb-4">
-            {message}
-          </div>
-        )}
-        {error && (
-          <div className="bg-red-100 text-red-700 p-2 rounded mb-4">{error}</div>
-        )}
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">

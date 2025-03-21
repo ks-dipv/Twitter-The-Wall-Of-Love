@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { registerUser } from "../services/api";
 import { Link } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
 
 const SignUp = () => {
   const { signup } = useAuth();
@@ -12,8 +13,6 @@ const SignUp = () => {
     email: "",
     password: "",
   });
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(""); // New state for success message
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -21,27 +20,24 @@ const SignUp = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
 
     if (!formData.name || !formData.email || !formData.password) {
-      setError("All fields are required.");
+      toast.error("All fields are required.");
       return;
     }
 
     try {
       const response = await registerUser(formData);
       signup(response.data);
-      setSuccess("Verification email sent successfully! Please check your inbox.");
-      
-      // Redirect after a short delay
+      toast.success("Verification email sent!Please check your inbox 📩.");
+
       setTimeout(() => {
         navigate("/resend-email", { state: { email: formData.email } });
-      }, 1000);
+      }, 5000);
       
     } catch (err) {
       console.error("Signup failed:", err.response?.data || err.message);
-      setError(err.response?.data?.message || "Signup failed, try again.");
+      toast.error(err.response?.data?.message || "Signup failed, try again.");
     }
   };
 
@@ -53,13 +49,12 @@ const SignUp = () => {
           "url('https://img.freepik.com/free-vector/realistic-luxury-background_23-2149354608.jpg')",
       }}
     >
+      <ToastContainer/>
+
       <div className="bg-gradient-to-br from-white to-gray-100 dark:from-gray-900 dark:to-gray-800 p-8 rounded-xl shadow-2xl border border-gray-300 dark:border-gray-700 w-full max-w-md">
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">
           Create an account
         </h2>
-
-        {error && <div className="bg-red-100 text-red-700 p-2 rounded mb-4">{error}</div>}
-        {success && <div className="bg-green-100 text-green-700 p-2 rounded mb-4">{success}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">

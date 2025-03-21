@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { addWalls } from "../services/api";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
 
 const CreateWallPage = () => {
   const navigate = useNavigate();
@@ -11,7 +12,7 @@ const CreateWallPage = () => {
     title: "",
     description: "",
     visibility: "public",
-    socialLinks: [{ platform: "", url: "" }], // Initialize with one empty social link
+    socialLinks: [{ platform: "", url: "" }],
     logo: null,
   });
 
@@ -59,20 +60,17 @@ const CreateWallPage = () => {
         visibility: wallData.visibility,
         social_links: wallData.socialLinks.filter(
           (link) => link.platform && link.url
-        ), // Filter out empty links
+        ),
         logo: wallData.logo,
       };
 
       const response = await addWalls(requestBody);
 
       if (response && (response.status === 200 || response.status === 201)) {
-        // Force navigation with window.location as a fallback
-        try {
+        toast.success("Wall created successfully! 🎉");
+        setTimeout(() => {
           navigate("/admin/list-walls", { replace: true });
-        } catch (navError) {
-          console.error("Navigation failed, using fallback:", navError);
-          window.location.href = "/admin/list-walls";
-        }
+        }, 5000);
       } else {
         throw new Error(
           "Failed to create wall. Server returned unexpected response."
@@ -88,6 +86,7 @@ const CreateWallPage = () => {
           error.message ||
           "Failed to create wall. Please try again."
       );
+      toast.error("Error creating wall. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -95,6 +94,7 @@ const CreateWallPage = () => {
 
   return (
     <div className="min-h-screen bg-white text-black">
+      <ToastContainer />
       <div className="w-full p-6">
         <h5 className="text-4xl font-extrabold text-center mb-5">
           Create Your Wall

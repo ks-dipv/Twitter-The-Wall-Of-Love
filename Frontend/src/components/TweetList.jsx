@@ -13,6 +13,7 @@ import {
   useSortable,
   rectSortingStrategy,
 } from "@dnd-kit/sortable";
+import { toast, ToastContainer } from "react-toastify";
 
 const SortableTweet = ({ tweet, onDelete }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -41,6 +42,7 @@ const SortableTweet = ({ tweet, onDelete }) => {
           onClick={(e) => {
             e.stopPropagation();
             onDelete(tweet.id);
+            toast.success("Deleted Tweet successfully!");
           }}
           className="absolute top-2 right-2 text-gray-500 hover:text-red-600"
         >
@@ -112,28 +114,39 @@ const TweetList = ({ tweets, onDelete, onReorder }) => {
     }
   };
 
-  return isShare ? (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-    >
-      <SortableContext
-        items={tweets.map((tweet) => tweet.id.toString())}
-        strategy={rectSortingStrategy}
-      >
+  return (
+    <div>
+      {/* Toast Notifications */}
+      <ToastContainer />
+
+      {isShare ? (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={tweets.map((tweet) => tweet.id.toString())}
+            strategy={rectSortingStrategy}
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4">
+              {tweets.map((tweet) => (
+                <SortableTweet
+                  key={tweet.id}
+                  tweet={tweet}
+                  onDelete={onDelete}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+      ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4">
           {tweets.map((tweet) => (
-            <SortableTweet key={tweet.id} tweet={tweet} onDelete={onDelete} />
+            <SortableTweet key={tweet.id} tweet={tweet} />
           ))}
         </div>
-      </SortableContext>
-    </DndContext>
-  ) : (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4">
-      {tweets.map((tweet) => (
-        <SortableTweet key={tweet.id} tweet={tweet} />
-      ))}
+      )}
     </div>
   );
 };

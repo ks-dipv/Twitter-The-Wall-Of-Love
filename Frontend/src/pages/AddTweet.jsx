@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { addTweetToWall } from "../services/api";
 import { Loader2 } from "lucide-react";
+import { toast, ToastContainer } from "react-toastify";
 
 const AddTweet = () => {
   const { wallId } = useParams();
@@ -16,17 +17,24 @@ const AddTweet = () => {
     setLoading(true);
 
     if (!tweetUrl.trim()) {
-      setError("Tweet URL cannot be empty.");
+      toast.error("Tweet URL cannot be empty.");
       setLoading(false);
       return;
     }
 
     try {
       await addTweetToWall(wallId, tweetUrl);
-      alert("Tweet added successfully!");
-      navigate(`/admin/walls/${wallId}`);
+      toast.success("Tweet added successfully! 🚀");
+      setTimeout(() => {
+        navigate(`/admin/walls/${wallId}`);
+      }, 5000);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to add tweet.");
+      console.error(
+        "API Error:",
+        err.response?.data?.message || "Failed to add tweet."
+      );
+      const errorMsg = err.response?.data?.message || "Failed to add tweet.";
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -34,6 +42,7 @@ const AddTweet = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <ToastContainer />
       <div className="w-full max-w-lg p-8 bg-white shadow-lg rounded-2xl">
         <h2 className="text-2xl font-bold text-gray-900 text-center mb-6">
           ✨ Add a Tweet to Your Wall
@@ -52,7 +61,11 @@ const AddTweet = () => {
             disabled={loading}
             className="w-full flex items-center justify-center bg-blue-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-blue-700 transition"
           >
-            {loading ? <Loader2 className="animate-spin w-5 h-5" /> : "+ Add Tweet"}
+            {loading ? (
+              <Loader2 className="animate-spin w-5 h-5" />
+            ) : (
+              "+ Add Tweet"
+            )}
           </button>
         </form>
       </div>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
 
 const SignIn = () => {
   const { login } = useAuth();
@@ -17,9 +18,14 @@ const SignIn = () => {
     setError("");
     try {
       await login(credentials);
-      navigate("/admin/list-walls");
+      toast.success("Login successful! 🚀");
+      setTimeout(() => {
+        navigate("/admin/dashboard");
+      }, 3000);
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed, try again.");
+      const errorMessage =
+        err.response?.data?.message || "Login failed, try again.";
+      toast.error(errorMessage);
     }
   };
 
@@ -31,6 +37,8 @@ const SignIn = () => {
           "url('https://img.freepik.com/free-vector/realistic-luxury-background_23-2149354608.jpg')",
       }}
     >
+      <ToastContainer />
+
       <div className="bg-gradient-to-br from-white to-gray-100 dark:from-gray-900 dark:to-gray-800 p-8 rounded-xl shadow-2xl border border-gray-300 dark:border-gray-700 w-full max-w-md">
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">
           Sign In

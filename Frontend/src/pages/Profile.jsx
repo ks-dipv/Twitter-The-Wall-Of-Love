@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import { FaUserCircle, FaCopy, FaKey, FaCheck } from "react-icons/fa";
 import { getUser, updateProfile, getApiToken } from "../services/api";
 
@@ -63,7 +63,6 @@ export default function ProfilePage() {
       setIsGeneratingToken(true);
       const response = await getApiToken();
 
-      // Handle different response formats
       if (
         response.data &&
         (response.data.token || typeof response.data === "string")
@@ -93,7 +92,6 @@ export default function ProfilePage() {
         toast.success("API token copied to clipboard");
         setCopied(true);
 
-        // Reset the copied state after 2 seconds
         setTimeout(() => {
           setCopied(false);
         }, 2000);
@@ -105,14 +103,14 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Navbar */}
+      <ToastContainer autoClose={4000} />
+
       <nav className="bg-white-600 p-4 shadow-md">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <h1 className="text-black text-xl font-bold">Your Profile</h1>
         </div>
       </nav>
 
-      {/* Profile Section */}
       <div className="max-w-2xl mx-auto p-6 mt-10 bg-white shadow-lg rounded-lg">
         {user ? (
           <div className="flex flex-col items-center">
@@ -166,7 +164,6 @@ export default function ProfilePage() {
               </>
             )}
 
-            {/* API Token Section */}
             <div className="w-full mt-8 pt-6 border-t border-gray-200">
               <h3 className="text-lg font-semibold mb-4 flex items-center">
                 <FaKey className="mr-2" /> API Token
@@ -207,8 +204,8 @@ export default function ProfilePage() {
                   {isGeneratingToken
                     ? "Generating..."
                     : apiToken
-                    ? "Regenerate Token"
-                    : "Generate API Token"}
+                      ? "Regenerate Token"
+                      : "Generate API Token"}
                 </button>
               </div>
             </div>

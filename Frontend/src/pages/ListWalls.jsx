@@ -3,6 +3,7 @@ import { deleteWall, getAllWalls } from "../services/api";
 import { useNavigate } from "react-router-dom";
 import { FiTrash2 } from "react-icons/fi";
 import { motion } from "framer-motion";
+import { toast, ToastContainer } from "react-toastify";
 
 const ListWalls = () => {
   const [walls, setWalls] = useState([]);
@@ -33,7 +34,8 @@ const ListWalls = () => {
     if (!window.confirm("Are you sure you want to delete this wall?")) return;
     try {
       await deleteWall(id);
-      setWalls(walls.filter((wall) => wall.id !== id));
+      setWalls((prevWalls) => prevWalls.filter((wall) => wall.id !== id));
+      toast.success("Wall deleted successfully!");
     } catch (err) {
       console.error("Error deleting wall:", err);
       setError("Failed to delete wall.");
@@ -45,7 +47,8 @@ const ListWalls = () => {
     return <div className="text-center text-red-500 mt-10">{error}</div>;
 
   return (
-    <div className={"min-h-screen"}>
+    <div className="min-h-screen">
+      <ToastContainer />
       <div className="p-6">
         <h1 className="text-3xl font-bold text-center mb-6">Your Walls</h1>
 
