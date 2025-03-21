@@ -70,7 +70,6 @@ const VerifyEmail = () => {
         {status === "success" && (
           <>
             <p className="text-green-600 font-semibold mb-4">{message}</p>
-            <p className="text-gray-500 text-sm">Redirecting to sign in...</p>
           </>
         )}
 
@@ -78,19 +77,13 @@ const VerifyEmail = () => {
           <>
             <p className="text-red-600 font-semibold mb-4">{message}</p>
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/signin")}
               className="w-full bg-gray-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-gray-600 transition"
             >
-              Back to Home
+              Back to Sigin
             </button>
           </>
         )}
-
-        <p className="text-center mt-4">
-          <Link to="/" className="text-blue-500 hover:underline">
-            &larr; Back to Home
-          </Link>
-        </p>
       </div>
     </div>
   );

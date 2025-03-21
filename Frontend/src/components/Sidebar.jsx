@@ -202,7 +202,7 @@ const Sidebar = () => {
           className="flex items-center gap-2 p-2 rounded hover:bg-gray-700"
         >
           <List className="w-5 h-5" />
-          {isOpen && "All Walls"}
+          {isOpen && "List of walls"}
         </Link>
       </li>
     </>

@@ -9,7 +9,7 @@ import Home from "./pages/Home";
 import AdminDashboard from "./pages/AdminDashboard";
 import ShareableWallPage from "./pages/ShareableWallPage";
 import VerifyEmail from "./pages/VerifyEmail";
-
+import ResendEmail from "./pages/ResendEmail";
 function App() {
   return (
     <AuthProvider>
@@ -21,6 +21,7 @@ function App() {
           <Route path="/admin/*" element={<AdminDashboard />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/resend-email" element={<ResendEmail />} />
           <Route
             path="/walls/:wallId/link/:uniqueId"
             element={<ShareableWallPage />}
