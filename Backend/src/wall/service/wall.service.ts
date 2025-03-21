@@ -205,6 +205,11 @@ export class WallService {
         throw new NotFoundException('Wall not found or access denied');
       }
 
+      if (wall.logo) {
+        const fileName = wall.logo.split('/').pop();
+        if (fileName) await this.uploadService.deleteLogo(fileName);
+      }
+
       await this.wallRepository.delete(id);
       return { message: 'Wall deleted successfully' };
     } catch (error) {
@@ -308,47 +313,6 @@ export class WallService {
     } catch (error) {
       console.error('Error updating wall:', error.message); // Debugging log
       throw new BadRequestException(error.message || 'Failed to update wall');
-    }
-  }
-
-  // Delete a social link by id
-  async deleteSocialLink(
-    id: number,
-    req: Request,
-  ): Promise<{ message: string }> {
-    try {
-      const user = req[REQUEST_USER_KEY];
-
-      if (!user) {
-        throw new UnauthorizedException('User not authenticated');
-      }
-
-      const existingUser = await this.userRepository.getByEmail(user.email);
-      if (!existingUser) {
-        throw new NotFoundException("User doesn't exist");
-      }
-
-      const socialLink = await this.socialLinkRepository.findOne({
-        where: { id },
-        relations: ['wall'],
-      });
-
-      if (!socialLink) {
-        throw new NotFoundException('Social link not found');
-      }
-
-      if (socialLink.wall.user.id !== existingUser.id) {
-        throw new UnauthorizedException(
-          'You do not have permission to delete this social link',
-        );
-      }
-
-      await this.socialLinkRepository.delete(id);
-      return { message: 'Social link deleted successfully' };
-    } catch (error) {
-      throw new BadRequestException(
-        error.message || 'Failed to delete social link',
-      );
     }
   }
 

@@ -23,15 +23,12 @@ const Sidebar = () => {
   const { logout } = useAuth();
   const [shareModalOpen, setShareModalOpen] = useState(false);
 
-  // Extract wallId from the URL
   const pathParts = location.pathname.split("/");
   const wallIdIndex = pathParts.findIndex((part) => part === "walls") + 1;
   const wallId = pathParts[wallIdIndex] || null;
 
-  // Check if we're on a wall-specific page
   const isWallPage = location.pathname.includes("/admin/walls/") && wallId;
 
-  // Function to check if link is active
   const isActive = (path) => location.pathname === path;
 
   const handleLogout = async () => {
@@ -41,7 +38,6 @@ const Sidebar = () => {
     navigate("/");
   };
 
-  // Handle Wall Deletion
   const handleDelete = async () => {
     if (!wallId) return;
 
@@ -60,7 +56,6 @@ const Sidebar = () => {
     }
   };
 
-  // Handle Share modal
   const handleOpenShareModal = () => {
     setShareModalOpen(true);
   };
@@ -79,7 +74,6 @@ const Sidebar = () => {
         </Link>
       </li>
 
-      {/* Wall Management */}
       <li className="font-bold mt-4">{isOpen && "Wall Management"}</li>
       <li>
         <Link
@@ -102,30 +96,6 @@ const Sidebar = () => {
           <List className="w-5 h-5" />
           {isOpen && "List of Walls"}
         </Link>
-      </li>
-
-      {/* Profile */}
-      <li className="mt-4">
-        <Link
-          to="/admin/profile"
-          className={`flex items-center gap-2 p-2 rounded ${
-            isActive("/admin/profile") ? "bg-gray-400" : "hover:bg-gray-700"
-          }`}
-        >
-          <User className="w-5 h-5" />
-          {isOpen && "Profile"}
-        </Link>
-      </li>
-
-      {/* Sign Out - Always visible */}
-      <li className="mt-10">
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-2 p-2 rounded hover:bg-red-700 w-full text-left"
-        >
-          <LogOut className="w-5 h-5" />
-          {isOpen && "LogOut"}
-        </button>
       </li>
     </>
   );
@@ -189,10 +159,10 @@ const Sidebar = () => {
       <li>
         <button
           onClick={handleDelete}
-          className="flex items-center gap-2 p-2 rounded hover:bg-gray-700 w-full text-left"
+          className="flex items-center gap-2 p-2 rounded hover:bg-red-700 w-full text-left"
         >
-          <Trash2 className="w-5 h-5" />
-          {isOpen && "Delete Wall"}
+          <Trash2 className="w-5 h-5 text-white-500" />
+          {isOpen && <span className="text-white-500">Delete Wall</span>}
         </button>
       </li>
 
@@ -210,7 +180,7 @@ const Sidebar = () => {
 
   return (
     <div
-      className={`h-screen bg-gray-800 text-white transition-all ${
+      className={`h-screen bg-gray-800 text-white transition-all flex flex-col ${
         isOpen ? "w-64" : "w-20"
       }`}
     >
@@ -227,15 +197,41 @@ const Sidebar = () => {
           )}
         </div>
 
-        {/* Hamburger Icon for Toggle */}
         <button onClick={() => setIsOpen(!isOpen)} className="text-white">
           <Menu className="w-6 h-6" />
         </button>
       </div>
 
-      <ul className="space-y-4 p-4">
+      <ul className="space-y-4 p-4 flex-1">
         {isWallPage ? renderWallSidebar() : renderDefaultSidebar()}
       </ul>
+
+      {/* Profile & Logout at Bottom */}
+      <div className="p-4 border-t border-gray-600">
+        <ul>
+          <li>
+            <Link
+              to="/admin/profile"
+              className={`flex items-center gap-2 p-2 rounded ${
+                isActive("/admin/profile") ? "bg-gray-400" : "hover:bg-gray-700"
+              }`}
+            >
+              <User className="w-5 h-5" />
+              {isOpen && "Profile"}
+            </Link>
+          </li>
+
+          <li className="mt-2">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 p-2 rounded hover:bg-red-700 w-full text-left"
+            >
+              <LogOut className="w-5 h-5 text-white-500" />
+              {isOpen && <span className="text-white-500">LogOut</span>}
+            </button>
+          </li>
+        </ul>
+      </div>
 
       {/* Share Wall Modal */}
       <ShareWallModal

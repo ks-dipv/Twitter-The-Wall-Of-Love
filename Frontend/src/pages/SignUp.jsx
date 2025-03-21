@@ -12,10 +12,15 @@ const SignUp = () => {
     name: "",
     email: "",
     password: "",
+    profile_pic: null,
   });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleFileChange = (e) => {
+    setFormData({ ...formData, profile_pic: e.target.files[0] });
   };
 
   const handleSubmit = async (e) => {
@@ -27,14 +32,29 @@ const SignUp = () => {
     }
 
     try {
-      const response = await registerUser(formData);
+      const requestBody = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        profile_pic: formData.profile_pic,
+      };
+      const response = await registerUser(requestBody);
       signup(response.data);
+
       toast.success("Verification email sent!Please check your inbox 📩.");
 
       setTimeout(() => {
         navigate("/resend-email", { state: { email: formData.email } });
       }, 5000);
-      
+
+      setSuccess(
+        "Verification email sent successfully! Please check your inbox."
+      );
+
+      // Redirect after a short delay
+      setTimeout(() => {
+        navigate("/resend-email", { state: { email: formData.email } });
+      }, 1000);
     } catch (err) {
       console.error("Signup failed:", err.response?.data || err.message);
       toast.error(err.response?.data?.message || "Signup failed, try again.");
@@ -49,13 +69,23 @@ const SignUp = () => {
           "url('https://img.freepik.com/free-vector/realistic-luxury-background_23-2149354608.jpg')",
       }}
     >
-      <ToastContainer/>
+      <ToastContainer />
 
       <div className="bg-gradient-to-br from-white to-gray-100 dark:from-gray-900 dark:to-gray-800 p-8 rounded-xl shadow-2xl border border-gray-300 dark:border-gray-700 w-full max-w-md">
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">
           Create an account
         </h2>
 
+        {error && (
+          <div className="bg-red-100 text-red-700 p-2 rounded mb-4">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="bg-green-100 text-green-700 p-2 rounded mb-4">
+            {success}
+          </div>
+        )}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-gray-700 dark:text-gray-300 mb-2">
@@ -99,9 +129,20 @@ const SignUp = () => {
               placeholder="Enter password"
             />
           </div>
+          <div>
+            <label className="block text-gray-700 dark:text-gray-300 mb-2">
+              Profile Image
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full p-2 border text-white rounded"
+            />
+          </div>
           <button
             type="submit"
-            className="w-full bg-green-500 text-white p-3 rounded hover:bg-green-600 transition"
+            className="w-full bg-green-500 text-white p-3 mt-4 rounded hover:bg-green-600 transition"
           >
             Sign Up
           </button>

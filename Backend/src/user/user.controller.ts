@@ -38,7 +38,7 @@ export class UserController {
   @ApiResponse({ status: 201, description: 'User signed up successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @Auth(AuthType.None)
-  @UseInterceptors(FileInterceptor('profileImage'), ClassSerializerInterceptor)
+  @UseInterceptors(FileInterceptor('profile_pic'), ClassSerializerInterceptor)
   public entry(
     @Body() signupDto: SignUpDto,
     @UploadedFile() profileImage?: Express.Multer.File,

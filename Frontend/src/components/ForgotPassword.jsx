@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { requestPasswordReset } from "../services/api"; // Import API function
 import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { requestPasswordReset } from "../services/api";
+import { Link } from "react-router-dom";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -33,11 +34,22 @@ const ForgotPassword = () => {
           "url('https://img.freepik.com/free-vector/realistic-luxury-background_23-2149354608.jpg')",
       }}
     >
-      <ToastContainer/>
+      <ToastContainer />
       <div className="bg-gradient-to-br from-white to-gray-100 dark:from-gray-900 dark:to-gray-800 p-8 rounded-xl shadow-2xl border border-gray-300 dark:border-gray-700 w-full max-w-md">
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">
           Reset Password
         </h2>
+
+        {message && (
+          <div className="bg-green-100 text-green-700 p-2 rounded mb-4">
+            {message}
+          </div>
+        )}
+        {error && (
+          <div className="bg-red-100 text-red-700 p-2 rounded mb-4">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -61,6 +73,12 @@ const ForgotPassword = () => {
             Send Reset Link
           </button>
         </form>
+
+        <p className="mt-4 text-center text-gray-600 dark:text-gray-300">
+          <Link to="/signin" className="text-blue-500 hover:underline">
+            &larr; Back to Sign In
+          </Link>
+        </p>
       </div>
     </div>
   );
