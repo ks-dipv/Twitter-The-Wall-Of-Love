@@ -1,97 +1,189 @@
-import React, { useEffect, useState } from "react";
-import { BarChart, Users, FileText, MessageSquare } from "lucide-react";
-import { Card, CardContent } from "../components/ui/card"; 
+import { useEffect, useState } from "react";
+import axios from "axios";
 import CountUp from "react-countup";
-import { Bar, BarChart as Chart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Users, FileText, MessageSquare } from "lucide-react";
+import { Card, CardContent } from "../components/ui/card"; 
+import { Skeleton } from "../components/ui/skeleton";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+
+const COLORS = ["#6ea7be", "#7997a3", "#1c5d77"]; //colors for pie chart
 
 const Dashboard = () => {
-  // State for dynamic data
   const [stats, setStats] = useState({
-    totalUsers: 0,
     totalWalls: 0,
-    totalTweets: 0,
+    publicWalls: 0,
+    privateWalls: 0,
+    wallTrend: [],
   });
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentDate, setCurrentDate] = useState(new Date());
 
-  // Fetch counts from backend API
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch("https://your-backend-api.com/api/stats"); 
-        const data = await response.json();
+        const response = await axios.post(
+          "http://localhost:3000/api/walls/total-data",
+          {},
+          { withCredentials: true }
+        );
+        setStats(response.data);
+      } catch (err) {
+        const errMsg =
+          err.response && typeof err.response.data === "object"
+            ? err.response.data.message || JSON.stringify(err.response.data)
+            : err.message;
+        setError(errMsg);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-        setStats({
-          totalUsers: data.totalUsers,
-          totalWalls: data.totalWalls,
-          totalTweets: data.totalTweets,
+    const fetchUser = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/user", {
+          withCredentials: true,
         });
-      } catch (error) {
-        console.error("Error fetching stats:", error);
+        setUser(response.data);
+      } catch (err) {
+        console.error("Error fetching user data", err);
       }
     };
 
     fetchStats();
+    fetchUser();
+
+    const dateInterval = setInterval(() => setCurrentDate(new Date()), 1000);
+    return () => clearInterval(dateInterval);
   }, []);
 
-  const data = [
-    { name: "Jan", walls: 50 },
-    { name: "Feb", walls: 80 },
-    { name: "Mar", walls: 100 },
-    { name: "Apr", walls: 120 },
-    { name: "May", walls: 140 },
-    { name: "Jun", walls: 160 },
+  if (loading) return <Skeleton className="h-96 w-full" />;
+  if (error) return <p className="text-red-500">Error: {error}</p>;
+
+  const publicPercentage = stats.totalWalls
+    ? ((stats.publicWalls / stats.totalWalls) * 100).toFixed(1)
+    : 0;
+  const privatePercentage = stats.totalWalls
+    ? ((stats.privateWalls / stats.totalWalls) * 100).toFixed(1)
+    : 0;
+
+
+  // Pie Chart Data
+  const pieChartData = [
+    { name: "Public Walls", value: stats.publicWalls },
+    { name: "Private Walls", value: stats.privateWalls },
+    { name: "Total Walls", value: stats.totalWalls },
   ];
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4">Dashboard</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Users */}
-        <Card className="p-4 flex items-center space-x-4 shadow-md">
-          <Users className="h-6 w-6 text-blue-500" />
+    <div className="p-6 space-y-6">
+      {/* Top Section: Profile & Date */}
+      <div className="p-6 space-y-6 bg-gray-100 min-h-screen">
+      {/* Profile & Date */}
+      <div className="flex items-center justify-between p-4 bg-white rounded-lg shadow-lg">
+        <div className="flex items-center space-x-4">
+          <img
+            src={user?.profile_pic || "/default-avatar.png"}
+            alt="Profile"
+            className="w-14 h-14 rounded-full border-2 border-blue-400"
+          />
           <div>
-            <p className="text-gray-600">Total Users</p>
-            <p className="text-2xl font-semibold">
-              <CountUp end={stats.totalUsers} duration={2} />
-            </p>
+            <p className="text-lg font-semibold text-gray-800">{user?.name || "Guest"}</p>
+            <p className="text-sm text-gray-500">{user?.email}</p>
           </div>
-        </Card>
+        </div>
+        <p className="text-gray-600 font-medium">
+          {currentDate.toLocaleDateString()} {currentDate.toLocaleTimeString()}
+        </p>
+      </div>
 
-        {/* Total Walls */}
-        <Card className="p-4 flex items-center space-x-4 shadow-md">
-          <FileText className="h-6 w-6 text-green-500" />
+      <h1 className="text-3xl font-bold text-gray-800 text-center">Dashboard</h1>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="p-6 flex items-center space-x-4 shadow-lg bg-white hover:shadow-xl transition">
+          <Users className="h-8 w-8 text-blue-500" />
           <div>
             <p className="text-gray-600">Total Walls</p>
-            <p className="text-2xl font-semibold">
+            <p className="text-3xl font-bold">
               <CountUp end={stats.totalWalls} duration={2} />
             </p>
           </div>
         </Card>
-
-        {/* Total Tweets */}
-        <Card className="p-4 flex items-center space-x-4 shadow-md">
-          <MessageSquare className="h-6 w-6 text-purple-500" />
+        <Card className="p-6 flex items-center space-x-4 shadow-lg bg-white hover:shadow-xl transition">
+          <FileText className="h-8 w-8 text-green-500" />
           <div>
-            <p className="text-gray-600">Total Tweets</p>
-            <p className="text-2xl font-semibold">
-              <CountUp end={stats.totalTweets} duration={2} />
+            <p className="text-gray-600">Total Public Walls</p>
+            <p className="text-3xl font-bold">
+              <CountUp end={stats.publicWalls} duration={2} />
+            </p>
+          </div>
+        </Card>
+        <Card className="p-6 flex items-center space-x-4 shadow-lg bg-white hover:shadow-xl transition">
+          <MessageSquare className="h-8 w-8 text-purple-500" />
+          <div>
+            <p className="text-gray-600">Total Private Walls</p>
+            <p className="text-3xl font-bold">
+              <CountUp end={stats.privateWalls} duration={2} />
             </p>
           </div>
         </Card>
       </div>
 
-      {/* Chart Section */}
-      <div className="mt-6 p-4 bg-white rounded-lg shadow-md">
-        <h2 className="text-lg font-semibold mb-4">Wall Creation Trend</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <Chart data={data}>
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="walls" fill="#3b82f6" />
-          </Chart>
-        </ResponsiveContainer>
+      {/* Percentage Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="p-6 flex items-center justify-between shadow-lg bg-white hover:shadow-xl transition">
+          <div>
+            <p className="text-gray-600">Public Walls Percentage</p>
+            <p className="text-3xl font-bold text-black">{publicPercentage}%</p>
+          </div>
+        </Card>
+        <Card className="p-6 flex items-center justify-between shadow-lg bg-white hover:shadow-xl transition">
+          <div>
+            <p className="text-gray-600">Private Walls Percentage</p>
+            <p className="text-3xl font-bold text-black">{privatePercentage}%</p>
+          </div>
+        </Card>
       </div>
-    </div>
+
+        {/* Pie Chart for Walls Distribution */}
+        <Card className="p-4 bg-white rounded-lg shadow-md">
+          <h2 className="text-lg font-semibold mb-4">Walls Distribution</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={pieChartData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={100}
+                fill="#8884d8"
+                label
+              >
+                {pieChartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </Card>
+      </div>
+   </div>
   );
 };
 

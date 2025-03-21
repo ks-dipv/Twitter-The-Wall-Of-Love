@@ -1,15 +1,14 @@
 import React from "react";
+import { cn } from "../lib/utils";
 
-const Card = ({ children, className }) => {
+export function Card({ className, children, ...props }) {
   return (
-    <div className={`bg-white shadow-md rounded-lg p-4 ${className}`}>
+    <div className={cn("rounded-lg shadow-md bg-gray", className)} {...props}>
       {children}
     </div>
   );
-};
+}
 
-const CardContent = ({ children }) => {
-  return <div className="mt-2">{children}</div>;
-};
-
-export { Card, CardContent };
+export function CardContent({ className, children, ...props }) {
+  return <div className={cn("p-4", className)} {...props}>{children}</div>;
+}
