@@ -16,23 +16,25 @@ export default function ProfilePage() {
   const [isGeneratingToken, setIsGeneratingToken] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    async function fetchUser() {
-      try {
-        const response = await getUser();
-        setUser(response.data);
-        setFormData({
-          name: response.data.name,
-          email: response.data.email,
-          profile_pic: response.data.profile_pic,
-        });
-        if (response.data.api_token) {
-          setApiToken(response.data.api_token);
-        }
-      } catch (error) {
-        toast.error("Failed to load profile");
+  // Function to fetch user data
+  const fetchUser = async () => {
+    try {
+      const response = await getUser();
+      setUser(response.data);
+      setFormData({
+        name: response.data.name,
+        email: response.data.email,
+        profile_pic: response.data.profile_pic,
+      });
+      if (response.data.api_token) {
+        setApiToken(response.data.api_token);
       }
+    } catch (error) {
+      toast.error("Failed to load profile");
     }
+  };
+
+  useEffect(() => {
     fetchUser();
   }, []);
 
@@ -52,6 +54,8 @@ export default function ProfilePage() {
 
       await updateProfile(formDataObj);
       toast.success("Profile updated successfully");
+      await fetchUser();
+      setFile(null);
       setEditing(false);
     } catch (error) {
       toast.error("Failed to update profile");
@@ -105,12 +109,11 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Navbar */}
-      <nav className="bg-white-600 p-4 shadow-md">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <h1 className="text-black text-xl font-bold">Your Profile</h1>
-        </div>
-      </nav>
+      <div className="max-w-6xl mx-auto flex justify-center items-center">
+        <h1 className="text-4xl font-extrabold text-center mb-5">
+          Your Profile
+        </h1>
+      </div>
 
       {/* Profile Section */}
       <div className="max-w-2xl mx-auto p-6 mt-10 bg-white shadow-lg rounded-lg">

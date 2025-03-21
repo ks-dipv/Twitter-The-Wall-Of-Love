@@ -115,16 +115,6 @@ export class WallController {
     return await this.wallService.updateWall(id, updateWallDto, req, logo);
   }
 
-  //Delete a social link
-  @Delete('social-link/:id')
-  @ApiOperation({ summary: 'Delete a social link' })
-  @ApiParam({ name: 'id', description: 'ID of the Social Link', type: Number })
-  @ApiResponse({ status: 200, description: 'Social link deleted successfully' })
-  @ApiResponse({ status: 404, description: 'Social link not found' })
-  async deleteSocialLink(@Param('id') id: number, @Request() req) {
-    return await this.wallService.deleteSocialLink(id, req);
-  }
-
   @Post('total-data')
   async getTotaData(@Request() req) {
     return await this.wallService.getTotalData(req);
