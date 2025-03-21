@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import { getSharableLink } from "../services/api";
 import TweetList from "../components/TweetList";
 import Footer from "../components/Footer";
-import { motion } from "framer-motion";
 
 const ShareableWallPage = () => {
   const { wallId, uniqueId } = useParams();
@@ -23,7 +22,7 @@ const ShareableWallPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <div className="mt-4 ml-5">
+      <div className="mt-4 flex justify-center mt-4">
         {wall.logo && (
           <img
             src={wall.logo}
@@ -33,25 +32,11 @@ const ShareableWallPage = () => {
         )}
       </div>
       <main className="flex-grow flex flex-col items-center p-6">
-        {/* Header Section with Title and Animated Description */}
-        <motion.div
-          className="text-center mb-6 w-full"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-        >
-          <h1 className="text-4xl font-extrabold text-gray-900 md:text-5xl tracking-wide">
-            {wall.title}
-          </h1>
-          <motion.p
-            className="text-lg mt-4 max-w-2xl mx-auto text-gray-700 font-medium leading-relaxed"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.8, ease: "easeOut" }}
-          >
-            {wall.description}
-          </motion.p>
-        </motion.div>
+        <h1 className="text-4xl font-extrabold text-gray-900 md:text-5xl tracking-wide">
+          {wall.title}
+        </h1>
+
+        {wall.description}
 
         {/* Tweets Section */}
         <div className="w-full">
