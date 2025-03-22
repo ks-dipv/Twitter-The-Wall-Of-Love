@@ -9,6 +9,7 @@ import {
 import TweetList from "../components/TweetList";
 import Footer from "../components/Footer";
 import { motion } from "framer-motion";
+import Navbar from "../components/Navbar";
 
 const WallPage = () => {
   const { id } = useParams();
@@ -112,15 +113,7 @@ const WallPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <div className="flex justify-center mt-4">
-        {wall.logo && (
-          <img
-            src={wall.logo}
-            alt="Wall Logo"
-            className="size-20 rounded-full object-cover border-2 border-gray-400"
-          />
-        )}
-      </div>
+      <Navbar logo={wall.logo} wallId={wall.id} />
 
       <main className="flex-grow flex flex-col items-center p-6">
         {/* Header Section with Title and Animated Description */}

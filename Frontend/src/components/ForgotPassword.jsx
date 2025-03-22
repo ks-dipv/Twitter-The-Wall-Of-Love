@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { requestPasswordReset } from "../services/api"; // Import API function
 import { toast, ToastContainer } from "react-toastify";
-import { requestPasswordReset } from "../services/api";
 import { Link } from "react-router-dom";
 
 const ForgotPassword = () => {

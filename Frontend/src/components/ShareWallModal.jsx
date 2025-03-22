@@ -17,21 +17,13 @@ const ShareWallModal = ({ wallId, isOpen, onClose }) => {
   });
   const modalRef = useRef(null);
 
-  // Reset links when modal is closed
   useEffect(() => {
     if (!isOpen) {
-      setLinks({
-        shareable_link: "",
-        embed_link: "",
-      });
-      setCopied({
-        shareable: false,
-        embed: false,
-      });
+      setLinks({ shareable_link: "", embed_link: "" });
+      setCopied({ shareable: false, embed: false });
     }
   }, [isOpen]);
 
-  // Close modal when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
@@ -41,26 +33,20 @@ const ShareWallModal = ({ wallId, isOpen, onClose }) => {
 
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
-      // Add blur effect to the main content
       document.body.style.overflow = "hidden";
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
-      // Remove blur effect when modal closes
       document.body.style.overflow = "auto";
     };
   }, [isOpen, onClose]);
 
-  // Generate shareable link
   const handleGenerateShareableLink = async () => {
     setLoading({ ...loading, shareable: true });
     try {
       const response = await generateSharableLink(wallId);
-      setLinks({
-        ...links,
-        shareable_link: response.data.shareable_link,
-      });
+      setLinks({ ...links, shareable_link: response.data.shareable_link });
     } catch (error) {
       console.error("Failed to generate shareable link:", error);
       alert("Error generating shareable link. Please try again.");
@@ -69,15 +55,11 @@ const ShareWallModal = ({ wallId, isOpen, onClose }) => {
     }
   };
 
-  // Generate embed link
   const handleGenerateEmbedLink = async () => {
     setLoading({ ...loading, embed: true });
     try {
       const response = await generateSharableLink(wallId);
-      setLinks({
-        ...links,
-        embed_link: response.data.embed_link,
-      });
+      setLinks({ ...links, embed_link: response.data.embed_link });
     } catch (error) {
       console.error("Failed to generate embed link:", error);
       alert("Error generating embed link. Please try again.");
@@ -86,7 +68,6 @@ const ShareWallModal = ({ wallId, isOpen, onClose }) => {
     }
   };
 
-  // Copy link to clipboard
   const handleCopy = (type) => {
     const textToCopy =
       type === "shareable" ? links.shareable_link : links.embed_link;
@@ -97,20 +78,17 @@ const ShareWallModal = ({ wallId, isOpen, onClose }) => {
           setCopied({ ...copied, [type]: false });
         }, 2000);
       },
-      (err) => {
-        console.error("Could not copy text: ", err);
-      }
+      (err) => console.error("Could not copy text: ", err)
     );
   };
 
-  // If modal is not open, don't render anything
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 transition-all duration-300">
+    <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 px-4 sm:px-0">
       <div
         ref={modalRef}
-        className="bg-white rounded-lg shadow-2xl w-full max-w-md p-6 transform transition-all duration-300 scale-100"
+        className="bg-white rounded-lg shadow-2xl w-full max-w-lg sm:max-w-md p-6 transform transition-all duration-300 scale-100"
       >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-800">Share Wall</h2>
@@ -129,33 +107,38 @@ const ShareWallModal = ({ wallId, isOpen, onClose }) => {
               <FaLink className="text-blue-500" />
               <span>Shareable Link</span>
             </div>
-            <div className="flex">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input
                 type="text"
                 value={links.shareable_link}
                 readOnly
                 placeholder="Generate link to share this wall"
-                className="flex-grow text-black border border-gray-300 rounded-l-lg p-2 text-sm bg-gray-50"
+                className="flex-grow text-black border border-gray-300 rounded-lg p-2 text-sm bg-gray-50"
               />
-              {links.shareable_link ? (
-                <button
-                  onClick={() => handleCopy("shareable")}
-                  className={`px-3 py-2 rounded-r-lg ${
-                    copied.shareable ? "bg-green-500" : "bg-blue-500"
-                  } text-white flex items-center transition-colors`}
-                >
-                  <FaCopy className="mr-1" />
-                  {copied.shareable ? "Copied!" : "Copy"}
-                </button>
-              ) : (
-                <button
-                  onClick={handleGenerateShareableLink}
-                  disabled={loading.shareable}
-                  className="px-3 py-2 rounded-r-lg bg-blue-500 hover:bg-blue-600 text-white flex items-center transition-colors"
-                >
-                  {loading.shareable ? "Generating..." : "Generate"}
-                </button>
-              )}
+              <button
+                onClick={
+                  links.shareable_link
+                    ? () => handleCopy("shareable")
+                    : handleGenerateShareableLink
+                }
+                disabled={loading.shareable}
+                className={`px-3 py-2 rounded-lg text-white flex items-center justify-center transition-colors w-full sm:w-auto ${
+                  links.shareable_link
+                    ? copied.shareable
+                      ? "bg-green-500"
+                      : "bg-blue-500"
+                    : "bg-blue-500 hover:bg-blue-600"
+                }`}
+              >
+                {links.shareable_link ? <FaCopy className="mr-1" /> : null}
+                {loading.shareable
+                  ? "Generating..."
+                  : copied.shareable
+                  ? "Copied!"
+                  : links.shareable_link
+                  ? "Copy"
+                  : "Generate"}
+              </button>
             </div>
           </div>
 
@@ -165,35 +148,38 @@ const ShareWallModal = ({ wallId, isOpen, onClose }) => {
               <FaCode className="text-blue-500" />
               <span>Embed Link</span>
             </div>
-            <div className="flex">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input
                 type="text"
                 value={links.embed_link}
                 readOnly
                 placeholder="Generate code to embed this wall"
-                className="flex-grow text-black border border-gray-300 rounded-l-lg p-2 text-sm bg-gray-50"
+                className="flex-grow text-black border border-gray-300 rounded-lg p-2 text-sm bg-gray-50"
               />
-              <div className="flex flex-col">
-                {links.embed_link ? (
-                  <button
-                    onClick={() => handleCopy("embed")}
-                    className={`h-full px-3 py-2 rounded-r-lg ${
-                      copied.embed ? "bg-green-500" : "bg-blue-500"
-                    } text-white flex items-center transition-colors`}
-                  >
-                    <FaCopy className="mr-1" />
-                    {copied.embed ? "Copied!" : "Copy"}
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleGenerateEmbedLink}
-                    disabled={loading.embed}
-                    className="h-full px-3 py-2 rounded-r-lg bg-blue-500 hover:bg-blue-600 text-white flex items-center transition-colors"
-                  >
-                    {loading.embed ? "Generating..." : "Generate"}
-                  </button>
-                )}
-              </div>
+              <button
+                onClick={
+                  links.embed_link
+                    ? () => handleCopy("embed")
+                    : handleGenerateEmbedLink
+                }
+                disabled={loading.embed}
+                className={`px-3 py-2 rounded-lg text-white flex items-center justify-center transition-colors w-full sm:w-auto ${
+                  links.embed_link
+                    ? copied.embed
+                      ? "bg-green-500"
+                      : "bg-blue-500"
+                    : "bg-blue-500 hover:bg-blue-600"
+                }`}
+              >
+                {links.embed_link ? <FaCopy className="mr-1" /> : null}
+                {loading.embed
+                  ? "Generating..."
+                  : copied.embed
+                  ? "Copied!"
+                  : links.embed_link
+                  ? "Copy"
+                  : "Generate"}
+              </button>
             </div>
           </div>
         </div>
