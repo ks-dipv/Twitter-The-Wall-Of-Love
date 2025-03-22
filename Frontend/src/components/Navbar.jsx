@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { deleteWall } from "../services/api";
 import ShareWallModal from "./ShareWallModal";
-import { FaShare, FaEdit, FaTrash, FaCog } from "react-icons/fa";
+import { FaShare, FaEdit, FaTrash, FaCog, FaPlus } from "react-icons/fa";
 
 const Navbar = ({ logo, wallId }) => {
   const navigate = useNavigate();
@@ -47,57 +47,61 @@ const Navbar = ({ logo, wallId }) => {
 
   return (
     <>
-    <nav className="bg-white-500 shadow-md p-4 flex justify-between items-center">
-      {/* Logo */}
-      {logo && (
-        <img
-          src={logo}
-          alt="Wall Logo"
-          className="h-12 w-12 rounded-full object-cover border-2 border-gray-400"
-        />
-      )}
+      <nav className="bg-gray-300 p-4 text-black flex items-center justify-between shadow-md">
+        {/* Logo */}
+        <div className="flex items-center gap-3">
+          {logo && (
+            <img
+              src={logo}
+              alt="Wall Logo"
+              className="h-12 w-12 rounded-full object-cover border-2 border-gray-400"
+            />
+          )}
+          <h2 className="text-lg font-bold">Wall Management</h2>
+        </div>
 
+        {/* Action Buttons */}
         <div className="flex gap-4">
           {/* Add Tweet Button */}
           <button
-            className="px-6 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition"
+            className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition"
             onClick={() => navigate(`/admin/walls/${wallId}/add-tweet`)}
           >
-            + Add Tweet
+            <FaPlus /> Add Tweet
           </button>
 
-          {/* Wall Settings Button */}
+            {/* Wall Settings Button */}
           <div className="relative" ref={dropdownRef}>
             <button
-              className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition transform hover:scale-105"
+              className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition"
               onClick={() => setDropdownOpen((prev) => !prev)}
             >
-              <FaCog className="inline mr-2" /> Wall Settings
+              <FaCog /> Wall Settings
             </button>
 
             {/* Dropdown Menu */}
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-52 bg-white shadow-md rounded-lg border z-10">
+              <div className="absolute right-0 mt-2 w-56 bg-white text-black shadow-lg rounded-lg border z-10">
                 <button
                   onClick={handleOpenShareModal}
-                  className="block w-full text-left px-4 py-3 font-medium hover:bg-gray-100 transition flex items-center"
+                  className="flex items-center gap-2 w-full text-left px-4 py-3 font-medium hover:bg-gray-100 transition"
                 >
-                  <FaShare className="mr-2 text-blue-500" /> Share Wall
+                  <FaShare className="text-blue-500" /> Share Wall
                 </button>
                 <button
                   onClick={() => {
                     navigate(`/admin/walls/${wallId}/update`);
                     setDropdownOpen(false);
                   }}
-                  className="block w-full text-left px-4 py-3 font-medium hover:bg-gray-100 transition flex items-center"
+                  className="flex items-center gap-2 w-full text-left px-4 py-3 font-medium hover:bg-gray-100 transition"
                 >
-                  <FaEdit className="mr-2 text-gray-700" /> Update Wall
+                  <FaEdit className="text-gray-700" /> Update Wall
                 </button>
                 <button
                   onClick={handleDelete}
-                  className="block w-full text-left px-4 py-3 text-red-600 font-medium hover:bg-red-100 transition flex items-center"
+                  className="flex items-center gap-2 w-full text-left px-4 py-3 text-red-600 font-medium hover:bg-red-100 transition"
                 >
-                  <FaTrash className="mr-2" /> Delete Wall
+                  <FaTrash /> Delete Wall
                 </button>
               </div>
             )}

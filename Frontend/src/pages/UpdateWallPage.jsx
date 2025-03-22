@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { getWallById, updateWall } from "../services/api";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 const UpdateWallPage = () => {
   const { id } = useParams();
@@ -108,11 +107,12 @@ const UpdateWallPage = () => {
   return (
     <div className="min-h-screen bg-white text-black">
       <ToastContainer hideProgressBar/>
-      <div className="w-full p-6">
-        <h5 className="text-4xl font-extrabold text-center mb-5">
-          Update Your Wall
-        </h5>
+      {/* Navbar */}
+      <nav className="bg-gray-300 p-4 text-black flex justify-between">
+        <h1 className="text-lg font-bold">Update your wall</h1>
+      </nav>
 
+      <div className="w-full p-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block">Title:</label>
