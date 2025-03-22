@@ -98,7 +98,7 @@ export default function ProfilePage() {
 
         setTimeout(() => {
           setCopied(false);
-        }, 2000);
+        }, 1000);
       })
       .catch(() => {
         toast.error("Failed to copy API token");
@@ -107,7 +107,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <ToastContainer autoClose={4000} />
+      <ToastContainer autoClose={2000} hideProgressBar/>
 
       <div className="max-w-6xl mx-auto flex justify-center items-center">
         <h1 className="text-4xl font-extrabold text-center mb-5">

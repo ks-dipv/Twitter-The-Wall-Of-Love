@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { deleteWall, getAllWalls } from "../services/api";
 import { useNavigate } from "react-router-dom";
-import { FiTrash2 } from "react-icons/fi";
+import { FiTrash2, FiEdit } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { toast, ToastContainer } from "react-toastify";
 
 const ListWalls = () => {
   const [walls, setWalls] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = "";
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -82,9 +82,15 @@ const ListWalls = () => {
                 <div className="absolute bottom-4 left-4 right-4 flex justify-between">
                   <button
                     onClick={() => handleDelete(wall.id)}
-                    className="flex items-center gap-2  text-black px-4 py-2 rounded-md shadow hover: transition"
+                    className="flex items-center gap-2 text-black px-4 py-2 rounded-md shadow hover: transition"
                   >
                     <FiTrash2 /> Delete
+                  </button>
+                  <button
+                    onClick={() => navigate(`/admin/walls/${wall.id}/update`)}
+                    className="flex items-center gap-2 text-blue-600 px-4 py-2 rounded-md shadow hover: transition"
+                  >
+                    <FiEdit /> Update
                   </button>
                 </div>
               </motion.div>
