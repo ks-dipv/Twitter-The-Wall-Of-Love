@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { Link } from "react-router-dom";
+import { requestPasswordReset } from "../services/api";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,11 +42,7 @@ const ForgotPassword = () => {
             {message}
           </div>
         )}
-        {error && (
-          <div className="bg-red-100 text-red-700 p-2 rounded mb-4">
-            {error}
-          </div>
-        )}
+        
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
