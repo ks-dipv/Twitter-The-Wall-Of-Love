@@ -27,7 +27,7 @@ const AddTweet = () => {
       toast.success("Tweet added successfully! 🚀");
       setTimeout(() => {
         navigate(`/admin/walls/${wallId}`);
-      }, 5000);
+      }, 1000);
     } catch (err) {
       console.error(
         "API Error:",
@@ -42,7 +42,7 @@ const AddTweet = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <ToastContainer />
+      <ToastContainer hideProgressBar/>
       <div className="w-full max-w-lg p-8 bg-white shadow-lg rounded-2xl">
         <h2 className="text-2xl font-bold text-gray-900 text-center mb-6">
           ✨ Add a Tweet to Your Wall

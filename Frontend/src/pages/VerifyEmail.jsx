@@ -26,7 +26,7 @@ const VerifyEmail = () => {
       const response = await userVerify(verificationToken);
       setStatus("success");
       toast.success("Email verified successfully!");
-      setTimeout(() => navigate("/signin"), 4000);
+      setTimeout(() => navigate("/signin"), 2000);
     } catch (error) {
       setStatus("error");
       const errorMsg =
@@ -44,7 +44,7 @@ const VerifyEmail = () => {
           "url('https://img.freepik.com/free-vector/realistic-luxury-background_23-2149354608.jpg')",
       }}
     >
-      <ToastContainer />
+      <ToastContainer hideProgressBar />
       <div className="bg-gradient-to-br from-white to-gray-100 dark:from-gray-900 dark:to-gray-800 p-8 rounded-xl shadow-2xl border border-gray-300 dark:border-gray-700 w-full max-w-md">
         <h2 className="text-2xl font-bold text-center mb-3 text-gray-900 dark:text-white">
           Verify Your Email

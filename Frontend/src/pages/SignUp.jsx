@@ -43,16 +43,11 @@ const SignUp = () => {
 
       toast.success("Verification email sent!Please check your inbox 📩.");
 
-      setTimeout(() => {
-        navigate("/resend-email", { state: { email: formData.email } });
-      }, 5000);
-
       // Redirect after a short delay
       setTimeout(() => {
         navigate("/resend-email", { state: { email: formData.email } });
       }, 1000);
     } catch (err) {
-      console.error("Signup failed:", err.response?.data || err.message);
       toast.error(err.response?.data?.message || "Signup failed, try again.");
     }
   };
