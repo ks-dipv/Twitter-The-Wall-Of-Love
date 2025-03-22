@@ -94,7 +94,7 @@ const UpdateWallPage = () => {
 
       if (response.status === 200) {
         toast.success("Wall updated successfully! 🎉");
-        setTimeout(() => navigate(`/admin/walls/${id}`), 5000);
+        setTimeout(() => navigate(`/admin/walls/${id}`), 1000);
       }
     } catch (error) {
       console.error(
@@ -107,7 +107,7 @@ const UpdateWallPage = () => {
 
   return (
     <div className="min-h-screen bg-white text-black">
-      <ToastContainer/>
+      <ToastContainer hideProgressBar/>
       <div className="w-full p-6">
         <h5 className="text-4xl font-extrabold text-center mb-5">
           Update Your Wall

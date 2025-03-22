@@ -21,7 +21,7 @@ const SignIn = () => {
       toast.success("Login successful! 🚀");
       setTimeout(() => {
         navigate("/admin/dashboard");
-      }, 3000);
+      }, 2000);
     } catch (err) {
       const errorMessage =
         err.response?.data?.message || "Login failed, try again.";
@@ -37,7 +37,7 @@ const SignIn = () => {
           "url('https://img.freepik.com/free-vector/realistic-luxury-background_23-2149354608.jpg')",
       }}
     >
-      <ToastContainer />
+      <ToastContainer hideProgressBar />
 
       <div className="bg-gradient-to-br from-white to-gray-100 dark:from-gray-900 dark:to-gray-800 p-8 rounded-xl shadow-2xl border border-gray-300 dark:border-gray-700 w-full max-w-md">
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">

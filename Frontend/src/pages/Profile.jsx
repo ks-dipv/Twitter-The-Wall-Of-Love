@@ -109,12 +109,6 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-gray-100">
       <ToastContainer autoClose={4000} />
 
-      <nav className="bg-white-600 p-4 shadow-md">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <h1 className="text-black text-xl font-bold">Your Profile</h1>
-        </div>
-      </nav>
-
       <div className="max-w-6xl mx-auto flex justify-center items-center">
         <h1 className="text-4xl font-extrabold text-center mb-5">
           Your Profile

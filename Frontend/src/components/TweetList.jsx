@@ -92,7 +92,7 @@ const TweetList = ({ tweets, onDelete, onReorder }) => {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8, // Minimum distance required to start a drag
+        distance: 8, 
       },
     }),
     useSensor(KeyboardSensor, {
@@ -117,7 +117,7 @@ const TweetList = ({ tweets, onDelete, onReorder }) => {
   return (
     <div>
       {/* Toast Notifications */}
-      <ToastContainer />
+      <ToastContainer autoclose={1000} hideProgressBar />
 
       {isShare ? (
         <DndContext

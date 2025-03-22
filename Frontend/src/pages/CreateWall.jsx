@@ -70,7 +70,7 @@ const CreateWallPage = () => {
         toast.success("Wall created successfully! 🎉");
         setTimeout(() => {
           navigate("/admin/list-walls", { replace: true });
-        }, 5000);
+        }, 1000);
       } else {
         throw new Error(
           "Failed to create wall. Server returned unexpected response."
@@ -94,7 +94,7 @@ const CreateWallPage = () => {
 
   return (
     <div className="min-h-screen bg-white text-black">
-      <ToastContainer />
+      <ToastContainer hideProgressBar/>
       <div className="w-full p-6">
         <h5 className="text-4xl font-extrabold text-center mb-5">
           Create Your Wall

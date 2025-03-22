@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { requestPasswordReset } from "../services/api"; // Import API function
 import { toast, ToastContainer } from "react-toastify";
 import { requestPasswordReset } from "../services/api";
 import { Link } from "react-router-dom";
@@ -12,7 +11,6 @@ const ForgotPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
-    setError("");
 
     try {
       const response = await requestPasswordReset(email);
@@ -34,7 +32,7 @@ const ForgotPassword = () => {
           "url('https://img.freepik.com/free-vector/realistic-luxury-background_23-2149354608.jpg')",
       }}
     >
-      <ToastContainer />
+      <ToastContainer autoClose={2000} hideProgressBar />
       <div className="bg-gradient-to-br from-white to-gray-100 dark:from-gray-900 dark:to-gray-800 p-8 rounded-xl shadow-2xl border border-gray-300 dark:border-gray-700 w-full max-w-md">
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">
           Reset Password

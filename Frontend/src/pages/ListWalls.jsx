@@ -19,9 +19,8 @@ const ListWalls = () => {
           throw new Error("Invalid API response");
         setWalls(response.data);
       } catch (err) {
-        setError("Failed to fetch walls.");
         console.error("API Error:", err);
-        setWalls([]); // Ensure walls is always an array
+        setWalls([]);
       } finally {
         setLoading(false);
       }
@@ -37,8 +36,7 @@ const ListWalls = () => {
       setWalls((prevWalls) => prevWalls.filter((wall) => wall.id !== id));
       toast.success("Wall deleted successfully!");
     } catch (err) {
-      console.error("Error deleting wall:", err);
-      setError("Failed to delete wall.");
+      toast.error("Failed to delete wall.");
     }
   };
 
@@ -48,7 +46,7 @@ const ListWalls = () => {
 
   return (
     <div className="min-h-screen">
-      <ToastContainer />
+      <ToastContainer autoClose={2000} hideProgressBar />
       <div className="p-6">
         <h1 className="text-4xl font-extrabold text-center mb-5">Your Walls</h1>
 

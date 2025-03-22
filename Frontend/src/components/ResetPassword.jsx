@@ -28,7 +28,7 @@ const ResetPassword = () => {
     try {
       const response = await resetPassword(token, newPassword);
       toast.success(response.data.message || "Password successfully reset.");
-      setTimeout(() => navigate("/signin"), 4000);
+      setTimeout(() => navigate("/signin"), 2000);
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to reset password.");
     }
@@ -42,7 +42,7 @@ const ResetPassword = () => {
           "url('https://img.freepik.com/free-vector/realistic-luxury-background_23-2149354608.jpg')",
       }}
     >
-      <ToastContainer/>
+      <ToastContainer hideProgressBar/>
       <div className="bg-gradient-to-br from-white to-gray-100 dark:from-gray-900 dark:to-gray-800 p-8 rounded-xl shadow-2xl border border-gray-300 dark:border-gray-700 w-full max-w-md">
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">
           Reset Your Password

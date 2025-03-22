@@ -45,18 +45,9 @@ const SignUp = () => {
 
       setTimeout(() => {
         navigate("/resend-email", { state: { email: formData.email } });
-      }, 5000);
+      }, 2000);
 
-      setSuccess(
-        "Verification email sent successfully! Please check your inbox."
-      );
-
-      // Redirect after a short delay
-      setTimeout(() => {
-        navigate("/resend-email", { state: { email: formData.email } });
-      }, 1000);
     } catch (err) {
-      console.error("Signup failed:", err.response?.data || err.message);
       toast.error(err.response?.data?.message || "Signup failed, try again.");
     }
   };
@@ -76,16 +67,6 @@ const SignUp = () => {
           Create an account
         </h2>
 
-        {error && (
-          <div className="bg-red-100 text-red-700 p-2 rounded mb-4">
-            {error}
-          </div>
-        )}
-        {success && (
-          <div className="bg-green-100 text-green-700 p-2 rounded mb-4">
-            {success}
-          </div>
-        )}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-gray-700 dark:text-gray-300 mb-2">
