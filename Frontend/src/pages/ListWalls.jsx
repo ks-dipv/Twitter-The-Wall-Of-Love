@@ -29,6 +29,13 @@ const ListWalls = () => {
     };
     fetchWalls();
   }, []);
+
+  const truncateText = (text, maxLength) => {
+    return text.length > maxLength
+      ? text.substring(0, maxLength) + "...."
+      : text;
+  };
+
   const openDeleteDialog = (id, title) => {
     setWallToDelete({ id, title });
     setShowDeleteDialog(true);
@@ -82,7 +89,6 @@ const ListWalls = () => {
                   className="w-full h-24 sm:h-32 object-cover rounded-md mb-3"
                   onClick={() => navigate(`/admin/walls/${wall.id}`)}
                 />
-
                 {/* Content Section */}
                 <div
                   className="relative flex-1"
@@ -92,10 +98,9 @@ const ListWalls = () => {
                     {wall.title}
                   </h2>
                   <p className="text-gray-600 absolute top-10 left-0 right-0 h-[80px] sm:h-[100px] overflow-hidden text-ellipsis p-2">
-                    {wall.description}
+                    {truncateText(wall.description, 150)}
                   </p>
                 </div>
-
                 {/* Action Buttons */}
                 <div className="absolute bottom-4 left-4 right-4 flex flex-col sm:flex-row justify-between gap-2 sm:gap-0">
                   <button
@@ -138,7 +143,6 @@ const ListWalls = () => {
           </div>
         )}
       </div>
-
       {/* Delete Confirmation Dialog */}
       <ConfirmationDialog
         isOpen={showDeleteDialog}
