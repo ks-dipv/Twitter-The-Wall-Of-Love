@@ -111,6 +111,7 @@ const ListWalls = () => {
                       openDeleteDialog(wall.id, wall.title);
                     }}
                     className="flex items-center justify-center gap-1 sm:gap-2 text-red-600 hover:text-red-700 px-2 py-1 sm:px-3 sm:py-2 rounded-md bg-white border border-red-200 hover:bg-red-50 transition text-sm sm:text-base w-full sm:w-auto"
+                    title="Delete this wall"
                   >
                     <FiTrash2 className="shrink-0" />
                     <span className="hidden xs:inline">Delete</span>
@@ -121,6 +122,7 @@ const ListWalls = () => {
                       navigate(`/admin/walls/${wall.id}/update`);
                     }}
                     className="flex items-center justify-center gap-1 sm:gap-2 text-blue-600 hover:text-blue-700 px-2 py-1 sm:px-3 sm:py-2 rounded-md bg-white border border-blue-200 hover:bg-blue-50 transition text-sm sm:text-base w-full sm:w-auto"
+                    title="Update this wall"
                   >
                     <FiEdit className="shrink-0" />
                     <span className="hidden xs:inline">Update</span>
