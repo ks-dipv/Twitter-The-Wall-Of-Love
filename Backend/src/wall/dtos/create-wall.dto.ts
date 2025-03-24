@@ -6,7 +6,7 @@ import {
   IsOptional,
   IsString,
   MaxLength,
-  Matches
+  Matches,
 } from 'class-validator';
 import { WallVisibility } from '../enum/wall-visibility.enum';
 import { SocialLinkDto } from './social-link.dto';

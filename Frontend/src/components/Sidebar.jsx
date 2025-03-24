@@ -22,7 +22,7 @@ const Sidebar = () => {
 
   // Function to check if link is active
   const isActive = (path) => location.pathname === path;
-  
+
   const handleLogoutClick = () => {
     setLogoutDialogOpen(true);
   };
@@ -51,7 +51,7 @@ const Sidebar = () => {
     handleResize();
 
     window.addEventListener("resize", handleResize);
-    
+
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
@@ -74,12 +74,15 @@ const Sidebar = () => {
     <>
       {/* Mobile overlay */}
       {isMobile && isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-20" onClick={() => setIsOpen(false)} />
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-20"
+          onClick={() => setIsOpen(false)}
+        />
       )}
 
       {/* Mobile toggle button - always visible on mobile */}
       {isMobile && !isOpen && (
-        <button 
+        <button
           onClick={() => setIsOpen(true)}
           className="fixed top-10 left-6 z-30 text-black p-2"
         >
@@ -92,27 +95,50 @@ const Sidebar = () => {
         id="sidebar"
         className={`h-screen bg-gray-800 text-white transition-all duration-300 flex flex-col ${
           isOpen ? "w-64" : "w-0 md:w-20"
-        } ${isMobile ? "fixed z-30" : ""} ${!isOpen && isMobile ? "hidden" : ""}`}
+        } ${isMobile ? "fixed z-30" : ""} ${
+          !isOpen && isMobile ? "hidden" : ""
+        }`}
       >
         {/* Logo & Toggle Button */}
-        <div className="flex items-center justify-between p-4">
-          <div className="flex items-center space-x-3">
-            <img
-              src="https://cdn-icons-png.flaticon.com/128/2297/2297921.png"
-              alt="Wall of Love Logo"
-              className="h-10 w-auto"
-            />
-            {isOpen && (
-              <h1 className="text-white text-2xl font-bold">Wall of Love</h1>
-            )}
-          </div>
-          {/* Close/Toggle Button */}
-          <button onClick={() => setIsOpen(!isOpen)} className="text-white">
-            {isMobile ? 
-              <X className="w-6 h-6" /> : 
-              <Menu className="w-6 h-6" />
-            }
-          </button>
+        <div
+          className={`p-4 ${
+            isOpen
+              ? "flex items-center justify-between"
+              : "flex flex-col items-center gap-4"
+          }`}
+        >
+          {isOpen ? (
+            <>
+              {/* When sidebar is open: Logo on left, menu button on right */}
+              <div className="flex items-center space-x-3">
+                <img
+                  src="https://cdn-icons-png.flaticon.com/128/2297/2297921.png"
+                  alt="Wall of Love Logo"
+                  className="h-10 w-auto"
+                />
+                <h1 className="text-white text-2xl font-bold">Wall of Love</h1>
+              </div>
+              <button onClick={() => setIsOpen(!isOpen)} className="text-white">
+                {isMobile ? (
+                  <X className="w-6 h-6" />
+                ) : (
+                  <Menu className="w-6 h-6" />
+                )}
+              </button>
+            </>
+          ) : (
+            <>
+              {/* When sidebar is collapsed: Menu button on top, logo below */}
+              <button onClick={() => setIsOpen(!isOpen)} className="text-white">
+                <Menu className="w-6 h-6" />
+              </button>
+              <img
+                src="https://cdn-icons-png.flaticon.com/128/2297/2297921.png"
+                alt="Wall of Love Logo"
+                className="h-10 w-auto"
+              />
+            </>
+          )}
         </div>
 
         {/* Main Navigation */}
@@ -122,7 +148,9 @@ const Sidebar = () => {
               <Link
                 to="/admin/dashboard"
                 className={`flex items-center gap-2 p-2 rounded ${
-                  isActive("/admin/dashboard") ? "bg-gray-400" : "hover:bg-gray-700"
+                  isActive("/admin/dashboard")
+                    ? "bg-gray-400"
+                    : "hover:bg-gray-700"
                 }`}
                 onClick={() => isMobile && setIsOpen(false)}
               >
@@ -132,7 +160,11 @@ const Sidebar = () => {
             </li>
 
             {/* Wall Management */}
-            {isOpen && <li className="font-bold mt-4 text-gray-400 text-sm uppercase">Wall Management</li>}
+            {isOpen && (
+              <li className="font-bold mt-4 text-gray-400 text-sm uppercase">
+                Wall Management
+              </li>
+            )}
             <li>
               <Link
                 to="/admin/create-wall"
@@ -171,7 +203,9 @@ const Sidebar = () => {
               <Link
                 to="/admin/profile"
                 className={`flex items-center gap-2 p-2 rounded ${
-                  isActive("/admin/profile") ? "bg-gray-400" : "hover:bg-gray-700"
+                  isActive("/admin/profile")
+                    ? "bg-gray-400"
+                    : "hover:bg-gray-700"
                 }`}
                 onClick={() => isMobile && setIsOpen(false)}
               >

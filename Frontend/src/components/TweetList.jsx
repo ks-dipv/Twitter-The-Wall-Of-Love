@@ -50,11 +50,11 @@ const SortableTweet = ({ tweet, onDelete }) => {
       {...listeners}
       className="bg-white shadow-md rounded-lg p-4 flex flex-col h-full relative cursor-pointer"
     >
-      {/* Delete Button */}
       {onDelete && tweet.id && (
         <button
           onClick={openDeleteDialog}
           className="absolute top-2 right-2 text-gray-500 hover:text-red-600"
+          title="Permanently Delete this tweet"
         >
           ❌
         </button>

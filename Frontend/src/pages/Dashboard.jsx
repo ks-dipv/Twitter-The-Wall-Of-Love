@@ -24,7 +24,7 @@ const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -54,8 +54,13 @@ const Dashboard = () => {
     fetchStats();
     fetchUser();
 
-    const dateInterval = setInterval(() => setCurrentDate(new Date()), 1000);
-    return () => clearInterval(dateInterval);
+    // Update time every second
+    const timeInterval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    // Clean up the interval when component unmounts
+    return () => clearInterval(timeInterval);
   }, []);
 
   if (loading) return <Skeleton className="h-96 w-full" />;
@@ -72,33 +77,47 @@ const Dashboard = () => {
   const pieChartData = [
     { name: "Public Walls", value: stats.publicWalls },
     { name: "Private Walls", value: stats.privateWalls },
-    { name: "Total Walls", value: stats.totalWalls },
   ];
+
+  // Format date for better display
+  const formattedDate = currentTime.toLocaleDateString();
+  const formattedTime = currentTime.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 
   return (
     <div className="p-6 space-y-6">
-      {/* Top Section: Profile & Date */}
       <div className="p-6 space-y-6 bg-gray-100 min-h-screen">
-        {/* Profile & Date */}
-        <div className="flex items-center justify-between p-4 bg-white rounded-lg shadow-lg">
-          <div className="flex items-center space-x-4">
-            <img
-              src={user?.profile_pic || "/default-avatar.png"}
-              alt="Profile"
-              className="w-14 h-14 rounded-full border-2 border-blue-400"
-            />
-            <div>
-              <p className="text-lg font-semibold text-gray-800">
-                {user?.name || "Guest"}
+        {/* Profile & Date - Fixed layout */}
+        <Card className="bg-white rounded-lg shadow-lg">
+          <div className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center space-x-4">
+              <img
+                src={user?.profile_pic || "/default-avatar.png"}
+                alt="Profile"
+                className="w-14 h-14 rounded-full border-2 border-blue-400"
+              />
+              <div>
+                <p className="text-lg font-semibold text-gray-800">
+                  {user?.name || "Guest"}
+                </p>
+                <p className="text-sm text-gray-500 truncate max-w-xs">
+                  {user?.email}
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-gray-600 font-medium whitespace-nowrap">
+                {formattedDate}
               </p>
-              <p className="text-sm text-gray-500">{user?.email}</p>
+              <p className="text-gray-600 font-medium whitespace-nowrap">
+                {formattedTime}
+              </p>
             </div>
           </div>
-          <p className="text-gray-600 font-medium">
-            {currentDate.toLocaleDateString()}{" "}
-            {currentDate.toLocaleTimeString()}
-          </p>
-        </div>
+        </Card>
 
         <h1 className="text-3xl font-bold text-gray-800 text-center">
           Dashboard
@@ -110,7 +129,7 @@ const Dashboard = () => {
             <Users className="h-8 w-8 text-blue-500" />
             <div>
               <p className="text-gray-600">Total Walls</p>
-              <p className="text-3xl font-bold">{stats.totalWalls} </p>
+              <p className="text-3xl font-bold">{stats.totalWalls}</p>
             </div>
           </Card>
           <Card className="p-6 flex items-center space-x-4 shadow-lg bg-white hover:shadow-xl transition">
