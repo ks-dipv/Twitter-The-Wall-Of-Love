@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsString,
   MaxLength,
+  Matches
 } from 'class-validator';
 import { WallVisibility } from '../enum/wall-visibility.enum';
 import { SocialLinkDto } from './social-link.dto';
@@ -29,6 +30,9 @@ export class CreateWallDto {
   })
   @IsOptional()
   @IsString()
+  @Matches(/\.(jpg|jpeg|png)$/i, {
+    message: 'Logo must be in JPG, JPEG, or PNG format',
+  })
   logo?: string;
 
   @ApiPropertyOptional({
