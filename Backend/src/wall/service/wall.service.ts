@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
   UnauthorizedException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { WallRepository } from '../repository/wall.repository';
 import { CreateWallDto } from '../dtos/create-wall.dto';
@@ -71,42 +72,65 @@ export class WallService {
   ) {
     try {
       const user = req[REQUEST_USER_KEY];
-      const { title, logo, description, visibility } = createWallDto;
-
-      let logoUrl: string | null = logo || null;
+      if (!user) {
+        throw new UnauthorizedException('User not authenticated');
+      }
 
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) {
         throw new NotFoundException('User not found');
       }
 
+      const { title, logo, description, visibility, social_links } =
+        createWallDto;
+
+      let logoUrl: string | null = logo || null;
+
+      // Handle file upload if provided
       if (wallLogo) {
-        logoUrl = await this.uploadService.logo(wallLogo);
+        if (!wallLogo.mimetype.match(/^image\/(jpeg|jpg|png)$/)) {
+          throw new BadRequestException(
+            'Invalid file format. Allowed: JPG, JPEG, PNG',
+          );
+        }
+        try {
+          logoUrl = await this.uploadService.logo(wallLogo);
+        } catch (uploadError) {
+          throw new InternalServerErrorException(
+            'Failed to upload logo. Please try again.',
+          );
+        }
       }
 
-      const wall = this.wallRepository.create({
-        title,
-        logo: logoUrl,
-        description,
-        visibility,
-        user: existingUser,
-      });
+      // Use a transaction to ensure data integrity
+      return await this.wallRepository.manager.transaction(
+        async (transactionalEntityManager) => {
+          const wall = transactionalEntityManager.create(Wall, {
+            title,
+            logo: logoUrl,
+            description,
+            visibility,
+            user: existingUser,
+          });
 
-      const savedWall = await this.wallRepository.save(wall);
+          const savedWall = await transactionalEntityManager.save(wall);
 
-      if (createWallDto.social_links && createWallDto.social_links.length > 0) {
-        const socialLinksEntities = createWallDto.social_links.map((link) =>
-          this.socialLinkRepository.create({
-            platform: link.platform as SocialPlatform,
-            url: link.url,
-            wall: savedWall,
-          }),
-        );
-        await this.socialLinkRepository.save(socialLinksEntities);
-        savedWall.social_links = socialLinksEntities;
-      }
+          // Handle social links if provided
+          if (social_links?.length > 0) {
+            const socialLinksEntities = social_links.map((link) =>
+              transactionalEntityManager.create(SocialLink, {
+                platform: link.platform as SocialPlatform,
+                url: link.url,
+                wall: savedWall,
+              }),
+            );
+            await transactionalEntityManager.save(socialLinksEntities);
+            savedWall.social_links = socialLinksEntities;
+          }
 
-      return savedWall;
+          return savedWall;
+        },
+      );
     } catch (error) {
       throw new BadRequestException(error.message || 'Failed to create wall');
     }
@@ -250,68 +274,91 @@ export class WallService {
         );
       }
 
-      // 🔹 Handle Logo Update
-      let logoUrl: string | null = wall.logo;
+      // Begin transaction for atomicity
+      return await this.wallRepository.manager.transaction(
+        async (transactionalEntityManager) => {
+          let logoUrl: string | null = wall.logo;
 
-      if (logo) {
-        // Delete old logo if exists
-        if (wall.logo) {
-          const fileName = wall.logo.split('/').pop();
-          if (fileName) {
-            await this.uploadService.deleteLogo(fileName);
+          // 🔹 Handle Logo Update with Format Validation
+          if (logo) {
+            if (!logo.mimetype.match(/^image\/(jpeg|jpg|png)$/)) {
+              throw new BadRequestException(
+                'Invalid file format. Allowed: JPG, JPEG, PNG',
+              );
+            }
+
+            // Delete old logo if exists
+            if (wall.logo) {
+              const fileName = wall.logo.split('/').pop();
+              if (fileName) {
+                await this.uploadService.deleteLogo(fileName);
+              }
+            }
+
+            // Upload new logo
+            try {
+              logoUrl = await this.uploadService.logo(logo);
+            } catch (uploadError) {
+              throw new InternalServerErrorException(
+                'Failed to upload logo. Please try again.',
+              );
+            }
           }
-        }
 
-        // Upload new logo
-        logoUrl = await this.uploadService.logo(logo);
-      }
+          // Update wall properties
+          wall.title = updateWallDto.title ?? wall.title;
+          wall.description = updateWallDto.description ?? wall.description;
+          wall.visibility = updateWallDto.visibility ?? wall.visibility;
+          wall.logo = logoUrl;
 
-      // Update wall properties
-      wall.title = updateWallDto.title ?? wall.title;
-      wall.description = updateWallDto.description ?? wall.description;
-      wall.visibility = updateWallDto.visibility ?? wall.visibility;
-      wall.logo = logoUrl;
+          // Save updated wall
+          const updatedWall = await transactionalEntityManager.save(wall);
 
-      // 🔹 Handle Social Links (Update, Add, Delete)
-      if (updateWallDto.social_links) {
-        const updatedLinks = updateWallDto.social_links.map(
-          (linkDto) => linkDto.platform,
-        );
+          // 🔹 Handle Social Links (Update, Add, Delete)
+          if (updateWallDto.social_links) {
+            const updatedLinks = updateWallDto.social_links.map(
+              (linkDto) => linkDto.platform,
+            );
 
-        // **DELETE** removed social links
-        wall.social_links = await this.socialLinkRepository.find({
-          where: { wall: { id: wall.id } },
-        });
-        for (const existingLink of wall.social_links) {
-          if (!updatedLinks.includes(existingLink.platform)) {
-            await this.socialLinkRepository.delete({ id: existingLink.id });
-          }
-        }
-
-        // **UPDATE or ADD** new social links
-        for (const linkDto of updateWallDto.social_links) {
-          const existingLink = wall.social_links.find(
-            (link) => link.platform === linkDto.platform,
-          );
-
-          if (existingLink) {
-            existingLink.url = linkDto.url;
-            await this.socialLinkRepository.save(existingLink);
-          } else {
-            const newSocialLink = this.socialLinkRepository.create({
-              platform: linkDto.platform,
-              url: linkDto.url,
-              wall,
+            // **DELETE** removed social links
+            const existingLinks = await this.socialLinkRepository.find({
+              where: { wall: { id: wall.id } },
             });
-            await this.socialLinkRepository.save(newSocialLink);
-            wall.social_links.push(newSocialLink);
-          }
-        }
-      }
+            for (const existingLink of existingLinks) {
+              if (!updatedLinks.includes(existingLink.platform)) {
+                await transactionalEntityManager.delete(SocialLink, {
+                  id: existingLink.id,
+                });
+              }
+            }
 
-      return await this.wallRepository.save(wall);
+            // **UPDATE or ADD** new social links
+            for (const linkDto of updateWallDto.social_links) {
+              const existingLink = existingLinks.find(
+                (link) => link.platform === linkDto.platform,
+              );
+
+              if (existingLink) {
+                existingLink.url = linkDto.url;
+                await transactionalEntityManager.save(existingLink);
+              } else {
+                const newSocialLink = transactionalEntityManager.create(
+                  SocialLink,
+                  {
+                    platform: linkDto.platform,
+                    url: linkDto.url,
+                    wall: updatedWall,
+                  },
+                );
+                await transactionalEntityManager.save(newSocialLink);
+              }
+            }
+          }
+
+          return updatedWall;
+        },
+      );
     } catch (error) {
-      console.error('Error updating wall:', error.message); // Debugging log
       throw new BadRequestException(error.message || 'Failed to update wall');
     }
   }
