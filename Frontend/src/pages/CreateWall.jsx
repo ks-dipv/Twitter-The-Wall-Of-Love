@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { addWalls } from "../services/api";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css"; // Import styles
 
 const CreateWallPage = () => {
   const navigate = useNavigate();
@@ -32,20 +34,8 @@ const CreateWallPage = () => {
     });
   };
 
-  const addSocialLink = () => {
-    setWallData((prevState) => ({
-      ...prevState,
-      socialLinks: [...prevState.socialLinks, { platform: "", url: "" }],
-    }));
-  };
-
-  const removeSocialLink = (index) => {
-    setWallData((prevState) => {
-      const newSocialLinks = prevState.socialLinks.filter(
-        (_, i) => i !== index
-      );
-      return { ...prevState, socialLinks: newSocialLinks };
-    });
+  const handleDescriptionChange = (value) => {
+    setWallData({ ...wallData, description: value });
   };
 
   const handleSubmit = async (e) => {
@@ -56,7 +46,7 @@ const CreateWallPage = () => {
     try {
       const requestBody = {
         title: wallData.title,
-        description: wallData.description,
+        description: wallData.description, // Quill stores as HTML
         visibility: wallData.visibility,
         social_links: wallData.socialLinks.filter(
           (link) => link.platform && link.url
@@ -99,7 +89,6 @@ const CreateWallPage = () => {
         <h1 className="text-lg font-bold">Create your wall</h1>
       </nav>
       <div className="w-full p-6">
-        
         {error && (
           <div
             className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4"
@@ -133,13 +122,10 @@ const CreateWallPage = () => {
           </div>
           <div>
             <label className="block">Description:</label>
-            <textarea
-              name="description"
+            <ReactQuill
               value={wallData.description}
-              onChange={handleChange}
-              required
-              rows="4"
-              className="w-full p-3 border rounded"
+              onChange={handleDescriptionChange}
+              className="bg-white"
               placeholder="Describe what this wall is about"
             />
           </div>
@@ -200,7 +186,12 @@ const CreateWallPage = () => {
             ))}
             <button
               type="button"
-              onClick={addSocialLink}
+              onClick={() =>
+                setWallData((prev) => ({
+                  ...prev,
+                  socialLinks: [...prev.socialLinks, { platform: "", url: "" }],
+                }))
+              }
               className="text-blue-500 hover:underline mt-2"
             >
               + Add Social Link

@@ -65,7 +65,7 @@ const Navbar = ({ logo, wallId }) => {
 
   return (
     <>
-      <nav className="bg-white shadow-md p-4 flex justify-between items-center relative">
+      <nav className="bg-gray-300 shadow-md p-4 flex justify-between items-center relative">
         {/* Logo */}
         {logo && (
           <img
