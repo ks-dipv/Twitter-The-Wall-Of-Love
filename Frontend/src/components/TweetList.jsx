@@ -41,12 +41,6 @@ const SortableTweet = ({ tweet, onDelete }) => {
     transition,
   };
 
-  const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this wall?")) return;
-    onDelete(tweet.id);
-    toast.success("Deleted Tweet successfully!");
-  };
-
   return (
     <div
       ref={setNodeRef}
@@ -61,10 +55,7 @@ const SortableTweet = ({ tweet, onDelete }) => {
           <AlertDialogTrigger asChild>
             <button
               className="absolute top-2 right-2 text-gray-500 hover:text-red-600"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDelete();
-              }}
+              onClick={(e) => e.stopPropagation()}
             >
               ❌
             </button>
