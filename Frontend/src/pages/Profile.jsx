@@ -108,10 +108,11 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gray-100">
       <ToastContainer autoClose={2000} hideProgressBar />
+      <nav className="bg-gray-300 p-4 text-black flex justify-between">
+        <h1 className="text-lg font-bold">Your Profile</h1>
+      </nav>
       <div className="max-w-6xl mx-auto flex justify-center items-center">
-        <h1 className="text-4xl font-extrabold text-center mb-5">
-          Your Profile
-        </h1>
+        
       </div>
 
       <div className="max-w-2xl mx-auto p-6 mt-10 bg-white shadow-lg rounded-lg">

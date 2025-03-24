@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   DndContext,
   closestCenter,
@@ -14,12 +14,25 @@ import {
   rectSortingStrategy,
 } from "@dnd-kit/sortable";
 import { toast, ToastContainer } from "react-toastify";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "../components/ui/alert-dialog";
 
 const SortableTweet = ({ tweet, onDelete }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({
       id: tweet.id.toString(),
     });
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const style = {
     transform: transform
@@ -42,17 +55,44 @@ const SortableTweet = ({ tweet, onDelete }) => {
       {...listeners}
       className="bg-white shadow-md rounded-lg p-4 flex flex-col h-full relative cursor-pointer"
     >
-      {/* Delete Button */}
+      {/* Delete Button with Confirmation Dialog */}
       {onDelete && tweet.id && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleDelete()
-          }}
-          className="absolute top-2 right-2 text-gray-500 hover:text-red-600"
-        >
-          ❌
-        </button>
+        <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <AlertDialogTrigger asChild>
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-red-600"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete();
+              }}
+            >
+              ❌
+            </button>
+          </AlertDialogTrigger>
+
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Tweet?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this tweet?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex justify-center gap-4 mt-4">
+              <AlertDialogCancel className="bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300">
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  onDelete(tweet.id);
+                  setIsDialogOpen(false);
+                  toast.success("Deleted Tweet successfully!");
+                }}
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
 
       {/* Author Section */}
@@ -122,7 +162,7 @@ const TweetList = ({ tweets, onDelete, onReorder }) => {
   return (
     <div>
       {/* Toast Notifications */}
-      <ToastContainer autoclose={1000} hideProgressBar />
+      <ToastContainer autoClose={1000} hideProgressBar />
 
       {isShare ? (
         <DndContext

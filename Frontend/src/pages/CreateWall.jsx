@@ -95,11 +95,11 @@ const CreateWallPage = () => {
   return (
     <div className="min-h-screen bg-white text-black">
       <ToastContainer hideProgressBar/>
+      <nav className="bg-gray-300 p-4 text-black flex justify-between">
+        <h1 className="text-lg font-bold">Create your wall</h1>
+      </nav>
       <div className="w-full p-6">
-        <h5 className="text-4xl font-extrabold text-center mb-5">
-          Create Your Wall
-        </h5>
-
+        
         {error && (
           <div
             className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4"
