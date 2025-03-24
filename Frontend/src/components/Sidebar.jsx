@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   User,
@@ -7,17 +7,20 @@ import {
   LogOut,
   Menu,
   LayoutDashboard,
+  X,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
-  const location = useLocation(); // Get current route
+  const [isMobile, setIsMobile] = useState(false);
+  const location = useLocation();
   const navigate = useNavigate();
   const { logout } = useAuth();
 
   // Function to check if link is active
   const isActive = (path) => location.pathname === path;
+  
   const handleLogout = async () => {
     alert("Logout");
     await logout();
@@ -25,97 +28,163 @@ const Sidebar = () => {
     navigate("/");
   };
 
+  // Handle responsive behavior
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) {
+        setIsOpen(false);
+      }
+    };
+
+    handleResize();
+
+    window.addEventListener("resize", handleResize);
+    
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Close sidebar when clicking outside on mobile
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const sidebar = document.getElementById("sidebar");
+      if (isMobile && isOpen && sidebar && !sidebar.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMobile, isOpen]);
+
   return (
-    <div
-      className={`h-screen bg-gray-800 text-white transition-all ${
-        isOpen ? "w-64" : "w-20"
-      }`}
-    >
-      {/* Logo & Toggle Button */}
-      <div className="flex items-center justify-between p-4">
-        <div className="flex items-center space-x-3">
-          <img
-            src="https://cdn-icons-png.flaticon.com/128/2297/2297921.png"
-            alt="Wall of Love Logo"
-            className="h-10 w-auto"
-          />
-          {isOpen && (
-            <h1 className="text-white text-2xl font-bold">Wall of Love</h1>
-          )}
-        </div>
-        {/* Hamburger Icon for Toggle */}
-        <button onClick={() => setIsOpen(!isOpen)} className="text-white">
+    <>
+      {/* Mobile overlay */}
+      {isMobile && isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-20" onClick={() => setIsOpen(false)} />
+      )}
+
+      {/* Mobile toggle button - always visible on mobile */}
+      {isMobile && !isOpen && (
+        <button 
+          onClick={() => setIsOpen(true)}
+          className="fixed top-10 left-6 z-30 text-black p-2"
+        >
           <Menu className="w-6 h-6" />
         </button>
-      </div>
+      )}
 
-      <ul className="space-y-4 p-4">
-        <li>
-          <Link
-            to="/admin/dashboard"
-            className={`flex items-center gap-2 p-2 rounded ${
-              isActive("/admin/dashboard") ? "bg-gray-400" : "hover:bg-gray-700"
-            }`}
-          >
-            <LayoutDashboard className="w-5 h-5" />
-            {isOpen && "Dashboard"}
-          </Link>
-        </li>
-
-        {/* Wall Management */}
-        <li className="font-bold mt-4">Wall Management</li>
-        <li>
-          <Link
-            to="/admin/create-wall"
-            className={`flex items-center gap-2 p-2 rounded ${
-              isActive("/admin/create-wall")
-                ? "bg-gray-400"
-                : "hover:bg-gray-700"
-            }`}
-          >
-            <PlusCircle className="w-5 h-5" />
-            {isOpen && "Create Wall"}
-          </Link>
-        </li>
-        <li>
-          <Link
-            to="/admin/list-walls"
-            className={`flex items-center gap-2 p-2 rounded ${
-              isActive("/admin/list-walls")
-                ? "bg-gray-400"
-                : "hover:bg-gray-700"
-            }`}
-          >
-            <List className="w-5 h-5" />
-            {isOpen && "List of Walls"}
-          </Link>
-        </li>
-
-        {/* Profile */}
-        <li className="mt-4">
-          <Link
-            to="/admin/profile"
-            className={`flex items-center gap-2 p-2 rounded ${
-              isActive("/admin/profile") ? "bg-gray-400" : "hover:bg-gray-700"
-            }`}
-          >
-            <User className="w-5 h-5" />
-            {isOpen && "Profile"}
-          </Link>
-        </li>
-
-        {/* Sign Out */}
-        <li className="mt-10">
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 p-2 rounded hover:bg-red-700"
-          >
-            <LogOut className="w-5 h-5" />
-            {isOpen && "LogOut"}
+      {/* Sidebar */}
+      <div
+        id="sidebar"
+        className={`h-screen bg-gray-800 text-white transition-all duration-300 flex flex-col ${
+          isOpen ? "w-64" : "w-0 md:w-20"
+        } ${isMobile ? "fixed z-30" : ""} ${!isOpen && isMobile ? "hidden" : ""}`}
+      >
+        {/* Logo & Toggle Button */}
+        <div className="flex items-center justify-between p-4">
+          <div className="flex items-center space-x-3">
+            <img
+              src="https://cdn-icons-png.flaticon.com/128/2297/2297921.png"
+              alt="Wall of Love Logo"
+              className="h-10 w-auto"
+            />
+            {isOpen && (
+              <h1 className="text-white text-2xl font-bold">Wall of Love</h1>
+            )}
+          </div>
+          {/* Close/Toggle Button */}
+          <button onClick={() => setIsOpen(!isOpen)} className="text-white">
+            {isMobile ? 
+              <X className="w-6 h-6" /> : 
+              <Menu className="w-6 h-6" />
+            }
           </button>
-        </li>
-      </ul>
-    </div>
+        </div>
+
+        {/* Main Navigation */}
+        <div className="flex-grow overflow-y-auto">
+          <ul className="space-y-4 p-4">
+            <li>
+              <Link
+                to="/admin/dashboard"
+                className={`flex items-center gap-2 p-2 rounded ${
+                  isActive("/admin/dashboard") ? "bg-gray-400" : "hover:bg-gray-700"
+                }`}
+                onClick={() => isMobile && setIsOpen(false)}
+              >
+                <LayoutDashboard className="w-5 h-5 flex-shrink-0" />
+                {isOpen && <span className="truncate">Dashboard</span>}
+              </Link>
+            </li>
+
+            {/* Wall Management */}
+            {isOpen && <li className="font-bold mt-4 text-gray-400 text-sm uppercase">Wall Management</li>}
+            <li>
+              <Link
+                to="/admin/create-wall"
+                className={`flex items-center gap-2 p-2 rounded ${
+                  isActive("/admin/create-wall")
+                    ? "bg-gray-400"
+                    : "hover:bg-gray-700"
+                }`}
+                onClick={() => isMobile && setIsOpen(false)}
+              >
+                <PlusCircle className="w-5 h-5 flex-shrink-0" />
+                {isOpen && <span className="truncate">Create Wall</span>}
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/admin/list-walls"
+                className={`flex items-center gap-2 p-2 rounded ${
+                  isActive("/admin/list-walls")
+                    ? "bg-gray-400"
+                    : "hover:bg-gray-700"
+                }`}
+                onClick={() => isMobile && setIsOpen(false)}
+              >
+                <List className="w-5 h-5 flex-shrink-0" />
+                {isOpen && <span className="truncate">List of Walls</span>}
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        {/* Profile and Logout fixed at bottom */}
+        <div className="mt-auto p-4 border-t border-gray-700">
+          <ul className="space-y-4">
+            <li>
+              <Link
+                to="/admin/profile"
+                className={`flex items-center gap-2 p-2 rounded ${
+                  isActive("/admin/profile") ? "bg-gray-400" : "hover:bg-gray-700"
+                }`}
+                onClick={() => isMobile && setIsOpen(false)}
+              >
+                <User className="w-5 h-5 flex-shrink-0" />
+                {isOpen && <span className="truncate">Profile</span>}
+              </Link>
+            </li>
+
+            {/* Sign Out */}
+            <li>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 p-2 rounded w-full hover:bg-red-700"
+              >
+                <LogOut className="w-5 h-5 flex-shrink-0" />
+                {isOpen && <span className="truncate">LogOut</span>}
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </>
   );
 };
+
 export default Sidebar;

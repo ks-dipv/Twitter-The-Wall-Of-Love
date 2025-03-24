@@ -28,6 +28,12 @@ const SortableTweet = ({ tweet, onDelete }) => {
     transition,
   };
 
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this wall?")) return;
+    onDelete(tweet.id);
+    toast.success("Deleted Tweet successfully!");
+  };
+
   return (
     <div
       ref={setNodeRef}
@@ -41,8 +47,7 @@ const SortableTweet = ({ tweet, onDelete }) => {
         <button
           onClick={(e) => {
             e.stopPropagation();
-            onDelete(tweet.id);
-            toast.success("Deleted Tweet successfully!");
+            handleDelete()
           }}
           className="absolute top-2 right-2 text-gray-500 hover:text-red-600"
         >
@@ -92,7 +97,7 @@ const TweetList = ({ tweets, onDelete, onReorder }) => {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8, 
+        distance: 8,
       },
     }),
     useSensor(KeyboardSensor, {
