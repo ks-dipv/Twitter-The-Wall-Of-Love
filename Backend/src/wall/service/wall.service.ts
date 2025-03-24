@@ -95,9 +95,9 @@ export class WallService {
         }
         try {
           logoUrl = await this.uploadService.logo(wallLogo);
-        } catch (uploadError) {
+        } catch (error) {
           throw new InternalServerErrorException(
-            'Failed to upload logo. Please try again.',
+            error.message || 'Failed to upload logo. Please try again.',
           );
         }
       }
@@ -298,9 +298,9 @@ export class WallService {
             // Upload new logo
             try {
               logoUrl = await this.uploadService.logo(logo);
-            } catch (uploadError) {
+            } catch (error) {
               throw new InternalServerErrorException(
-                'Failed to upload logo. Please try again.',
+                error.message || 'Failed to upload logo. Please try again.',
               );
             }
           }
