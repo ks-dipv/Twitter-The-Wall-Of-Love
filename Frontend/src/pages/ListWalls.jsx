@@ -13,7 +13,6 @@ const ListWalls = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [wallToDelete, setWallToDelete] = useState(null);
   const navigate = useNavigate();
-
   useEffect(() => {
     const fetchWalls = async () => {
       try {
@@ -23,30 +22,23 @@ const ListWalls = () => {
         setWalls(response.data);
       } catch (err) {
         console.error("API Error:", err);
-        setError(err.message || "Failed to fetch walls");
-        toast.error("Failed to fetch walls.");
         setWalls([]);
       } finally {
         setLoading(false);
       }
     };
-
     fetchWalls();
   }, []);
-
   const openDeleteDialog = (id, title) => {
     setWallToDelete({ id, title });
     setShowDeleteDialog(true);
   };
-
   const closeDeleteDialog = () => {
     setShowDeleteDialog(false);
     setWallToDelete(null);
   };
-
   const handleDelete = async () => {
     if (!wallToDelete) return;
-
     try {
       await deleteWall(wallToDelete.id);
       setWalls((prevWalls) =>
@@ -61,12 +53,7 @@ const ListWalls = () => {
     }
   };
 
-  if (loading)
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900"></div>
-      </div>
-    );
+  if (loading) return <div className="text-center mt-10">Loading walls...</div>;
   if (error)
     return <div className="text-center text-red-500 mt-10">{error}</div>;
 
@@ -79,7 +66,6 @@ const ListWalls = () => {
             Your Walls
           </h1>
         </div>
-
         {Array.isArray(walls) && walls.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {walls.map((wall) => (
@@ -89,13 +75,15 @@ const ListWalls = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 1.05 }}
               >
+                {/* Logo */}
                 <img
-                  src={wall.logo || "/default-placeholder.png"}
+                  src={wall.logo}
                   alt={wall.title}
                   className="w-full h-24 sm:h-32 object-cover rounded-md mb-3"
                   onClick={() => navigate(`/admin/walls/${wall.id}`)}
                 />
 
+                {/* Content Section */}
                 <div
                   className="relative flex-1"
                   onClick={() => navigate(`/admin/walls/${wall.id}`)}
@@ -103,18 +91,20 @@ const ListWalls = () => {
                   <h2 className="text-lg sm:text-xl font-semibold">
                     {wall.title}
                   </h2>
-                  <p className="text-gray-600 line-clamp-3 p-2">
+                  <p className="text-gray-600 absolute top-10 left-0 right-0 h-[80px] sm:h-[100px] overflow-hidden text-ellipsis p-2">
                     {wall.description}
                   </p>
                 </div>
 
-                <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-2">
+                {/* Action Buttons */}
+                <div className="absolute bottom-4 left-4 right-4 flex flex-col sm:flex-row justify-between gap-2 sm:gap-0">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       openDeleteDialog(wall.id, wall.title);
                     }}
-                    className="flex items-center justify-center gap-2 text-red-600 hover:text-red-700 px-3 py-2 rounded-md bg-white border border-red-200 hover:bg-red-50 transition text-base w-full sm:w-auto"
+                    className="flex items-center justify-center gap-1 sm:gap-2 text-red-600 hover:text-red-700 px-2 py-1 sm:px-3 sm:py-2 rounded-md bg-white border border-red-200 hover:bg-red-50 transition text-sm sm:text-base w-full sm:w-auto"
+                    title="Delete this wall"
                   >
                     <FiTrash2 className="shrink-0" />
                     <span className="hidden xs:inline">Delete</span>
@@ -124,7 +114,8 @@ const ListWalls = () => {
                       e.stopPropagation();
                       navigate(`/admin/walls/${wall.id}/update`);
                     }}
-                    className="flex items-center justify-center gap-2 text-blue-600 hover:text-blue-700 px-3 py-2 rounded-md bg-white border border-blue-200 hover:bg-blue-50 transition text-base w-full sm:w-auto"
+                    className="flex items-center justify-center gap-1 sm:gap-2 text-blue-600 hover:text-blue-700 px-2 py-1 sm:px-3 sm:py-2 rounded-md bg-white border border-blue-200 hover:bg-blue-50 transition text-sm sm:text-base w-full sm:w-auto"
+                    title="Update this wall"
                   >
                     <FiEdit className="shrink-0" />
                     <span className="hidden xs:inline">Update</span>
@@ -148,6 +139,7 @@ const ListWalls = () => {
         )}
       </div>
 
+      {/* Delete Confirmation Dialog */}
       <ConfirmationDialog
         isOpen={showDeleteDialog}
         onClose={closeDeleteDialog}
@@ -164,5 +156,4 @@ const ListWalls = () => {
     </div>
   );
 };
-
 export default ListWalls;
