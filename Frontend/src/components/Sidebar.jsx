@@ -10,10 +10,12 @@ import {
   X,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import ConfirmationDialog from "./ConfirmationDialog";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -21,11 +23,19 @@ const Sidebar = () => {
   // Function to check if link is active
   const isActive = (path) => location.pathname === path;
   
-  const handleLogout = async () => {
-    alert("Logout");
-    await logout();
-    setIsOpen(false);
-    navigate("/");
+  const handleLogoutClick = () => {
+    setLogoutDialogOpen(true);
+  };
+
+  const confirmLogout = async () => {
+    try {
+      await logout();
+      setIsOpen(false);
+      setLogoutDialogOpen(false);
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   // Handle responsive behavior
@@ -173,7 +183,7 @@ const Sidebar = () => {
             {/* Sign Out */}
             <li>
               <button
-                onClick={handleLogout}
+                onClick={handleLogoutClick}
                 className="flex items-center gap-2 p-2 rounded w-full hover:bg-red-700"
               >
                 <LogOut className="w-5 h-5 flex-shrink-0" />
@@ -183,6 +193,18 @@ const Sidebar = () => {
           </ul>
         </div>
       </div>
+
+      {/* Logout Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={logoutDialogOpen}
+        onClose={() => setLogoutDialogOpen(false)}
+        onConfirm={confirmLogout}
+        title="Logout Confirmation"
+        message="Are you sure you want to logout from your account?"
+        confirmText="Logout"
+        cancelText="Cancel"
+        confirmButtonClass="bg-red-600 hover:bg-red-700"
+      />
     </>
   );
 };

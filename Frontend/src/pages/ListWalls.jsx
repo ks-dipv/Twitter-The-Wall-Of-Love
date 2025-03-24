@@ -1,26 +1,17 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { deleteWall, getAllWalls } from "../services/api";
 import { useNavigate } from "react-router-dom";
 import { FiTrash2, FiEdit, FiPlus } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { toast, ToastContainer } from "react-toastify";
-import {
-  AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogAction,
-  AlertDialogCancel,
-} from "../components/ui/alert-dialog";
+import ConfirmationDialog from "../components/ConfirmationDialog"; // Import the dialog component
 
 const ListWalls = () => {
   const [walls, setWalls] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [selectedWall, setSelectedWall] = useState(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [wallToDelete, setWallToDelete] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,21 +32,32 @@ const ListWalls = () => {
     fetchWalls();
   }, []);
 
-  const handleDelete = useCallback(async () => {
-    if (!selectedWall) return;
+  const openDeleteDialog = (id, title) => {
+    setWallToDelete({ id, title });
+    setShowDeleteDialog(true);
+  };
+
+  const closeDeleteDialog = () => {
+    setShowDeleteDialog(false);
+    setWallToDelete(null);
+  };
+
+  const handleDelete = async () => {
+    if (!wallToDelete) return;
+
     try {
-      await deleteWall(selectedWall.id);
+      await deleteWall(wallToDelete.id);
       setWalls((prevWalls) =>
-        prevWalls.filter((wall) => wall.id !== selectedWall.id)
+        prevWalls.filter((wall) => wall.id !== wallToDelete.id)
       );
       toast.success("Wall deleted successfully!");
+      closeDeleteDialog();
     } catch (err) {
       setError(err.message || "Failed to delete wall");
       toast.error("Failed to delete wall.");
-    } finally {
-      setSelectedWall(null);
+      closeDeleteDialog();
     }
-  }, [selectedWall]);
+  };
 
   if (loading) return <div className="text-center mt-10">Loading walls...</div>;
   if (error)
@@ -102,44 +104,26 @@ const ListWalls = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="absolute bottom-4 left-4 right-4 flex justify-between">
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <button
-                        onClick={() => setSelectedWall(wall)}
-                        className="flex items-center gap-2 text-black px-4 py-2 rounded-md shadow hover:bg-red-100 transition"
-                      >
-                        <FiTrash2 />
-                      </button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent className="max-w-lg mx-auto bg-white shadow-lg rounded-lg p-6">
-                      <AlertDialogHeader>
-                        <AlertDialogTitle className="text-xl font-bold text-center">
-                          Confirm Deletion
-                        </AlertDialogTitle>
-                      </AlertDialogHeader>
-                      <AlertDialogDescription className="text-center text-gray-600">
-                        Are you sure you want to delete <b>"{wall.title}"</b>?
-                      </AlertDialogDescription>
-                      <AlertDialogFooter className="flex justify-center gap-4 mt-4">
-                        <AlertDialogCancel className="bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300">
-                          Cancel
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                          className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-                          onClick={handleDelete}
-                        >
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-
+                <div className="absolute bottom-4 left-4 right-4 flex flex-col sm:flex-row justify-between gap-2 sm:gap-0">
                   <button
-                    onClick={() => navigate(`/admin/walls/${wall.id}/update`)}
-                    className="flex items-center gap-2 text-blue-600 px-4 py-2 rounded-md shadow hover:bg-blue-100 transition"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openDeleteDialog(wall.id, wall.title);
+                    }}
+                    className="flex items-center justify-center gap-1 sm:gap-2 text-red-600 hover:text-red-700 px-2 py-1 sm:px-3 sm:py-2 rounded-md bg-white border border-red-200 hover:bg-red-50 transition text-sm sm:text-base w-full sm:w-auto"
                   >
-                    <FiEdit />
+                    <FiTrash2 className="shrink-0" />
+                    <span className="hidden xs:inline">Delete</span>
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/admin/walls/${wall.id}/update`);
+                    }}
+                    className="flex items-center justify-center gap-1 sm:gap-2 text-blue-600 hover:text-blue-700 px-2 py-1 sm:px-3 sm:py-2 rounded-md bg-white border border-blue-200 hover:bg-blue-50 transition text-sm sm:text-base w-full sm:w-auto"
+                  >
+                    <FiEdit className="shrink-0" />
+                    <span className="hidden xs:inline">Update</span>
                   </button>
                 </div>
               </motion.div>
@@ -159,6 +143,21 @@ const ListWalls = () => {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={showDeleteDialog}
+        onClose={closeDeleteDialog}
+        onConfirm={handleDelete}
+        title="Confirm Delete"
+        message={
+          wallToDelete
+            ? `Are you sure you want to delete ${wallToDelete.title}?`
+            : ""
+        }
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
     </div>
   );
 };

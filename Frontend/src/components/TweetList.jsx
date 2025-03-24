@@ -14,25 +14,15 @@ import {
   rectSortingStrategy,
 } from "@dnd-kit/sortable";
 import { toast, ToastContainer } from "react-toastify";
-import {
-  AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogAction,
-  AlertDialogCancel,
-} from "../components/ui/alert-dialog";
+import ConfirmationDialog from "../components/ConfirmationDialog";
 
 const SortableTweet = ({ tweet, onDelete }) => {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({
       id: tweet.id.toString(),
     });
-
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const style = {
     transform: transform
@@ -41,10 +31,15 @@ const SortableTweet = ({ tweet, onDelete }) => {
     transition,
   };
 
-  const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this wall?")) return;
+  const openDeleteDialog = (e) => {
+    e.stopPropagation();
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteConfirm = () => {
     onDelete(tweet.id);
     toast.success("Deleted Tweet successfully!");
+    setShowDeleteDialog(false);
   };
 
   return (
@@ -55,44 +50,14 @@ const SortableTweet = ({ tweet, onDelete }) => {
       {...listeners}
       className="bg-white shadow-md rounded-lg p-4 flex flex-col h-full relative cursor-pointer"
     >
-      {/* Delete Button with Confirmation Dialog */}
+      {/* Delete Button */}
       {onDelete && tweet.id && (
-        <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <AlertDialogTrigger asChild>
-            <button
-              className="absolute top-2 right-2 text-gray-500 hover:text-red-600"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDelete();
-              }}
-            >
-              ❌
-            </button>
-          </AlertDialogTrigger>
-
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete Tweet?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete this tweet?
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="flex justify-center gap-4 mt-4">
-              <AlertDialogCancel className="bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300">
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => {
-                  onDelete(tweet.id);
-                  setIsDialogOpen(false);
-                  toast.success("Deleted Tweet successfully!");
-                }}
-              >
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <button
+          onClick={openDeleteDialog}
+          className="absolute top-2 right-2 text-gray-500 hover:text-red-600"
+        >
+          ❌
+        </button>
       )}
 
       {/* Author Section */}
@@ -128,6 +93,17 @@ const SortableTweet = ({ tweet, onDelete }) => {
         <span>❤️ {tweet.likes}</span>
         <span>💬 {tweet.comments}</span>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Tweet"
+        message={`Are you sure you want to delete this tweet?`}
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
     </div>
   );
 };

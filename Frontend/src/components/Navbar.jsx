@@ -2,26 +2,35 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { deleteWall } from "../services/api";
 import ShareWallModal from "./ShareWallModal";
-import { FaShare, FaEdit, FaTrash, FaCog, FaPlus } from "react-icons/fa";
+import ConfirmationDialog from "./ConfirmationDialog";
+import {
+  FaShare,
+  FaEdit,
+  FaTrash,
+  FaCog,
+} from "react-icons/fa";
 
 const Navbar = ({ logo, wallId }) => {
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const dropdownRef = useRef(null);
   const mobileMenuRef = useRef(null);
 
   // Handle Wall Deletion
   const handleDelete = async () => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this wall?"
-    );
-    if (!confirmDelete) return;
+    setDeleteDialogOpen(true);
+    setDropdownOpen(false);
+    setMobileMenuOpen(false);
+  };
 
+  // Confirm delete action
+  const confirmDelete = async () => {
     try {
       await deleteWall(wallId);
-      alert("Wall deleted successfully!");
+      setDeleteDialogOpen(false);
       navigate("/admin/list-walls");
     } catch (error) {
       console.error("Failed to delete wall:", error);
@@ -56,60 +65,58 @@ const Navbar = ({ logo, wallId }) => {
 
   return (
     <>
-      <nav className="bg-gray-300 p-4 text-black flex items-center justify-between shadow-md">
+      <nav className="bg-white shadow-md p-4 flex justify-between items-center relative">
         {/* Logo */}
-        <div className="flex items-center gap-3">
-          {logo && (
-            <img
-              src={logo}
-              alt="Wall Logo"
-              className="h-12 w-12 rounded-full object-cover border-2 border-gray-400"
-            />
-          )}
-        </div>
+        {logo && (
+          <img
+            src={logo}
+            alt="Wall Logo"
+            className="h-10 w-10 ml-4 md:h-12 md:w-12 rounded-full object-cover border-2 border-gray-400"
+          />
+        )}
 
-        {/* Action Buttons */}
-        <div className="flex gap-4">
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex gap-4">
           {/* Add Tweet Button */}
           <button
-            className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition"
+            className="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition"
             onClick={() => navigate(`/admin/walls/${wallId}/add-tweet`)}
           >
-            <FaPlus /> Add Tweet
+            + Add Tweet
           </button>
 
           {/* Wall Settings Button */}
           <div className="relative" ref={dropdownRef}>
             <button
-              className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition"
+              className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition"
               onClick={() => setDropdownOpen((prev) => !prev)}
             >
-              <FaCog /> Wall Settings
+              <FaCog className="inline mr-2" />Wall Settings
             </button>
 
             {/* Dropdown Menu */}
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white text-black shadow-lg rounded-lg border z-10">
+              <div className="absolute right-0 mt-2 w-52 bg-white shadow-md rounded-lg border z-20">
                 <button
                   onClick={handleOpenShareModal}
-                  className="flex items-center gap-2 w-full text-left px-4 py-3 font-medium hover:bg-gray-100 transition"
+                  className="block w-full text-left px-4 py-3 font-medium hover:bg-gray-100 transition flex items-center"
                 >
-                  <FaShare className="text-blue-500" /> Share Wall
+                  <FaShare className="mr-2 text-blue-500" /> Share Wall
                 </button>
                 <button
                   onClick={() => {
                     navigate(`/admin/walls/${wallId}/update`);
                     setDropdownOpen(false);
                   }}
-                  className="flex items-center gap-2 w-full text-left px-4 py-3 font-medium hover:bg-gray-100 transition"
+                  className="block w-full text-left px-4 py-3 font-medium hover:bg-gray-100 transition flex items-center"
                 >
-                  <FaEdit className="text-gray-700" /> Update Wall
+                  <FaEdit className="mr-2 text-gray-700" /> Update Wall
                 </button>
                 <button
                   onClick={handleDelete}
-                  className="flex items-center gap-2 w-full text-left px-4 py-3 text-red-600 font-medium hover:bg-red-100 transition"
+                  className="block w-full text-left px-4 py-3 text-red-600 font-medium hover:bg-gray-100 transition flex items-center"
                 >
-                  <FaTrash /> Delete Wall
+                  <FaTrash className="mr-2" /> Delete Wall
                 </button>
               </div>
             )}
@@ -177,6 +184,18 @@ const Navbar = ({ logo, wallId }) => {
         wallId={wallId}
         isOpen={shareModalOpen}
         onClose={() => setShareModalOpen(false)}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={confirmDelete}
+        title="Delete Wall"
+        message="Are you sure you want to delete this wall?"
+        confirmText="Delete"
+        cancelText="Cancel"
+        confirmButtonClass="bg-red-600 hover:bg-red-700"
       />
     </>
   );
