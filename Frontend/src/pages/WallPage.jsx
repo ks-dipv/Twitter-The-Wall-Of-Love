@@ -131,9 +131,8 @@ const WallPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.8, ease: "easeOut" }}
-          >
-            {wall.description}
-          </motion.p>
+            dangerouslySetInnerHTML={{ __html: wall.description }}
+          ></motion.p>
         </motion.div>
 
         {/* Action Section with Shuffle Button aligned to the right */}

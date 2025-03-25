@@ -3,13 +3,12 @@ import { addWalls } from "../services/api";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css"; // Import styles
+import "react-quill/dist/quill.snow.css";
 
 const CreateWallPage = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-
   const [wallData, setWallData] = useState({
     title: "",
     description: "",
@@ -34,8 +33,20 @@ const CreateWallPage = () => {
     });
   };
 
-  const handleDescriptionChange = (value) => {
-    setWallData({ ...wallData, description: value });
+  const addSocialLink = () => {
+    setWallData((prevState) => ({
+      ...prevState,
+      socialLinks: [...prevState.socialLinks, { platform: "", url: "" }],
+    }));
+  };
+
+  const removeSocialLink = (index) => {
+    setWallData((prevState) => {
+      const newSocialLinks = prevState.socialLinks.filter(
+        (_, i) => i !== index
+      );
+      return { ...prevState, socialLinks: newSocialLinks };
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -46,7 +57,7 @@ const CreateWallPage = () => {
     try {
       const requestBody = {
         title: wallData.title,
-        description: wallData.description, // Quill stores as HTML
+        description: wallData.description,
         visibility: wallData.visibility,
         social_links: wallData.socialLinks.filter(
           (link) => link.platform && link.url
@@ -84,7 +95,7 @@ const CreateWallPage = () => {
 
   return (
     <div className="min-h-screen bg-white text-black">
-      <ToastContainer hideProgressBar/>
+      <ToastContainer hideProgressBar />
       <nav className="bg-gray-300 p-4 text-black flex justify-between">
         <h1 className="text-lg font-bold">Create your wall</h1>
       </nav>
@@ -123,11 +134,17 @@ const CreateWallPage = () => {
           <div>
             <label className="block">Description:</label>
             <ReactQuill
+              theme="snow"
               value={wallData.description}
-              onChange={handleDescriptionChange}
-              className="bg-white"
-              placeholder="Describe what this wall is about"
+              onChange={(value) =>
+                setWallData({ ...wallData, description: value })
+              }
+              className="w-full bg-white border rounded"
             />
+            <p className="text-sm text-gray-500 mt-1">
+              {" "}
+              Maximum 250 characters
+            </p>
           </div>
           <div>
             <label className="block">Visibility:</label>
@@ -186,12 +203,7 @@ const CreateWallPage = () => {
             ))}
             <button
               type="button"
-              onClick={() =>
-                setWallData((prev) => ({
-                  ...prev,
-                  socialLinks: [...prev.socialLinks, { platform: "", url: "" }],
-                }))
-              }
+              onClick={addSocialLink}
               className="text-blue-500 hover:underline mt-2"
             >
               + Add Social Link

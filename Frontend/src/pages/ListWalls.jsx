@@ -91,9 +91,10 @@ const ListWalls = () => {
                   <h2 className="text-lg sm:text-xl font-semibold">
                     {wall.title}
                   </h2>
-                  <p className="text-gray-600 absolute top-10 left-0 right-0 h-[80px] sm:h-[100px] overflow-hidden text-ellipsis p-2">
-                    {wall.description}
-                  </p>
+                  <p
+                    className="text-gray-600 absolute top-10 left-0 right-0 h-[80px] sm:h-[100px] overflow-hidden text-ellipsis p-2"
+                    dangerouslySetInnerHTML={{ __html: wall.description }}
+                  ></p>
                 </div>
 
                 {/* Action Buttons */}
