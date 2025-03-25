@@ -116,6 +116,10 @@ export class WallController {
   }
 
   @Post('total-data')
+  @ApiOperation({ summary: 'Get total data of walls' })
+  @ApiResponse({status: 200,description: 'Total data retrieved successfully'})
+  @ApiResponse({ status: 400, description: 'Invalid request parameters' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getTotaData(@Request() req) {
     return await this.wallService.getTotalData(req);
   }

@@ -13,13 +13,9 @@ const ForgotPassword = () => {
 
     try {
       const response = await requestPasswordReset(email);
-      const successMessage =
-        response.data.message || "Check your email for the reset link.";
-      toast.success(successMessage);
+      toast.success(response.data.message || "Check your email for the reset link.");
     } catch (err) {
-      const errorMessage =
-        err.response?.data?.message || "Failed to send reset email.";
-      toast.error(errorMessage);
+      toast.error(err.response?.data?.message || "Failed to send reset email.");
     }
   };
 
@@ -42,12 +38,11 @@ const ForgotPassword = () => {
             {message}
           </div>
         )}
-        
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-gray-700 dark:text-gray-300 mb-2">
-              Email Address
+              Email <span className="text-red-500">*</span>
             </label>
             <input
               type="email"

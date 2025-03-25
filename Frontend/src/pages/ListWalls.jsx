@@ -29,6 +29,13 @@ const ListWalls = () => {
     };
     fetchWalls();
   }, []);
+
+  const truncateText = (text, maxLength) => {
+    return text.length > maxLength
+      ? text.substring(0, maxLength) + "...."
+      : text;
+  };
+
   const openDeleteDialog = (id, title) => {
     setWallToDelete({ id, title });
     setShowDeleteDialog(true);
@@ -48,7 +55,7 @@ const ListWalls = () => {
       closeDeleteDialog();
     } catch (err) {
       setError(err.message || "Failed to delete wall");
-      toast.error("Failed to delete wall.");
+      toast.error(err.message || "Failed to delete wall.");
       closeDeleteDialog();
     }
   };
@@ -82,7 +89,6 @@ const ListWalls = () => {
                   className="w-full h-24 sm:h-32 object-cover rounded-md mb-3"
                   onClick={() => navigate(`/admin/walls/${wall.id}`)}
                 />
-
                 {/* Content Section */}
                 <div
                   className="relative flex-1"
@@ -94,9 +100,10 @@ const ListWalls = () => {
                   <p
                     className="text-gray-600 absolute top-10 left-0 right-0 h-[80px] sm:h-[100px] overflow-hidden text-ellipsis p-2"
                     dangerouslySetInnerHTML={{ __html: wall.description }}
-                  ></p>
+                  >
+                    {truncateText(wall.description, 150)}
+                  </p>
                 </div>
-
                 {/* Action Buttons */}
                 <div className="absolute bottom-4 left-4 right-4 flex flex-col sm:flex-row justify-between gap-2 sm:gap-0">
                   <button
@@ -129,7 +136,7 @@ const ListWalls = () => {
           <div className="text-center text-gray-500 mt-10 p-8 bg-gray-50 rounded-lg shadow-sm">
             <p className="mb-4">No walls found. Create a new one!</p>
             <motion.button
-              onClick={() => navigate("/admin/walls/new")}
+              onClick={() => navigate("/admin/create-wall")}
               className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700 transition mx-auto"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -139,7 +146,6 @@ const ListWalls = () => {
           </div>
         )}
       </div>
-
       {/* Delete Confirmation Dialog */}
       <ConfirmationDialog
         isOpen={showDeleteDialog}

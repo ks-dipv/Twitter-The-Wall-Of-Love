@@ -10,6 +10,7 @@ import TweetList from "../components/TweetList";
 import Footer from "../components/Footer";
 import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
+import { toast } from "react-toastify";
 
 const WallPage = () => {
   const { id } = useParams();
@@ -64,7 +65,7 @@ const WallPage = () => {
       const orderedTweetIds = reorderedTweets.map((tweet) => tweet.id);
       await reorderTweets(wall.id, orderedTweetIds);
     } catch (error) {
-      console.error("Error reordering tweets:", error);
+      toast.error("Error reordering tweets:", error);
       // Optionally revert the order in case of error
       const tweetsResponse = await getTweetsByWall(id);
       setTweets(tweetsResponse.data);
@@ -93,7 +94,7 @@ const WallPage = () => {
       const orderedTweetIds = shuffledTweets.map((tweet) => tweet.id);
       await reorderTweets(wall.id, orderedTweetIds);
     } catch (error) {
-      console.error("Error updating shuffled tweets:", error);
+      toast.error("Error updating shuffled tweets:", error);
     } finally {
       setIsSaving(false);
     }
