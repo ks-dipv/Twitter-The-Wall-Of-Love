@@ -30,12 +30,6 @@ const ListWalls = () => {
     fetchWalls();
   }, []);
 
-  const truncateText = (text, maxLength) => {
-    return text.length > maxLength
-      ? text.substring(0, maxLength) + "...."
-      : text;
-  };
-
   const openDeleteDialog = (id, title) => {
     setWallToDelete({ id, title });
     setShowDeleteDialog(true);
@@ -99,10 +93,13 @@ const ListWalls = () => {
                   </h2>
                   <p
                     className="text-gray-600 absolute top-10 left-0 right-0 h-[80px] sm:h-[100px] overflow-hidden text-ellipsis p-2"
-                    dangerouslySetInnerHTML={{ __html: wall.description }}
-                  >
-                    {truncateText(wall.description, 150)}
-                  </p>
+                    dangerouslySetInnerHTML={{
+                      __html:
+                        wall.description.length > 160
+                          ? `${wall.description.substring(0, 160)}...`
+                          : wall.description,
+                    }}
+                  ></p>
                 </div>
                 {/* Action Buttons */}
                 <div className="absolute bottom-4 left-4 right-4 flex flex-col sm:flex-row justify-between gap-2 sm:gap-0">
