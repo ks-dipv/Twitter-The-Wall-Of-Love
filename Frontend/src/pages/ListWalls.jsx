@@ -55,7 +55,7 @@ const ListWalls = () => {
       closeDeleteDialog();
     } catch (err) {
       setError(err.message || "Failed to delete wall");
-      toast.error(err.message||"Failed to delete wall.");
+      toast.error(err.message || "Failed to delete wall.");
       closeDeleteDialog();
     }
   };
@@ -133,7 +133,7 @@ const ListWalls = () => {
           <div className="text-center text-gray-500 mt-10 p-8 bg-gray-50 rounded-lg shadow-sm">
             <p className="mb-4">No walls found. Create a new one!</p>
             <motion.button
-              onClick={() => navigate("/admin/walls/new")}
+              onClick={() => navigate("/admin/create-wall")} 
               className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700 transition mx-auto"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}

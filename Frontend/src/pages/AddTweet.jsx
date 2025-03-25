@@ -29,12 +29,9 @@ const AddTweet = () => {
         navigate(`/admin/walls/${wallId}`);
       }, 1000);
     } catch (err) {
-      console.error(
-        "API Error:",
-        err.response?.data?.message || "Failed to add tweet."
+      console.error("API Error:",err.response?.data?.message || "Failed to add tweet."
       );
-      const errorMsg = err.response?.data?.message || "Failed to add tweet.";
-      toast.error(errorMsg);
+      toast.error(err.response?.data?.message || "Failed to add tweet.");
     } finally {
       setLoading(false);
     }

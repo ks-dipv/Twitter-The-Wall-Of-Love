@@ -22,9 +22,9 @@ const Home = () => {
         {/* Logo & Title */}
         <div className="flex items-center space-x-3">
           <img
-            src="https://cdn-icons-png.flaticon.com/128/2297/2297921.png" // Replace with your logo URL or local file
+            src="https://cdn-icons-png.flaticon.com/128/2297/2297921.png" 
             alt="Wall of Love Logo"
-            className="h-10 w-auto" // Adjust the size if needed
+            className="h-10 w-auto" 
           />
           <h1 className="text-white text-2xl font-bold">Wall of Love</h1>
         </div>
