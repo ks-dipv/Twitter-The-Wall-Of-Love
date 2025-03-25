@@ -42,7 +42,6 @@ export class CreateWallDto {
   })
   @IsOptional()
   @IsString()
-  @MaxLength(250)
   description?: string;
 
   @ApiPropertyOptional({

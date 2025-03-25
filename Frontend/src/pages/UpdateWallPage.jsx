@@ -2,16 +2,20 @@ import React, { useState, useEffect } from "react";
 import { getWallById, updateWall } from "../services/api";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 const UpdateWallPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   const [wallData, setWallData] = useState({
     title: "",
     description: "",
     visibility: "public",
-    socialLinks: [],
+    socialLinks: [{ platform: "", url: "" }],
     logo: null,
   });
 
@@ -38,6 +42,7 @@ const UpdateWallPage = () => {
         });
       } catch (error) {
         console.error("Failed to fetch wall:", error);
+        setError("Failed to load wall details. Please try again.");
         toast.error("Failed to load wall details.");
       }
     };
@@ -79,14 +84,18 @@ const UpdateWallPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setError("");
 
     try {
       const requestBody = {
         title: wallData.title,
         description: wallData.description,
         visibility: wallData.visibility,
-        social_links: wallData.socialLinks,
-        logo: wallData.logo
+        social_links: wallData.socialLinks.filter(
+          (link) => link.platform && link.url
+        ),
+        logo: wallData.logo,
       };
 
       const response = await updateWall(id, requestBody);
@@ -94,25 +103,45 @@ const UpdateWallPage = () => {
       if (response.status === 200) {
         toast.success("Wall updated successfully! 🎉");
         setTimeout(() => navigate(`/admin/walls/${id}`), 1000);
+      } else {
+        throw new Error(
+          "Failed to update wall. Server returned unexpected response."
+        );
       }
     } catch (error) {
       console.error(
         "Failed to update wall:",
         error.response?.data || error.message
       );
-      toast.error(error.response?.data?.message || "Failed to update wall.");
+      setError(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to update wall. Please try again."
+      );
+      toast.error("Error updating wall. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-white text-black">
-      <ToastContainer hideProgressBar/>
+      <ToastContainer hideProgressBar />
       {/* Navbar */}
       <nav className="bg-gray-300 p-4 text-black flex justify-between">
         <h1 className="text-lg font-bold">Update your wall</h1>
       </nav>
 
       <div className="w-full p-6">
+        {error && (
+          <div
+            className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4"
+            role="alert"
+          >
+            <p>{error}</p>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block">Title:</label>
@@ -129,19 +158,25 @@ const UpdateWallPage = () => {
             <label className="block">Logo:</label>
             <input
               type="file"
+              accept="image/*"
               onChange={handleFileChange}
               className="w-full p-2 border rounded"
             />
           </div>
           <div>
             <label className="block">Description:</label>
-            <textarea
-              name="description"
+            <ReactQuill
+              theme="snow"
               value={wallData.description}
-              onChange={handleChange}
-              required
-              className="w-full p-3 border rounded"
+              onChange={(value) =>
+                setWallData({ ...wallData, description: value })
+              }
+              className="w-full bg-white border rounded"
             />
+            <p className="text-sm text-gray-500 mt-1">
+              {" "}
+              Maximum 250 characters
+            </p>
           </div>
           <div>
             <label className="block">Visibility:</label>
@@ -154,6 +189,11 @@ const UpdateWallPage = () => {
               <option value="public">Public</option>
               <option value="private">Private</option>
             </select>
+            <p className="text-sm text-gray-500 mt-1">
+              {wallData.visibility === "public"
+                ? "Public walls can be viewed by anyone with the link"
+                : "Private walls can only be viewed by you"}
+            </p>
           </div>
 
           {/* Social Links */}
@@ -172,6 +212,7 @@ const UpdateWallPage = () => {
                   <option value="LinkedIn">LinkedIn</option>
                   <option value="YouTube">YouTube</option>
                   <option value="Facebook">Facebook</option>
+                  <option value="Instagram">Instagram</option>
                 </select>
                 <input
                   type="text"
@@ -201,12 +242,15 @@ const UpdateWallPage = () => {
             </button>
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white p-3 rounded hover:bg-blue-600"
-          >
-            Update Wall
-          </button>
+          <div className="flex space-x-4 pt-4">
+            <button
+              type="submit"
+              className="w-full bg-blue-500 text-white p-3 rounded hover:bg-blue-600"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Updating..." : "Update Wall"}
+            </button>
+          </div>
         </form>
       </div>
     </div>

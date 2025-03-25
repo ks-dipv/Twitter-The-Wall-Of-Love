@@ -97,7 +97,10 @@ const ListWalls = () => {
                   <h2 className="text-lg sm:text-xl font-semibold">
                     {wall.title}
                   </h2>
-                  <p className="text-gray-600 absolute top-10 left-0 right-0 h-[80px] sm:h-[100px] overflow-hidden text-ellipsis p-2">
+                  <p
+                    className="text-gray-600 absolute top-10 left-0 right-0 h-[80px] sm:h-[100px] overflow-hidden text-ellipsis p-2"
+                    dangerouslySetInnerHTML={{ __html: wall.description }}
+                  >
                     {truncateText(wall.description, 150)}
                   </p>
                 </div>
@@ -133,7 +136,7 @@ const ListWalls = () => {
           <div className="text-center text-gray-500 mt-10 p-8 bg-gray-50 rounded-lg shadow-sm">
             <p className="mb-4">No walls found. Create a new one!</p>
             <motion.button
-              onClick={() => navigate("/admin/create-wall")} 
+              onClick={() => navigate("/admin/create-wall")}
               className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700 transition mx-auto"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
