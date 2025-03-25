@@ -13,6 +13,8 @@ const VerifyEmail = () => {
   useEffect(() => {
     if (!verificationToken) {
       toast.error("Invalid verification link.");
+      setMessage("Invalid verification link.");
+      setStatus("error");
     }
   }, [verificationToken]);
 
@@ -25,14 +27,19 @@ const VerifyEmail = () => {
     try {
       const response = await userVerify(verificationToken);
       setStatus("success");
+      setMessage(response.data.message);
       toast.success("Email verified successfully!");
       setTimeout(() => navigate("/signin"), 2000);
     } catch (error) {
       setStatus("error");
-      toast.error(error.response?.data?.message || "Failed to verify email.");
+      const errorMessage = error.response?.data?.message || "Failed to verify email.";
+      if (errorMessage.includes("expired")) {
+        toast.error("Your verification link has expired. Please request a new one.");
+      } else {
+        toast.error(errorMessage);
+      }
     }
   };
-
   return (
     <div
       className="min-h-screen flex items-center justify-center bg-cover bg-center"
@@ -55,9 +62,6 @@ const VerifyEmail = () => {
 
         {status === "pending" && verificationToken && (
           <>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">
-              Click the button below to verify your email.
-            </p>
             <button
               onClick={handleVerify}
               className="w-full bg-blue-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-600 transition"
