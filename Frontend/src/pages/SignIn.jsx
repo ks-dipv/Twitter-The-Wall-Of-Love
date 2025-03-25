@@ -23,9 +23,7 @@ const SignIn = () => {
         navigate("/admin/dashboard");
       }, 2000);
     } catch (err) {
-      const errorMessage =
-        err.response?.data?.message || "Login failed, try again.";
-      toast.error(errorMessage);
+      toast.error(err.response?.data?.message || "Login failed, try again.");
     }
   };
 
@@ -51,7 +49,7 @@ const SignIn = () => {
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-gray-700 dark:text-gray-300 mb-2">
-              Email
+              Email <span className="text-red-500">*</span>
             </label>
             <input
               type="email"
@@ -65,7 +63,7 @@ const SignIn = () => {
           </div>
           <div className="mb-4">
             <label className="block text-gray-700 dark:text-gray-300 mb-2">
-              Password
+              Password <span className="text-red-500">*</span>
             </label>
             <input
               type="password"

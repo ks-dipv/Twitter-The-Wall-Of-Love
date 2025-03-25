@@ -29,10 +29,7 @@ const VerifyEmail = () => {
       setTimeout(() => navigate("/signin"), 2000);
     } catch (error) {
       setStatus("error");
-      const errorMsg =
-        error.response?.data?.message || "Failed to verify email.";
-
-      toast.error(errorMsg);
+      toast.error(error.response?.data?.message || "Failed to verify email.");
     }
   };
 

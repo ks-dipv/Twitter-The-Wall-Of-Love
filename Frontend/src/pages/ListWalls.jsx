@@ -55,7 +55,7 @@ const ListWalls = () => {
       closeDeleteDialog();
     } catch (err) {
       setError(err.message || "Failed to delete wall");
-      toast.error("Failed to delete wall.");
+      toast.error(err.message||"Failed to delete wall.");
       closeDeleteDialog();
     }
   };

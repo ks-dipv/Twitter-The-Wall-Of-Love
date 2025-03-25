@@ -43,10 +43,9 @@ const SignUp = () => {
 
       toast.success("Verification email sent!Please check your inbox 📩.");
 
-      // Redirect after a short delay
       setTimeout(() => {
         navigate("/resend-email", { state: { email: formData.email } });
-      }, 1000);
+      }, 2000);
     } catch (err) {
       toast.error(err.response?.data?.message || "Signup failed, try again.");
     }
@@ -60,7 +59,7 @@ const SignUp = () => {
           "url('https://img.freepik.com/free-vector/realistic-luxury-background_23-2149354608.jpg')",
       }}
     >
-      <ToastContainer />
+      <ToastContainer hideProgressBar />
 
       <div className="bg-gradient-to-br from-white to-gray-100 dark:from-gray-900 dark:to-gray-800 p-8 rounded-xl shadow-2xl border border-gray-300 dark:border-gray-700 w-full max-w-md">
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">
@@ -70,7 +69,7 @@ const SignUp = () => {
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-gray-700 dark:text-gray-300 mb-2">
-              Full Name
+              Full Name <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -84,7 +83,7 @@ const SignUp = () => {
           </div>
           <div className="mb-4">
             <label className="block text-gray-700 dark:text-gray-300 mb-2">
-              Email
+              Email <span className="text-red-500">*</span>
             </label>
             <input
               type="email"
@@ -98,7 +97,7 @@ const SignUp = () => {
           </div>
           <div className="mb-4">
             <label className="block text-gray-700 dark:text-gray-300 mb-2">
-              Password
+              Password <span className="text-red-500">*</span>
             </label>
             <input
               type="password"

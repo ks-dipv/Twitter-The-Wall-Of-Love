@@ -78,11 +78,9 @@ export default function ProfilePage() {
         setApiToken(token);
         toast.success("API token generated successfully");
       } else {
-        console.error("Unexpected response format:", response.data);
-        toast.error("Unexpected response format from server");
+        toast.error(response.data,"Unexpected response format from server");
       }
     } catch (error) {
-      console.error("Generate token error:", error);
       toast.error("Failed to generate API token");
     } finally {
       setIsGeneratingToken(false);
