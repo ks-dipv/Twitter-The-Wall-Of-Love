@@ -22,10 +22,7 @@ const ShareableWallPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-
-
       <div className="mt-4 flex justify-center mt-4">
-
         {wall.logo && (
           <img
             src={wall.logo}
@@ -38,8 +35,10 @@ const ShareableWallPage = () => {
         <h1 className="text-4xl font-extrabold text-gray-900 md:text-5xl tracking-wide">
           {wall.title}
         </h1>
-
-        {wall.description}
+        <p
+          className="text-lg mt-4 max-w-2xl mx-auto text-gray-700 font-medium leading-relaxed"
+          dangerouslySetInnerHTML={{ __html: wall.description }}
+        ></p>
 
         {/* Tweets Section */}
         <div className="w-full">
