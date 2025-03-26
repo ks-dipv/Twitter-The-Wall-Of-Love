@@ -25,7 +25,7 @@ import {
   ApiBody,
   ApiConsumes,
 } from '@nestjs/swagger';
-
+import { BadRequestException } from '@nestjs/common';
 @ApiTags('Walls')
 @Controller('api/walls')
 export class WallController {
@@ -38,7 +38,6 @@ export class WallController {
   @ApiResponse({ status: 201, description: 'Wall created successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @UseInterceptors(FileInterceptor('logo'), ClassSerializerInterceptor)
-  @UsePipes(new ValidationPipe({ transform: true }))
   async createWall(
     @Body() createWallDto: CreateWallDto,
     @Request() req,

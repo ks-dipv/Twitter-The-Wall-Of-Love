@@ -41,8 +41,6 @@ export class UpdateWallDto extends PartialType(CreateWallDto) {
     type: [SocialLinkDto],
   })
   @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
   @Type(() => SocialLinkDto)
   social_links?: SocialLinkDto[];
 }
