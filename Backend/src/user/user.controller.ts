@@ -24,9 +24,11 @@ import {
   ApiResponse,
   ApiTags,
   ApiParam,
+  ApiConsumes,
 } from '@nestjs/swagger';
 import { Auth } from '../common/decorator/auth.decorator';
-
+import { UsePipes } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 @ApiTags('Users')
 @Controller('api')
 export class UserController {
@@ -34,6 +36,7 @@ export class UserController {
 
   @Post('auth/signup')
   @ApiOperation({ summary: 'User signup' })
+  @ApiConsumes('multipart/form-data')
   @ApiBody({ type: SignUpDto })
   @ApiResponse({ status: 201, description: 'User signed up successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
@@ -91,11 +94,13 @@ export class UserController {
 
   @Put('user/profile')
   @ApiOperation({ summary: 'Update user details' })
+  @ApiConsumes('multipart/form-data')
   @ApiBody({ type: UpdateDto })
   @ApiResponse({ status: 200, description: 'User updated successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @Auth(AuthType.Bearer)
   @UseInterceptors(FileInterceptor('profileImage'), ClassSerializerInterceptor)
+  @UsePipes(new ValidationPipe({ transform: true }))
   public update(
     @Request() req,
     @Body() updateDto: UpdateDto,

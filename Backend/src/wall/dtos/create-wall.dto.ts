@@ -27,13 +27,15 @@ export class CreateWallDto {
   @ApiPropertyOptional({
     description: 'The URL of the wall logo',
     example: 'https://example.com/logo.png',
+    type: 'file',
+    format: 'binary', 
   })
   @IsOptional()
   @IsString()
   @Matches(/\.(jpg|jpeg|png)$/i, {
     message: 'Logo must be in JPG, JPEG, or PNG format',
   })
-  logo?: string;
+  logo?: any;
 
   @ApiPropertyOptional({
     description: 'A short description of the wall',

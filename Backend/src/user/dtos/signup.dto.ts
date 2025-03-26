@@ -42,11 +42,15 @@ export class SignUpDto {
   @ApiPropertyOptional({
     description: 'Profile picture URL',
     example: 'https://example.com/profile-pic.jpg',
+    type:'file',
+    format: 'binary', 
+
   })
   @IsString()
   @IsOptional()
   @Matches(/\.(jpg|jpeg|png)$/i, {
     message: 'Logo must be in JPG, JPEG, or PNG format',
   })
-  profile_pic?: string;
+  profile_pic?: any;
+
 }
