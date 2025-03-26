@@ -87,8 +87,8 @@ export class WallService {
         throw new NotFoundException('User not found');
       }
 
-      const { title, logo, description, visibility, social_links } =
-        createWallDto;
+      const { title, logo, description, visibility } = createWallDto;
+      let { social_links } = createWallDto;
 
       if (description && description.length > 250) {
         throw new BadRequestException(
@@ -115,6 +115,15 @@ export class WallService {
         }
       }
 
+      // Parse social_links if it's a string (for handling form-data)
+      if (typeof social_links === 'string') {
+        try {
+          social_links = JSON.parse(social_links);
+        } catch (error) {
+          throw new BadRequestException('Invalid format for social_links');
+        }
+      }
+
       const wall = queryRunner.manager.create(Wall, {
         title,
         logo: logoUrl,
@@ -126,7 +135,7 @@ export class WallService {
       const savedWall = await queryRunner.manager.save(wall);
 
       // Handle social links if provided
-      if (social_links?.length > 0) {
+      if (social_links.length > 0) {
         const socialLinksEntities = social_links.map((link) =>
           queryRunner.manager.create(SocialLink, {
             platform: link.platform as SocialPlatform,
@@ -334,7 +343,13 @@ export class WallService {
           'Description cannot exceed 250 characters',
         );
       }
-
+      if (typeof updateWallDto.social_links === 'string') {
+        try {
+          updateWallDto.social_links = JSON.parse(updateWallDto.social_links);
+        } catch (error) {
+          throw new BadRequestException('Invalid format for social_links');
+        }
+      }
       // Update wall properties
       wall.title = updateWallDto.title ?? wall.title;
       wall.description = updateWallDto.description ?? wall.description;
