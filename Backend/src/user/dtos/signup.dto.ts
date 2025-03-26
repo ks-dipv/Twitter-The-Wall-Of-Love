@@ -32,8 +32,11 @@ export class SignUpDto {
   @ApiPropertyOptional({
     description: 'Profile picture URL',
     example: 'https://example.com/profile-pic.jpg',
+    type:'file',
+    format: 'binary', 
+
   })
   @IsString()
   @IsOptional()
-  profile_pic?: string;
+  profile_pic?: any;
 }

@@ -10,6 +10,8 @@ import {
   UploadedFile,
   Put,
   ClassSerializerInterceptor,
+  UsePipes,
+  ValidationPipe
 } from '@nestjs/common';
 import { WallService } from './service/wall.service';
 import { CreateWallDto } from './dtos/create-wall.dto';
@@ -21,6 +23,7 @@ import {
   ApiTags,
   ApiParam,
   ApiBody,
+  ApiConsumes
 } from '@nestjs/swagger';
 
 @ApiTags('Walls')
@@ -31,9 +34,11 @@ export class WallController {
   // Create a new Wall
   @Post()
   @ApiOperation({ summary: 'Create a new Wall' })
+  @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 201, description: 'Wall created successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @UseInterceptors(FileInterceptor('logo'), ClassSerializerInterceptor)
+  @UsePipes(new ValidationPipe({ transform: true }))
   async createWall(
     @Body() createWallDto: CreateWallDto,
     @Request() req,
@@ -101,6 +106,7 @@ export class WallController {
   //Update a wall by ID
   @Put(':id')
   @ApiOperation({ summary: 'Update a Wall by ID' })
+  @ApiConsumes('multipart/form-data')
   @ApiParam({ name: 'id', description: 'ID of the Wall', type: Number })
   @ApiBody({ type: UpdateWallDto })
   @ApiResponse({ status: 200, description: 'Wall updated successfully' })
