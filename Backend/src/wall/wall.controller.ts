@@ -10,8 +10,6 @@ import {
   UploadedFile,
   Put,
   ClassSerializerInterceptor,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
 import { WallService } from './service/wall.service';
 import { CreateWallDto } from './dtos/create-wall.dto';
@@ -25,7 +23,6 @@ import {
   ApiBody,
   ApiConsumes,
 } from '@nestjs/swagger';
-import { BadRequestException } from '@nestjs/common';
 @ApiTags('Walls')
 @Controller('api/walls')
 export class WallController {

@@ -4,7 +4,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { WallVisibility } from '../enum/wall-visibility.enum';
 import { SocialLinkDto } from './social-link.dto';
 import { Type } from 'class-transformer';
-import { IsOptional, IsArray, ValidateNested } from 'class-validator';
+import { IsOptional } from 'class-validator';
 
 export class UpdateWallDto extends PartialType(CreateWallDto) {
   @ApiPropertyOptional({

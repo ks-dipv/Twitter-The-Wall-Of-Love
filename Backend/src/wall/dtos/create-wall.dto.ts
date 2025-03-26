@@ -1,8 +1,6 @@
 import {
   IsEnum,
   IsNotEmpty,
-  IsArray,
-  ValidateNested,
   IsOptional,
   IsString,
   MaxLength,
