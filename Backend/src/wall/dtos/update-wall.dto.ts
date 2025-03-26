@@ -18,7 +18,7 @@ export class UpdateWallDto extends PartialType(CreateWallDto) {
     description: 'The URL of the wall logo',
     example: 'https://example.com/logo.png',
     type: 'file',
-    format: 'binary', 
+    format: 'binary',
   })
   logo?: any;
 

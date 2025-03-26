@@ -11,7 +11,7 @@ import {
   Put,
   ClassSerializerInterceptor,
   UsePipes,
-  ValidationPipe
+  ValidationPipe,
 } from '@nestjs/common';
 import { WallService } from './service/wall.service';
 import { CreateWallDto } from './dtos/create-wall.dto';
@@ -23,7 +23,7 @@ import {
   ApiTags,
   ApiParam,
   ApiBody,
-  ApiConsumes
+  ApiConsumes,
 } from '@nestjs/swagger';
 
 @ApiTags('Walls')
@@ -123,7 +123,10 @@ export class WallController {
 
   @Post('total-data')
   @ApiOperation({ summary: 'Get total data of walls' })
-  @ApiResponse({status: 200,description: 'Total data retrieved successfully'})
+  @ApiResponse({
+    status: 200,
+    description: 'Total data retrieved successfully',
+  })
   @ApiResponse({ status: 400, description: 'Invalid request parameters' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getTotaData(@Request() req) {

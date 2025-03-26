@@ -25,7 +25,7 @@ export class UpdateDto extends PartialType(SignUpDto) {
   @ApiPropertyOptional({
     description: 'Profile picture file',
     type: 'file',
-    format: 'binary', 
+    format: 'binary',
   })
   profile_pic?: any;
 }

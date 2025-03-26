@@ -180,7 +180,6 @@ const CreateWallPage = () => {
                   <option value="LinkedIn">LinkedIn</option>
                   <option value="YouTube">YouTube</option>
                   <option value="Facebook">Facebook</option>
-                  <option value="Instagram">Instagram</option>
                 </select>
                 <input
                   type="text"

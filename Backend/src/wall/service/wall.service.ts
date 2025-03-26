@@ -302,7 +302,7 @@ export class WallService {
 
       let logoUrl: string | null = wall.logo;
 
-      // 🔹 Handle Logo Update with Format Validation
+      // Handle Logo Update with Format Validation
       if (logo) {
         if (!logo.mimetype.match(/^image\/(jpeg|jpg|png)$/)) {
           throw new BadRequestException(
@@ -344,7 +344,7 @@ export class WallService {
       // Save updated wall
       const updatedWall = await queryRunner.manager.save(wall);
 
-      // 🔹 Handle Social Links (Update, Add, Delete)
+      // Handle Social Links (Update, Add, Delete)
       if (updateWallDto.social_links) {
         const updatedLinks = updateWallDto.social_links.map(
           (linkDto) => linkDto.platform,

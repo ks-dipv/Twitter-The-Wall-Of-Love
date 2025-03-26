@@ -28,7 +28,7 @@ export class CreateWallDto {
     description: 'The URL of the wall logo',
     example: 'https://example.com/logo.png',
     type: 'file',
-    format: 'binary', 
+    format: 'binary',
   })
   @IsOptional()
   @IsString()
