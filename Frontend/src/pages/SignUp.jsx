@@ -15,8 +15,50 @@ const SignUp = () => {
     profile_pic: null,
   });
 
+  const [passwordErrors, setPasswordErrors] = useState([]);
+  const [emailError, setEmailError] = useState("");
+
+  const validatePassword = (password) => {
+    const errors = [];
+
+    // Check minimum length
+    if (password.length < 8) {
+      errors.push("Password must be at least 8 characters long");
+    }
+
+    // Check for at least one letter
+    if (!/[A-Za-z]/.test(password)) {
+      errors.push("Password must include at least one letter");
+    }
+
+    // Check for at least one number
+    if (!/\d/.test(password)) {
+      errors.push("Password must include at least one number");
+    }
+
+    // Check for at least one special character
+    if (!/[@$!%*#?&]/.test(password)) {
+      errors.push("Password must include at least one special character");
+    }
+
+    return errors;
+  };
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    e.preventDefault();
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    // Reset email error when email changes
+    if (name === "email") {
+      setEmailError("");
+    }
+
+    // Special handling for password validation
+    if (name === "password") {
+      const errors = validatePassword(value);
+      setPasswordErrors(errors);
+    }
   };
 
   const handleFileChange = (e) => {
@@ -26,8 +68,20 @@ const SignUp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Reset previous errors
+    setEmailError("");
+    setPasswordErrors([]);
+
+    // Validate all fields
     if (!formData.name || !formData.email || !formData.password) {
       toast.error("All fields are required.");
+      return;
+    }
+
+    // Check password validation before submission
+    const passwordValidationErrors = validatePassword(formData.password);
+    if (passwordValidationErrors.length > 0) {
+      passwordValidationErrors.forEach((error) => toast.error(error));
       return;
     }
 
@@ -41,13 +95,29 @@ const SignUp = () => {
       const response = await registerUser(requestBody);
       signup(response.data);
 
-      toast.success("Verification email sent!Please check your inbox 📩.");
+      toast.success("Verification email sent! Please check your inbox 📩.");
 
       setTimeout(() => {
         navigate("/resend-email", { state: { email: formData.email } });
       }, 2000);
     } catch (err) {
-      toast.error(err.response?.data?.message || "Signup failed, try again.");
+      // Handle specific email-related errors
+      if (err.response && err.response.data) {
+        const errorMessage = err.response.data.message;
+
+        // Check for email-specific error messages
+        if (
+          errorMessage.includes("Invalid email address") ||
+          errorMessage.includes("Email already exists") ||
+          errorMessage.includes("Email is not valid")
+        ) {
+          setEmailError(errorMessage);
+        } else {
+          toast.error(errorMessage || "Signup failed, try again.");
+        }
+      } else {
+        toast.error("Signup failed, try again.");
+      }
     }
   };
 
@@ -91,9 +161,14 @@ const SignUp = () => {
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              className={`w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white ${
+                emailError ? "border-red-500" : ""
+              }`}
               placeholder="Enter email"
             />
+            {emailError && (
+              <p className="text-red-500 text-sm mt-2">{emailError}</p>
+            )}
           </div>
           <div className="mb-4">
             <label className="block text-gray-700 dark:text-gray-300 mb-2">
@@ -108,6 +183,15 @@ const SignUp = () => {
               className="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
               placeholder="Enter password"
             />
+            {passwordErrors.length > 0 && (
+              <div className="mt-2 text-red-500 text-sm">
+                <ul className="list-disc list-inside">
+                  {passwordErrors.map((error, index) => (
+                    <li key={index}>{error}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
           <div>
             <label className="block text-gray-700 dark:text-gray-300 mb-2">

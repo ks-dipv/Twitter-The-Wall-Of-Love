@@ -36,6 +36,11 @@ export class UserService {
 
       let profilePicUrl: string | null = null;
       if (profileImage) {
+        if (!profileImage.mimetype.match(/^image\/(jpeg|jpg|png)$/)) {
+          throw new BadRequestException(
+            'Invalid file format. Allowed: JPG, JPEG, PNG',
+          );
+        }
         profilePicUrl = await this.uploadService.uploadImage(profileImage);
       }
 
@@ -195,6 +200,11 @@ export class UserService {
 
       let profilePicUrl: string | null = existingUser.profile_pic;
       if (profileImage) {
+        if (!profileImage.mimetype.match(/^image\/(jpeg|jpg|png)$/)) {
+          throw new BadRequestException(
+            'Invalid file format. Allowed: JPG, JPEG, PNG',
+          );
+        }
         if (existingUser.profile_pic) {
           const fileName = existingUser.profile_pic.split('/').pop();
           if (fileName) await this.uploadService.deleteImage(fileName);

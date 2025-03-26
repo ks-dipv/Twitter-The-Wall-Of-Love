@@ -13,11 +13,18 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
-    const message = exception.message;
+
+    const exceptionResponse = exception.getResponse();
+
+    const message =
+      typeof exceptionResponse === 'object' && 'message' in exceptionResponse
+        ? exceptionResponse['message']
+        : exception.message;
 
     response.status(status).json({
       statusCode: status,
       message: message,
+      error: exception.name || 'Bad Request',
       path: request.url,
     });
   }
