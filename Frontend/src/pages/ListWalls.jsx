@@ -62,11 +62,9 @@ const ListWalls = () => {
     <div className="min-h-screen">
       <ToastContainer autoClose={2000} hideProgressBar />
       <div className="p-4 md:p-6">
-        <div className="flex flex-col sm:flex-row justify-center items-center mb-5">
-          <h1 className="text-3xl md:text-4xl font-extrabold text-center sm:text-left">
-            Your Walls
-          </h1>
-        </div>
+        <nav className="bg-gray-300 p-4 text-black flex justify-between mb-5">
+          <h1 className="text-lg font-bold">Your walls</h1>
+        </nav>
         {Array.isArray(walls) && walls.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {walls.map((wall) => (
