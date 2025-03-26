@@ -1,5 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, Matches, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Matches,
+  MinLength,
+} from 'class-validator';
 
 export class SignUpDto {
   @ApiProperty({
@@ -7,13 +14,15 @@ export class SignUpDto {
     example: 'John Doe',
   })
   @IsString()
+  @IsNotEmpty()
   name: string;
 
   @ApiProperty({
     description: 'User email address',
     example: 'user@example.com',
   })
-  @IsString()
+  @IsEmail({}, { message: 'Invalid email address' })
+  @IsNotEmpty()
   email: string;
 
   @ApiProperty({
@@ -22,6 +31,7 @@ export class SignUpDto {
     example: 'Secure@123',
   })
   @IsString()
+  @IsNotEmpty()
   @MinLength(8)
   @Matches(/^(?=.*[A-Za-z])(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/, {
     message:
@@ -35,5 +45,8 @@ export class SignUpDto {
   })
   @IsString()
   @IsOptional()
+  @Matches(/\.(jpg|jpeg|png)$/i, {
+    message: 'Logo must be in JPG, JPEG, or PNG format',
+  })
   profile_pic?: string;
 }
