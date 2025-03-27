@@ -50,7 +50,7 @@ export default function ProfilePage() {
     try {
       const formDataObj = new FormData();
       formDataObj.append("name", formData.name);
-      if (file) formDataObj.append("profileImage", file);
+      if (file) formDataObj.append("profile_pic", file);
 
       await updateProfile(formDataObj);
       toast.success("Profile updated successfully");
