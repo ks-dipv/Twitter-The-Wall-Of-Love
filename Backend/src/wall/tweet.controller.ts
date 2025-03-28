@@ -9,6 +9,7 @@ import {
   Request,
   UseInterceptors,
   ClassSerializerInterceptor,
+  Query,
 } from '@nestjs/common';
 import { TweetService } from './service/tweet.service';
 import {
@@ -111,5 +112,20 @@ export class TweetController {
       orderedTweetIds,
       randomize,
     );
+  }
+
+  @Get(':wallId/tweet')
+  @UseInterceptors(ClassSerializerInterceptor)
+  @ApiOperation({
+    summary: 'Get all tweets for a specific wall or search tweets by keyword',
+  })
+  @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
+  @ApiResponse({ status: 200, description: 'List of tweets retrieved' })
+  async getAllTweets(
+    @Param('wallId') wallId: number,
+    @Query('search') keyword: string,
+    @Request() req: Request,
+  ) {
+    return await this.tweetService.searchTweets(wallId, keyword, req);
   }
 }
