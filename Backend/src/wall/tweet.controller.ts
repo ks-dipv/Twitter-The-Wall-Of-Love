@@ -6,7 +6,6 @@ import {
   Param,
   Body,
   Delete,
-  Request,
   UseInterceptors,
   ClassSerializerInterceptor,
   Query,
@@ -47,9 +46,8 @@ export class TweetController {
   async addTweet(
     @Param('wallId') wallId: number,
     @Body('tweetUrl') tweetUrl: string,
-    @Request() req: Request,
   ) {
-    return await this.tweetService.addTweetToWall(tweetUrl, wallId, req);
+    return await this.tweetService.addTweetToWall(tweetUrl, wallId);
   }
 
   @Get(':wallId/tweets')
@@ -57,11 +55,8 @@ export class TweetController {
   @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
   @ApiResponse({ status: 200, description: 'List of tweets retrieved' })
   @ApiResponse({ status: 404, description: 'Wall not found' })
-  async getAllTweetsByWall(
-    @Param('wallId') wallId: number,
-    @Request() req: Request,
-  ) {
-    return await this.tweetService.getAllTweetsByWall(wallId, req);
+  async getAllTweetsByWall(@Param('wallId') wallId: number) {
+    return await this.tweetService.getAllTweetsByWall(wallId);
   }
 
   @Delete(':wallId/tweets/:tweetId')
@@ -73,9 +68,8 @@ export class TweetController {
   async deleteTweetByWall(
     @Param('tweetId') tweetId: number,
     @Param('wallId') wallId: number,
-    @Request() req: Request,
   ) {
-    await this.tweetService.deleteTweetByWall(tweetId, wallId, req);
+    await this.tweetService.deleteTweetByWall(tweetId, wallId);
 
     return new SuccessDto('Tweet Delete Successfuly');
   }
@@ -105,16 +99,10 @@ export class TweetController {
   @ApiResponse({ status: 400, description: 'Invalid tweet order request' })
   async reorderTweets(
     @Param('wallId') wallId: number,
-    @Request() req: Request,
     @Body('orderedTweetIds') orderedTweetIds?: number[],
     @Body('randomize') randomize?: boolean,
   ) {
-    return this.tweetService.reorderTweets(
-      wallId,
-      req,
-      orderedTweetIds,
-      randomize,
-    );
+    return this.tweetService.reorderTweets(wallId, orderedTweetIds, randomize);
   }
 
   @Get(':wallId/tweet')
@@ -127,8 +115,7 @@ export class TweetController {
   async getAllTweets(
     @Param('wallId') wallId: number,
     @Query('search') keyword: string,
-    @Request() req: Request,
   ) {
-    return await this.tweetService.searchTweets(wallId, keyword, req);
+    return await this.tweetService.searchTweets(wallId, keyword);
   }
 }

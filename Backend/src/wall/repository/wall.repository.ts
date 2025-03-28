@@ -15,12 +15,6 @@ export class WallRepository extends Repository<Wall> {
     });
   }
 
-  async getWallByIdAndUser(wallId: number, userId: number): Promise<Wall> {
-    return await this.findOne({
-      where: { id: wallId, user: { id: userId } },
-    });
-  }
-
   async getTotalData(userId: number) {
     // Total walls count
     const totalWalls = await this.count({

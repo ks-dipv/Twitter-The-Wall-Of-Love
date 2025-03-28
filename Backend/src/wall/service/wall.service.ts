@@ -33,23 +33,8 @@ export class WallService {
   ) {}
 
   // Generate links
-  public async generateLinks(wallId: number, req: Request) {
+  public async generateLinks(wallId: number) {
     try {
-      const user = req[REQUEST_USER_KEY];
-
-      const existingUser = await this.userRepository.getByEmail(user.email);
-      if (!existingUser) {
-        throw new NotFoundException('User not found');
-      }
-
-      const wall = await this.wallRepository.getWallByIdAndUser(
-        wallId,
-        existingUser.id,
-      );
-      if (!wall || wall.user.id !== existingUser.id) {
-        throw new NotFoundException('Wall not found or access denied');
-      }
-
       const uniqueId = uuidv4();
       const baseUrl = 'http://localhost:5173';
       const shareable_link = `${baseUrl}/walls/${wallId}/link/${uniqueId}`;

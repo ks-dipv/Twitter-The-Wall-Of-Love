@@ -70,8 +70,8 @@ export class WallController {
   @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
   @ApiResponse({ status: 200, description: 'Shareable link generated' })
   @ApiResponse({ status: 404, description: 'Wall not found' })
-  async generateLink(@Param('wallId') wallId: number, @Request() req) {
-    return await this.wallService.generateLinks(wallId, req);
+  async generateLink(@Param('wallId') wallId: number) {
+    return await this.wallService.generateLinks(wallId);
   }
 
   // Get Wall by sharable link
