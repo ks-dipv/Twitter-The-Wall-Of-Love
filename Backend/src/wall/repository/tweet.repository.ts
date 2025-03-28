@@ -20,4 +20,17 @@ export class TweetRepository extends Repository<Tweets> {
       where: { id: tweetId, wall: { id: wallId } },
     });
   }
+
+  async searchTweetsByKeyword(
+    wallId: number,
+    keyword: string,
+  ): Promise<Tweets[]> {
+    return this.createQueryBuilder('tweets')
+      .leftJoin('tweets.wall', 'wall')
+      .where('wall.id = :wallId', { wallId })
+      .andWhere('LOWER(tweets.content) LIKE LOWER(:keyword)', {
+        keyword: `%${keyword}%`,
+      })
+      .getMany();
+  }
 }

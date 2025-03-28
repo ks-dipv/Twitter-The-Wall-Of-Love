@@ -209,4 +209,48 @@ export class TweetService {
       );
     }
   }
+
+  async searchTweets(
+    wallId: number,
+    keyword: string,
+    req: Request,
+  ): Promise<Tweets[]> {
+    try {
+      // Validate the request user
+      const user = req[REQUEST_USER_KEY];
+      if (!user) {
+        throw new UnauthorizedException('User not authenticated');
+      }
+      const existingUser = await this.userRepository.getByEmail(user.email);
+      if (!existingUser) {
+        throw new BadRequestException("User doesn't exist");
+      }
+
+      // Validate the wall exists for the given user
+      const wall = await this.wallRepository.getWallByIdAndUser(
+        wallId,
+        existingUser.id,
+      );
+      if (!wall) {
+        throw new NotFoundException('Wall not found or access denied');
+      }
+
+      // Validate the search keyword
+      if (!keyword || keyword.trim().length === 0) {
+        throw new BadRequestException('Search keyword is required');
+      }
+
+      // Search tweets by keyword for this wall
+      return await this.tweetRepository.searchTweetsByKeyword(wallId, keyword);
+    } catch (error) {
+      if (
+        error instanceof UnauthorizedException ||
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to search tweets');
+    }
+  }
 }
