@@ -71,7 +71,7 @@ export class WallService {
     createWallDto: CreateWallDto,
     req: Request,
     wallLogo?: Express.Multer.File,
-  ) {
+  ): Promise<Wall> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -241,7 +241,7 @@ export class WallService {
     }
   }
 
-  async deleteWall(id: number, req: Request) {
+  async deleteWall(id: number, req: Request): Promise<void> {
     try {
       const user = req[REQUEST_USER_KEY];
 
@@ -266,7 +266,6 @@ export class WallService {
       }
 
       await this.wallRepository.delete(id);
-      return { message: 'Wall deleted successfully' };
     } catch (error) {
       throw new BadRequestException(error.message || 'Failed to delete wall');
     }
@@ -415,7 +414,7 @@ export class WallService {
     }
   }
 
-  async getTotalData(req: Request) {
+  async getTotalData(req: Request): Promise<object> {
     const user = req[REQUEST_USER_KEY];
 
     if (!user) {

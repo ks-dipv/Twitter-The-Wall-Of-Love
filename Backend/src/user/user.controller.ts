@@ -29,6 +29,7 @@ import {
 import { Auth } from '../common/decorator/auth.decorator';
 import { UsePipes } from '@nestjs/common';
 import { ValidationPipe } from '@nestjs/common';
+import { SuccessDto } from 'src/common/dtos/success.dto';
 @ApiTags('Users')
 @Controller('api')
 export class UserController {
@@ -46,13 +47,21 @@ export class UserController {
     @Body() signupDto: SignUpDto,
     @UploadedFile() profileImage?: Express.Multer.File,
   ) {
-    return this.userService.signup(signupDto, profileImage);
+    this.userService.signup(signupDto, profileImage);
+
+    return new SuccessDto(
+      'Signup successful. Please check your email to verify your account.',
+    );
   }
 
   @Post('auth/verify-email/resend')
   @Auth(AuthType.None)
   async resendEmail(@Body('email') email: string) {
-    return this.userService.resendVerificationEmail(email);
+    this.userService.resendVerificationEmail(email);
+
+    return new SuccessDto(
+      'Verification email has been resent. Please check your inbox.',
+    );
   }
 
   @Post('auth/verify-email/:token')
@@ -116,7 +125,9 @@ export class UserController {
   @ApiResponse({ status: 404, description: 'User not found' })
   @Auth(AuthType.Bearer)
   public remove(@Request() req) {
-    return this.userService.remove(req);
+    this.userService.remove(req);
+
+    return new SuccessDto('User Deleted Successfully');
   }
 
   @Post('auth/reset-password/request')
@@ -134,7 +145,9 @@ export class UserController {
   @Auth(AuthType.None)
   public resetPasswordRequest(@Body() resetPassword: UpdateDto) {
     const { email } = resetPassword;
-    return this.userService.resetPasswordRequest(email);
+    this.userService.resetPasswordRequest(email);
+
+    return new SuccessDto('Reset Password Email Sent Successfully');
   }
 
   @Post('auth/reset-password/:token')
@@ -160,7 +173,9 @@ export class UserController {
     @Body() updatePassword: UpdateDto,
   ) {
     const { password } = updatePassword;
-    return this.userService.resetPassword(token, password);
+    this.userService.resetPassword(token, password);
+
+    return new SuccessDto('Password Reset Successfully');
   }
 
   @Post('developer/api-token')

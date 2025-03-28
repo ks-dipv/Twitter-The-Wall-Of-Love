@@ -22,7 +22,11 @@ export class TweetService {
     private readonly userRepository: UserRepository,
   ) {}
 
-  async addTweetToWall(tweetUrl: string, wallId: number, req: Request) {
+  async addTweetToWall(
+    tweetUrl: string,
+    wallId: number,
+    req: Request,
+  ): Promise<Tweets[]> {
     try {
       const user = req[REQUEST_USER_KEY];
       if (!user) throw new UnauthorizedException('User not authenticated');
@@ -81,7 +85,11 @@ export class TweetService {
     }
   }
 
-  async deleteTweetByWall(tweetId: number, wallId: number, req: Request) {
+  async deleteTweetByWall(
+    tweetId: number,
+    wallId: number,
+    req: Request,
+  ): Promise<void> {
     try {
       const user = req[REQUEST_USER_KEY];
       if (!user) throw new UnauthorizedException('User not authenticated');
@@ -102,7 +110,6 @@ export class TweetService {
       if (!tweet) throw new NotFoundException('Tweet not found');
 
       await this.tweetRepository.remove(tweet);
-      return { message: 'Tweet deleted successfully' };
     } catch (error) {
       if (
         error instanceof UnauthorizedException ||
@@ -120,7 +127,7 @@ export class TweetService {
     req: Request,
     orderedTweetIds?: number[],
     randomize?: boolean,
-  ) {
+  ): Promise<Tweets[]> {
     try {
       const user = req[REQUEST_USER_KEY];
       if (!user) throw new UnauthorizedException('User not authenticated');
@@ -181,7 +188,7 @@ export class TweetService {
   }
 
   @Cron('0 0 * * *')
-  async updateTweetStatsDaily() {
+  async updateTweetStatsDaily(): Promise<void> {
     try {
       const tweets = await this.tweetRepository.find();
       if (!tweets.length) return;

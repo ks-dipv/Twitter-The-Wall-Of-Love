@@ -23,6 +23,7 @@ import {
   ApiBody,
   ApiConsumes,
 } from '@nestjs/swagger';
+import { SuccessDto } from 'src/common/dtos/success.dto';
 @ApiTags('Walls')
 @Controller('api/walls')
 export class WallController {
@@ -96,7 +97,9 @@ export class WallController {
   @ApiResponse({ status: 200, description: 'Wall deleted successfully' })
   @ApiResponse({ status: 404, description: 'Wall not found' })
   async deleteWall(@Param('id') id: number, @Request() req) {
-    return await this.wallService.deleteWall(id, req);
+    await this.wallService.deleteWall(id, req);
+
+    return new SuccessDto('Wall Deleted Successfuly');
   }
 
   //Update a wall by ID

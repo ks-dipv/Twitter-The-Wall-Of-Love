@@ -56,6 +56,6 @@ import { UserRepository } from './repositories/user.repository';
     MailService,
     UserRepository,
   ],
-  exports: [UserModule],
+  exports: [UserModule, UserRepository],
 })
 export class UserModule {}

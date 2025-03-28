@@ -14,6 +14,7 @@ import { UpdateDto } from '../dtos/update.dto';
 import { MailService } from './mail.service';
 import { UserRepository } from '../repositories/user.repository';
 import { REQUEST_USER_KEY } from '../../common/constants/auth.constant';
+import { User } from '../entity/user.entity';
 
 @Injectable()
 export class UserService {
@@ -28,7 +29,7 @@ export class UserService {
   public async signup(
     signupDto: SignUpDto,
     profileImage?: Express.Multer.File,
-  ) {
+  ): Promise<void> {
     try {
       const existUser = await this.userRepository.getByEmail(signupDto.email);
       if (existUser)
@@ -63,11 +64,6 @@ export class UserService {
         verificationUrl,
         signupDto.email,
       );
-
-      return {
-        message:
-          'Signup successful. Please check your email to verify your account.',
-      };
     } catch (error) {
       console.log(error);
       if (error instanceof BadRequestException) throw error;
@@ -75,7 +71,7 @@ export class UserService {
     }
   }
 
-  public async resendVerificationEmail(email: string) {
+  public async resendVerificationEmail(email: string): Promise<void> {
     try {
       // Find the user by email
       const user = await this.userRepository.getByEmail(email);
@@ -101,10 +97,6 @@ export class UserService {
       // Send the verification email
       const verificationUrl = `http://localhost:5173/verify-email/${verificationToken}`;
       await this.mailService.sendVerificationEmail(verificationUrl, email);
-
-      return {
-        message: 'Verification email has been resent. Please check your inbox.',
-      };
     } catch (error) {
       console.log(error);
       if (
@@ -118,12 +110,13 @@ export class UserService {
     }
   }
 
-  public async verifyEmail(token: string) {
+  public async verifyEmail(token: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { email_verification_token: token },
     });
-    if (!user)
+    if (!user) {
       throw new BadRequestException('Invalid or expired verification token');
+    }
 
     user.is_email_verified = true;
     user.email_verification_token = null;
@@ -132,7 +125,7 @@ export class UserService {
     return user;
   }
 
-  public async signIn(signInDto: SignInDto, res) {
+  public async signIn(signInDto: SignInDto, res): Promise<object> {
     try {
       const user = await this.userRepository.getByEmail(signInDto.email);
       if (!user) throw new NotFoundException('User not found');
@@ -166,7 +159,7 @@ export class UserService {
     }
   }
 
-  public async getUserById(req: Request) {
+  public async getUserById(req: Request): Promise<User> {
     try {
       const user = req[REQUEST_USER_KEY];
       if (!user) throw new UnauthorizedException('User not authenticated');
@@ -190,7 +183,7 @@ export class UserService {
     req: Request,
     updateDto: UpdateDto,
     profileImage?: Express.Multer.File,
-  ) {
+  ): Promise<User> {
     try {
       const user = req[REQUEST_USER_KEY];
       if (!user) throw new UnauthorizedException('User not authenticated');
@@ -228,7 +221,7 @@ export class UserService {
     }
   }
 
-  public async remove(req: Request) {
+  public async remove(req: Request): Promise<void> {
     try {
       const user = req[REQUEST_USER_KEY];
       if (!user) throw new UnauthorizedException('User not authenticated');
@@ -242,7 +235,6 @@ export class UserService {
       }
 
       await this.userRepository.delete(user.sub);
-      return { id: user.sub };
     } catch (error) {
       console.log(error);
       if (
@@ -254,7 +246,7 @@ export class UserService {
     }
   }
 
-  public async resetPasswordRequest(email: string) {
+  public async resetPasswordRequest(email: string): Promise<void> {
     try {
       const user = await this.userRepository.getByEmail(email);
       if (!user) throw new NotFoundException("User doesn't exist");
@@ -275,7 +267,6 @@ export class UserService {
       const userEmail = tokenPayload.email;
 
       await this.mailService.sendResetPassword(url, userEmail);
-      return 'Email Sent Successfully';
     } catch (error) {
       console.log(error);
       if (error instanceof NotFoundException) throw error;
@@ -285,7 +276,7 @@ export class UserService {
     }
   }
 
-  public async resetPassword(token: string, password: string) {
+  public async resetPassword(token: string, password: string): Promise<void> {
     try {
       const user = await this.userRepository.getResetPasswordToken(token);
       if (!user) throw new NotFoundException('Invalid or expired token');
@@ -294,7 +285,6 @@ export class UserService {
       user.reset_password_token = null;
 
       await this.userRepository.save(user);
-      return 'Password Reset Successfully';
     } catch (error) {
       console.log(error);
       if (error instanceof NotFoundException) throw error;
