@@ -9,7 +9,6 @@ import { WallRepository } from '../repository/wall.repository';
 import { CreateWallDto } from '../dtos/create-wall.dto';
 import { Wall } from '../entity/wall.entity';
 import { UpdateWallDto } from '../dtos/update-wall.dto';
-import { REQUEST_USER_KEY } from '../../common/constants/auth.constant';
 import { UserRepository } from '../../user/repositories/user.repository';
 import { UploadService } from '../../common/services/upload.service';
 import { SocialLink } from '../entity/social-links.entity';
@@ -18,14 +17,13 @@ import { DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WallVisibility } from '../enum/wall-visibility.enum';
 import { v4 as uuidv4 } from 'uuid';
-
+import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class WallService {
   constructor(
     private readonly wallRepository: WallRepository,
-    private readonly userRepository: UserRepository,
     private readonly uploadService: UploadService,
-
+    private readonly configService: ConfigService ,
     @InjectRepository(SocialLink)
     private readonly socialLinkRepository: Repository<SocialLink>,
 
@@ -33,25 +31,10 @@ export class WallService {
   ) {}
 
   // Generate links
-  public async generateLinks(wallId: number, req: Request) {
+  public async generateLinks(wallId: number) {
     try {
-      const user = req[REQUEST_USER_KEY];
-
-      const existingUser = await this.userRepository.getByEmail(user.email);
-      if (!existingUser) {
-        throw new NotFoundException('User not found');
-      }
-
-      const wall = await this.wallRepository.getWallByIdAndUser(
-        wallId,
-        existingUser.id,
-      );
-      if (!wall || wall.user.id !== existingUser.id) {
-        throw new NotFoundException('Wall not found or access denied');
-      }
-
       const uniqueId = uuidv4();
-      const baseUrl = 'http://localhost:5173';
+      const baseUrl = this.configService.get<string>('BASE_URL');
       const shareable_link = `${baseUrl}/walls/${wallId}/link/${uniqueId}`;
       const embed_link = `<iframe src="${baseUrl}/walls/${wallId}/link/${uniqueId}" width="600" height="400"></iframe>`;
 
@@ -77,16 +60,6 @@ export class WallService {
     await queryRunner.startTransaction();
 
     try {
-      const user = req[REQUEST_USER_KEY];
-      if (!user) {
-        throw new UnauthorizedException('User not authenticated');
-      }
-
-      const existingUser = await this.userRepository.getByEmail(user.email);
-      if (!existingUser) {
-        throw new NotFoundException('User not found');
-      }
-
       const { title, logo, description, visibility } = createWallDto;
       let { social_links } = createWallDto;
 
@@ -129,7 +102,6 @@ export class WallService {
         logo: logoUrl,
         description,
         visibility,
-        user: existingUser,
       });
 
       const savedWall = await queryRunner.manager.save(wall);
@@ -169,44 +141,16 @@ export class WallService {
 
   async getAllWalls(req: Request): Promise<Wall[]> {
     try {
-      const user = req[REQUEST_USER_KEY];
-
-      if (!user) {
-        throw new UnauthorizedException('User not authenticated');
-      }
-
-      const existingUser = await this.userRepository.getByEmail(user.email);
-      if (!existingUser) {
-        throw new NotFoundException("User doesn't exist");
-      }
-
-      return await this.wallRepository.find({
-        where: { user: { id: existingUser.id } },
-      });
+      return await this.wallRepository.find({});
     } catch (error) {
       throw new BadRequestException(error.message || 'Failed to fetch walls');
     }
   }
 
   // Get wall by ID
-  async getWallById(id: number, req: Request): Promise<Wall> {
+  async getWallById(id: number): Promise<Wall> {
     try {
-      const user = req[REQUEST_USER_KEY];
-
-      if (!user) {
-        throw new UnauthorizedException('User not authenticated');
-      }
-
-      const existingUser = await this.userRepository.getByEmail(user.email);
-      if (!existingUser) {
-        throw new NotFoundException("User doesn't exist");
-      }
-
       const wall = await this.wallRepository.getById(id);
-
-      if (!wall || wall.user.id !== existingUser.id) {
-        throw new NotFoundException('Wall not found or access denied');
-      }
 
       return wall;
     } catch (error) {
@@ -243,22 +187,7 @@ export class WallService {
 
   async deleteWall(id: number, req: Request) {
     try {
-      const user = req[REQUEST_USER_KEY];
-
-      if (!user) {
-        throw new UnauthorizedException('User not authenticated');
-      }
-
-      const existingUser = await this.userRepository.getByEmail(user.email);
-      if (!existingUser) {
-        throw new NotFoundException("User doesn't exist");
-      }
-
       const wall = await this.wallRepository.getById(id);
-
-      if (!wall || wall.user.id !== existingUser.id) {
-        throw new NotFoundException('Wall not found or access denied');
-      }
 
       if (wall.logo) {
         const fileName = wall.logo.split('/').pop();
@@ -283,30 +212,11 @@ export class WallService {
     await queryRunner.startTransaction();
 
     try {
-      const user = req[REQUEST_USER_KEY];
-
-      if (!user) {
-        throw new UnauthorizedException('User not authenticated');
-      }
-
-      const existingUser = await this.userRepository.getByEmail(user.email);
-
-      if (!existingUser) {
-        throw new NotFoundException("User doesn't exist");
-      }
-
       // Find the existing wall
       const wall = await this.wallRepository.getById(id);
 
       if (!wall) {
         throw new NotFoundException(`Wall with ID ${id} not found`);
-      }
-
-      // Ensure the user owns the wall
-      if (wall.user.id !== existingUser.id) {
-        throw new UnauthorizedException(
-          'You do not have permission to update this wall',
-        );
       }
 
       let logoUrl: string | null = wall.logo;
@@ -415,20 +325,10 @@ export class WallService {
     }
   }
 
-  async getTotalData(req: Request) {
-    const user = req[REQUEST_USER_KEY];
+  async getTotalData() {
+    
 
-    if (!user) {
-      throw new UnauthorizedException('User not authenticated');
-    }
-
-    const existingUser = await this.userRepository.getByEmail(user.email);
-
-    if (!existingUser) {
-      throw new NotFoundException("User doesn't exist");
-    }
-
-    const result = await this.wallRepository.getTotalData(existingUser.id);
+    const result = await this.wallRepository.getTotalData();
 
     return result;
   }
