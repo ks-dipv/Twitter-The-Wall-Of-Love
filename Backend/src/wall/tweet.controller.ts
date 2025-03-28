@@ -19,6 +19,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { SuccessDto } from 'src/common/dtos/success.dto';
 
 @ApiTags('Tweets')
 @Controller('api/walls')
@@ -74,7 +75,9 @@ export class TweetController {
     @Param('wallId') wallId: number,
     @Request() req: Request,
   ) {
-    return await this.tweetService.deleteTweetByWall(tweetId, wallId, req);
+    await this.tweetService.deleteTweetByWall(tweetId, wallId, req);
+
+    return new SuccessDto('Tweet Delete Successfuly');
   }
 
   @Put(':wallId/tweets/reorder')

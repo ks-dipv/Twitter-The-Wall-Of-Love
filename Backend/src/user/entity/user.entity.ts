@@ -23,6 +23,13 @@ export class User {
   @Exclude()
   password?: string;
 
+  @Column({
+    type: 'varchar',
+    nullable: true,
+  })
+  @Exclude()
+  googleId?: string;
+
   @Column({ type: 'varchar', nullable: true })
   profile_pic?: string;
 

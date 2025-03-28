@@ -23,7 +23,7 @@ export class WallService {
   constructor(
     private readonly wallRepository: WallRepository,
     private readonly uploadService: UploadService,
-    private readonly configService: ConfigService ,
+    private readonly configService: ConfigService,
     @InjectRepository(SocialLink)
     private readonly socialLinkRepository: Repository<SocialLink>,
 
@@ -54,7 +54,7 @@ export class WallService {
     createWallDto: CreateWallDto,
     req: Request,
     wallLogo?: Express.Multer.File,
-  ) {
+  ): Promise<Wall> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -185,7 +185,7 @@ export class WallService {
     }
   }
 
-  async deleteWall(id: number, req: Request) {
+  async deleteWall(id: number, req: Request): Promise<void> {
     try {
       const wall = await this.wallRepository.getById(id);
 
@@ -195,7 +195,6 @@ export class WallService {
       }
 
       await this.wallRepository.delete(id);
-      return { message: 'Wall deleted successfully' };
     } catch (error) {
       throw new BadRequestException(error.message || 'Failed to delete wall');
     }
@@ -325,9 +324,7 @@ export class WallService {
     }
   }
 
-  async getTotalData() {
-    
-
+  async getTotalData(req: Request): Promise<object> {
     const result = await this.wallRepository.getTotalData();
 
     return result;
