@@ -15,18 +15,13 @@ export class WallRepository extends Repository<Wall> {
     });
   }
 
-  async getTotalData(userId: number) {
+  async getTotalData() {
     // Total walls count
-    const totalWalls = await this.count({
-      where: { user: { id: userId } },
-    });
+    const totalWalls = await this.count({});
 
     // Private walls count
     const privateWalls = await this.count({
-      where: {
-        user: { id: userId },
-        visibility: WallVisibility.PRIVATE,
-      },
+      where: { visibility: WallVisibility.PRIVATE },
     });
 
     // Public walls count

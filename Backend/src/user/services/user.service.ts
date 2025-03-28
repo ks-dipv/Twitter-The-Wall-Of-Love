@@ -14,6 +14,7 @@ import { UpdateDto } from '../dtos/update.dto';
 import { MailService } from './mail.service';
 import { UserRepository } from '../repositories/user.repository';
 import { REQUEST_USER_KEY } from '../../common/constants/auth.constant';
+import { ConfigService } from '@nestjs/config';
 import { User } from '../entity/user.entity';
 
 @Injectable()
@@ -24,6 +25,7 @@ export class UserService {
     private readonly generateTokenProvider: GenerateTokenProvider,
     private readonly uploadService: UploadService,
     private readonly mailService: MailService,
+    private readonly configService: ConfigService,
   ) {}
 
   public async signup(
@@ -59,7 +61,8 @@ export class UserService {
       await this.userRepository.save(newUser);
 
       // Send Verification Email
-      const verificationUrl = `http://localhost:5173/verify-email/${verificationToken}`;
+      const baseUrl = this.configService.get<string>('VERIFICATION_BASE_URL'); // Get from env
+      const verificationUrl = `${baseUrl}/${verificationToken}`;
       await this.mailService.sendVerificationEmail(
         verificationUrl,
         signupDto.email,

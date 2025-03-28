@@ -60,8 +60,8 @@ export class WallController {
   @ApiParam({ name: 'id', description: 'ID of the Wall', type: Number })
   @ApiResponse({ status: 200, description: 'Wall details retrieved' })
   @ApiResponse({ status: 404, description: 'Wall not found' })
-  async getWallById(@Param('id') id: number, @Request() req) {
-    return await this.wallService.getWallById(id, req);
+  async getWallById(@Param('id') id: number) {
+    return await this.wallService.getWallById(id);
   }
 
   @Post(':wallId/generate-link')
@@ -128,7 +128,7 @@ export class WallController {
   })
   @ApiResponse({ status: 400, description: 'Invalid request parameters' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getTotaData(@Request() req) {
-    return await this.wallService.getTotalData(req);
+  async getTotaData() {
+    return await this.wallService.getTotalData();
   }
 }
