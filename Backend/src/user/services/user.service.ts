@@ -98,7 +98,8 @@ export class UserService {
       await this.userRepository.save(user);
 
       // Send the verification email
-      const verificationUrl = `http://localhost:5173/verify-email/${verificationToken}`;
+      const baseUrl = this.configService.get<string>('VERIFICATION_BASE_URL'); // Get from env
+      const verificationUrl = `${baseUrl}/${verificationToken}`;
       await this.mailService.sendVerificationEmail(verificationUrl, email);
     } catch (error) {
       console.log(error);
