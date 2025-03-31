@@ -5,7 +5,6 @@ import {
   Param,
   Delete,
   Body,
-  Request,
   UseInterceptors,
   UploadedFile,
   Put,
@@ -39,7 +38,7 @@ export class WallController {
   async createWall(
     @Body() createWallDto: CreateWallDto,
     @User() user,
-    
+
     @UploadedFile() logo?: Express.Multer.File,
   ) {
     return await this.wallService.createWall(createWallDto, user, logo);
@@ -50,7 +49,7 @@ export class WallController {
   @UseInterceptors(ClassSerializerInterceptor)
   @ApiOperation({ summary: 'Get all Walls for the logged-in user' })
   @ApiResponse({ status: 200, description: 'List of walls retrieved' })
-  async getAllWalls( @User() user,) {
+  async getAllWalls(@User() user) {
     return await this.wallService.getAllWalls(user);
   }
 
@@ -97,7 +96,7 @@ export class WallController {
   @ApiParam({ name: 'id', description: 'ID of the Wall', type: Number })
   @ApiResponse({ status: 200, description: 'Wall deleted successfully' })
   @ApiResponse({ status: 404, description: 'Wall not found' })
-  async deleteWall(@Param('id') id: number,@User() user) {
+  async deleteWall(@Param('id') id: number, @User() user) {
     return await this.wallService.deleteWall(id, user);
   }
 

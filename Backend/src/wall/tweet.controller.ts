@@ -120,7 +120,7 @@ export class TweetController {
   async getAllTweets(
     @Param('wallId') wallId: number,
     @Query('search') keyword: string,
-   @User() user,
+    @User() user,
   ) {
     return await this.tweetService.searchTweets(wallId, keyword, user);
   }
