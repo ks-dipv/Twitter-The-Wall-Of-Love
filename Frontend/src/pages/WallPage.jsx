@@ -11,6 +11,7 @@ import Footer from "../components/Footer";
 import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
 import { toast } from "react-toastify";
+import axios from "axios";
 
 const WallPage = () => {
   const { id } = useParams();
@@ -18,6 +19,7 @@ const WallPage = () => {
   const [tweets, setTweets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
     const fetchWallData = async () => {
@@ -39,7 +41,6 @@ const WallPage = () => {
 
   const handleDelete = async (tweetId) => {
     if (!tweetId) return;
-
     try {
       await deleteTweet(wall.id, tweetId);
       setTweets((prevTweets) =>
@@ -52,13 +53,10 @@ const WallPage = () => {
 
   const handleReorder = async (startIndex, endIndex) => {
     if (startIndex === endIndex) return;
-
     // Create a new array with the reordered items
     const reorderedTweets = arrayMove(tweets, startIndex, endIndex);
-
     // Update the state with the new order
     setTweets(reorderedTweets);
-
     // Save the new order to the server
     setIsSaving(true);
     try {
@@ -76,7 +74,6 @@ const WallPage = () => {
 
   const handleShuffle = async () => {
     if (isSaving) return;
-
     // Shuffle tweets using Fisher-Yates algorithm
     const shuffledTweets = [...tweets];
     for (let i = shuffledTweets.length - 1; i > 0; i--) {
@@ -86,9 +83,7 @@ const WallPage = () => {
         shuffledTweets[i],
       ];
     }
-
     setTweets(shuffledTweets);
-
     setIsSaving(true);
     try {
       const orderedTweetIds = shuffledTweets.map((tweet) => tweet.id);
@@ -108,6 +103,25 @@ const WallPage = () => {
     return newArray;
   };
 
+  // Handle search submission
+  const handleSearchSubmit = async (e) => {
+    e.preventDefault();
+    if (searchText.trim() === "") return;
+    try {
+      const response = await axios.get(
+        `/api/walls/${wall.id}/tweet?search=${encodeURIComponent(searchText)}`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setTweets(data);
+      } else {
+        console.error("Search error", response.status);
+      }
+    } catch (error) {
+      console.error("Error during search", error);
+    }
+  };
+
   if (loading) return <p className="text-center mt-10">Loading...</p>;
   if (!wall)
     return <p className="text-center mt-10 text-red-500">Wall not found.</p>;
@@ -115,7 +129,6 @@ const WallPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar logo={wall.logo} wallId={wall.id} />
-
       <main className="flex-grow flex flex-col items-center p-6">
         {/* Header Section with Title and Animated Description */}
         <motion.div
@@ -135,6 +148,25 @@ const WallPage = () => {
             dangerouslySetInnerHTML={{ __html: wall.description }}
           ></motion.p>
         </motion.div>
+
+        {/* Search Box */}
+        <div className="w-full max-w-xl mb-6">
+          <form onSubmit={handleSearchSubmit} className="flex items-center">
+            <input
+              type="text"
+              placeholder="Search tweets..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className="p-2 border rounded-l w-full"
+            />
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-500 text-white rounded-r hover:bg-blue-600 transition"
+            >
+              Search
+            </button>
+          </form>
+        </div>
 
         {/* Action Section with Shuffle Button aligned to the right */}
         <div className="w-full flex justify-end mb-4">
