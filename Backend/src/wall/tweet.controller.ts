@@ -6,6 +6,7 @@ import {
   Param,
   Body,
   Delete,
+  Request,
   UseInterceptors,
   ClassSerializerInterceptor,
   Query,
@@ -18,8 +19,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { SuccessDto } from 'src/common/dtos/success.dto';
-
+import { User } from '../common/decorator/user.decorater';
 @ApiTags('Tweets')
 @Controller('api/walls')
 export class TweetController {
@@ -46,8 +46,9 @@ export class TweetController {
   async addTweet(
     @Param('wallId') wallId: number,
     @Body('tweetUrl') tweetUrl: string,
+    @User() user,
   ) {
-    return await this.tweetService.addTweetToWall(tweetUrl, wallId);
+    return await this.tweetService.addTweetToWall(tweetUrl, wallId, user);
   }
 
   @Get(':wallId/tweets')
@@ -55,8 +56,8 @@ export class TweetController {
   @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
   @ApiResponse({ status: 200, description: 'List of tweets retrieved' })
   @ApiResponse({ status: 404, description: 'Wall not found' })
-  async getAllTweetsByWall(@Param('wallId') wallId: number) {
-    return await this.tweetService.getAllTweetsByWall(wallId);
+  async getAllTweetsByWall(@Param('wallId') wallId: number, @User() user) {
+    return await this.tweetService.getAllTweetsByWall(wallId, user);
   }
 
   @Delete(':wallId/tweets/:tweetId')
@@ -68,10 +69,9 @@ export class TweetController {
   async deleteTweetByWall(
     @Param('tweetId') tweetId: number,
     @Param('wallId') wallId: number,
+    @Request() req: Request,
   ) {
-    await this.tweetService.deleteTweetByWall(tweetId, wallId);
-
-    return new SuccessDto('Tweet Delete Successfuly');
+    return await this.tweetService.deleteTweetByWall(tweetId, wallId, req);
   }
 
   @Put(':wallId/tweets/reorder')
@@ -99,12 +99,17 @@ export class TweetController {
   @ApiResponse({ status: 400, description: 'Invalid tweet order request' })
   async reorderTweets(
     @Param('wallId') wallId: number,
+    @User() user,
     @Body('orderedTweetIds') orderedTweetIds?: number[],
     @Body('randomize') randomize?: boolean,
   ) {
-    return this.tweetService.reorderTweets(wallId, orderedTweetIds, randomize);
+    return this.tweetService.reorderTweets(
+      wallId,
+      user,
+      orderedTweetIds,
+      randomize,
+    );
   }
-
   @Get(':wallId/tweet')
   @UseInterceptors(ClassSerializerInterceptor)
   @ApiOperation({
@@ -115,7 +120,8 @@ export class TweetController {
   async getAllTweets(
     @Param('wallId') wallId: number,
     @Query('search') keyword: string,
+   @User() user,
   ) {
-    return await this.tweetService.searchTweets(wallId, keyword);
+    return await this.tweetService.searchTweets(wallId, keyword, user);
   }
 }

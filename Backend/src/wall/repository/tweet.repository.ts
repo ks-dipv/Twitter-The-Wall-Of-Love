@@ -20,8 +20,7 @@ export class TweetRepository extends Repository<Tweets> {
       where: { id: tweetId, wall: { id: wallId } },
     });
   }
-
-  async searchTweetsByKeyword(
+   async searchTweetsByKeyword(
     wallId: number,
     keyword: string,
   ): Promise<Tweets[]> {

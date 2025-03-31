@@ -9,6 +9,7 @@ import { TweetRepository } from '../repository/tweet.repository';
 import { WallRepository } from '../repository/wall.repository';
 import { TwitterService } from './twitter.service';
 import { Tweets } from '../entity/tweets.entity';
+import { REQUEST_USER_KEY } from '../../common/constants/auth.constant';
 import { UserRepository } from '../../user/repositories/user.repository';
 import { Cron } from '@nestjs/schedule';
 
@@ -21,9 +22,17 @@ export class TweetService {
     private readonly userRepository: UserRepository,
   ) {}
 
-  async addTweetToWall(tweetUrl: string, wallId: number): Promise<Tweets[]> {
+  async addTweetToWall(tweetUrl: string, wallId: number, user) {
     try {
-      const wall = await this.wallRepository.getById(wallId);
+      if (!user) throw new UnauthorizedException('User not authenticated');
+
+      const existingUser = await this.userRepository.getByEmail(user.email);
+      if (!existingUser) throw new BadRequestException("User doesn't exist");
+
+      const wall = await this.wallRepository.getWallByIdAndUser(
+        wallId,
+        existingUser.id,
+      );
       if (!wall) throw new NotFoundException('Wall not found or access denied');
 
       const tweetData = await this.twitterService.fetchTweetDetails(tweetUrl);
@@ -34,6 +43,7 @@ export class TweetService {
       return await this.tweetRepository.save(tweet);
     } catch (error) {
       if (
+        error instanceof UnauthorizedException ||
         error instanceof BadRequestException ||
         error instanceof NotFoundException
       ) {
@@ -43,14 +53,23 @@ export class TweetService {
     }
   }
 
-  async getAllTweetsByWall(wallId: number): Promise<Tweets[]> {
+  async getAllTweetsByWall(wallId: number, user): Promise<Tweets[]> {
     try {
-      const wall = await this.wallRepository.getById(wallId);
+      if (!user) throw new UnauthorizedException('User not authenticated');
+
+      const existingUser = await this.userRepository.getByEmail(user.email);
+      if (!existingUser) throw new BadRequestException("User doesn't exist");
+
+      const wall = await this.wallRepository.getWallByIdAndUser(
+        wallId,
+        existingUser.id,
+      );
       if (!wall) throw new NotFoundException('Wall not found or access denied');
 
       return await this.tweetRepository.getTweetsByWall(wallId);
     } catch (error) {
       if (
+        error instanceof UnauthorizedException ||
         error instanceof BadRequestException ||
         error instanceof NotFoundException
       ) {
@@ -60,10 +79,17 @@ export class TweetService {
     }
   }
 
-  async deleteTweetByWall(tweetId: number, wallId: number): Promise<void> {
+  async deleteTweetByWall(tweetId: number, wallId: number, user) {
     try {
-      const wall = await this.wallRepository.getById(wallId);
-      if (!wall) throw new NotFoundException('Wall not found or access denied');
+      if (!user) throw new UnauthorizedException('User not authenticated');
+
+      const existingUser = await this.userRepository.getByEmail(user.email);
+      if (!existingUser) throw new BadRequestException("User doesn't exist");
+
+      const wall = await this.wallRepository.getWallByIdAndUser(
+        wallId,
+        existingUser.id,
+      );
 
       const tweet = await this.tweetRepository.getTweetByIdAndWall(
         tweetId,
@@ -72,8 +98,10 @@ export class TweetService {
       if (!tweet) throw new NotFoundException('Tweet not found');
 
       await this.tweetRepository.remove(tweet);
+      return { message: 'Tweet deleted successfully' };
     } catch (error) {
       if (
+        error instanceof UnauthorizedException ||
         error instanceof BadRequestException ||
         error instanceof NotFoundException
       ) {
@@ -85,11 +113,20 @@ export class TweetService {
 
   async reorderTweets(
     wallId: number,
+    user,
     orderedTweetIds?: number[],
     randomize?: boolean,
-  ): Promise<Tweets[]> {
+  ) {
     try {
-      const wall = await this.wallRepository.getById(wallId);
+      if (!user) throw new UnauthorizedException('User not authenticated');
+
+      const existingUser = await this.userRepository.getByEmail(user.email);
+      if (!existingUser) throw new BadRequestException("User doesn't exist");
+
+      const wall = await this.wallRepository.getWallByIdAndUser(
+        wallId,
+        existingUser.id,
+      );
       if (!wall) throw new NotFoundException('Wall not found or access denied');
 
       const tweets = await this.tweetRepository.getTweetsByWall(wallId);
@@ -128,6 +165,7 @@ export class TweetService {
       return await this.tweetRepository.getTweetsByWall(wallId);
     } catch (error) {
       if (
+        error instanceof UnauthorizedException ||
         error instanceof BadRequestException ||
         error instanceof NotFoundException
       ) {
@@ -138,7 +176,7 @@ export class TweetService {
   }
 
   @Cron('0 0 * * *')
-  async updateTweetStatsDaily(): Promise<void> {
+  async updateTweetStatsDaily() {
     try {
       const tweets = await this.tweetRepository.find();
       if (!tweets.length) return;
@@ -159,11 +197,23 @@ export class TweetService {
       );
     }
   }
-
-  async searchTweets(wallId: number, keyword: string): Promise<Tweets[]> {
+  async searchTweets(wallId: number, keyword: string, user): Promise<Tweets[]> {
     try {
+      // Validate the request user
+
+      if (!user) {
+        throw new UnauthorizedException('User not authenticated');
+      }
+      const existingUser = await this.userRepository.getByEmail(user.email);
+      if (!existingUser) {
+        throw new BadRequestException("User doesn't exist");
+      }
+
       // Validate the wall exists for the given user
-      const wall = await this.wallRepository.getById(wallId);
+      const wall = await this.wallRepository.getWallByIdAndUser(
+        wallId,
+        existingUser.id,
+      );
       if (!wall) {
         throw new NotFoundException('Wall not found or access denied');
       }
