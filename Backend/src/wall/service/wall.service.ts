@@ -9,7 +9,6 @@ import { WallRepository } from '../repository/wall.repository';
 import { CreateWallDto } from '../dtos/create-wall.dto';
 import { Wall } from '../entity/wall.entity';
 import { UpdateWallDto } from '../dtos/update-wall.dto';
-import { UserRepository } from '../../user/repositories/user.repository';
 import { UploadService } from '../../common/services/upload.service';
 import { SocialLink } from '../entity/social-links.entity';
 import { SocialPlatform } from '../enum/social-platform.enum';
@@ -52,7 +51,6 @@ export class WallService {
   // Create wall
   async createWall(
     createWallDto: CreateWallDto,
-    req: Request,
     wallLogo?: Express.Multer.File,
   ): Promise<Wall> {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -139,9 +137,9 @@ export class WallService {
     }
   }
 
-  async getAllWalls(req: Request): Promise<Wall[]> {
+  async getAllWalls(): Promise<Wall[]> {
     try {
-      return await this.wallRepository.find({});
+      return await this.wallRepository.find();
     } catch (error) {
       throw new BadRequestException(error.message || 'Failed to fetch walls');
     }
@@ -185,7 +183,7 @@ export class WallService {
     }
   }
 
-  async deleteWall(id: number, req: Request): Promise<void> {
+  async deleteWall(id: number): Promise<void> {
     try {
       const wall = await this.wallRepository.getById(id);
 
@@ -203,7 +201,6 @@ export class WallService {
   async updateWall(
     id: number,
     updateWallDto: UpdateWallDto,
-    req: Request,
     logo?: Express.Multer.File,
   ): Promise<Wall> {
     const queryRunner = this.dataSource.createQueryRunner();

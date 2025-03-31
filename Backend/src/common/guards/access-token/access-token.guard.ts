@@ -33,19 +33,11 @@ export class AccessTokenGuard implements CanActivate {
           ? this.jwtConfiguration.secret
           : this.jwtConfiguration.apiSecret;
 
-      const payload = await this.jwtService.verifyAsync(token, {
-        secret: secret,
-      });
-      request[REQUEST_USER_KEY] = payload;
+      const payload = await this.jwtService.verifyAsync(token, { secret });
+      request[REQUEST_USER_KEY] = payload; // Store user payload in request
       return true;
     } catch (error) {
-      if (error.name === 'TokenExpiredError') {
-        throw new UnauthorizedException('Token expired, please log in again');
-      }
-      if (error.name === 'JsonWebTokenError') {
-        throw new UnauthorizedException('Invalid token signature');
-      }
-      throw new UnauthorizedException('Failed to authenticate token');
+      throw new UnauthorizedException(error || 'Invalid or expired token');
     }
   }
 

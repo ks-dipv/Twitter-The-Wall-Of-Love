@@ -5,7 +5,6 @@ import {
   Param,
   Delete,
   Body,
-  Request,
   UseInterceptors,
   UploadedFile,
   Put,
@@ -24,6 +23,7 @@ import {
   ApiConsumes,
 } from '@nestjs/swagger';
 import { SuccessDto } from 'src/common/dtos/success.dto';
+
 @ApiTags('Walls')
 @Controller('api/walls')
 export class WallController {
@@ -38,10 +38,9 @@ export class WallController {
   @UseInterceptors(FileInterceptor('logo'), ClassSerializerInterceptor)
   async createWall(
     @Body() createWallDto: CreateWallDto,
-    @Request() req,
     @UploadedFile() logo?: Express.Multer.File,
   ) {
-    return await this.wallService.createWall(createWallDto, req, logo);
+    return await this.wallService.createWall(createWallDto, logo);
   }
 
   // Get all Walls for the logged-in user
@@ -49,8 +48,8 @@ export class WallController {
   @UseInterceptors(ClassSerializerInterceptor)
   @ApiOperation({ summary: 'Get all Walls for the logged-in user' })
   @ApiResponse({ status: 200, description: 'List of walls retrieved' })
-  async getAllWalls(@Request() req) {
-    return await this.wallService.getAllWalls(req);
+  async getAllWalls() {
+    return await this.wallService.getAllWalls();
   }
 
   // Get a specific Wall by ID
@@ -96,8 +95,8 @@ export class WallController {
   @ApiParam({ name: 'id', description: 'ID of the Wall', type: Number })
   @ApiResponse({ status: 200, description: 'Wall deleted successfully' })
   @ApiResponse({ status: 404, description: 'Wall not found' })
-  async deleteWall(@Param('id') id: number, @Request() req) {
-    await this.wallService.deleteWall(id, req);
+  async deleteWall(@Param('id') id: number) {
+    await this.wallService.deleteWall(id);
 
     return new SuccessDto('Wall Deleted Successfuly');
   }
@@ -114,10 +113,9 @@ export class WallController {
   async updateWall(
     @Param('id') id: number,
     @Body() updateWallDto: UpdateWallDto,
-    @Request() req,
     @UploadedFile() logo?: Express.Multer.File,
   ) {
-    return await this.wallService.updateWall(id, updateWallDto, req, logo);
+    return await this.wallService.updateWall(id, updateWallDto, logo);
   }
 
   @Post('total-data')

@@ -15,7 +15,7 @@ import {
 import { SignUpDto } from './dtos/signup.dto';
 import { UserService } from './services/user.service';
 import { SignInDto } from './dtos/signin.dto';
-import { AuthType } from './enum/auth-type.enum';
+import { AuthType } from '../common/enum/auth-type.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateDto } from './dtos/update.dto';
 import {
