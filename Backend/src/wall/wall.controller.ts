@@ -23,6 +23,7 @@ import {
   ApiBody,
   ApiConsumes,
 } from '@nestjs/swagger';
+import { User } from 'src/common/decorator/user.decorater';
 @ApiTags('Walls')
 @Controller('api/walls')
 export class WallController {
@@ -37,10 +38,11 @@ export class WallController {
   @UseInterceptors(FileInterceptor('logo'), ClassSerializerInterceptor)
   async createWall(
     @Body() createWallDto: CreateWallDto,
-    @Request() req,
+    @User() user,
+    
     @UploadedFile() logo?: Express.Multer.File,
   ) {
-    return await this.wallService.createWall(createWallDto, req, logo);
+    return await this.wallService.createWall(createWallDto, user, logo);
   }
 
   // Get all Walls for the logged-in user
@@ -48,8 +50,8 @@ export class WallController {
   @UseInterceptors(ClassSerializerInterceptor)
   @ApiOperation({ summary: 'Get all Walls for the logged-in user' })
   @ApiResponse({ status: 200, description: 'List of walls retrieved' })
-  async getAllWalls(@Request() req) {
-    return await this.wallService.getAllWalls(req);
+  async getAllWalls( @User() user,) {
+    return await this.wallService.getAllWalls(user);
   }
 
   // Get a specific Wall by ID
@@ -59,8 +61,8 @@ export class WallController {
   @ApiParam({ name: 'id', description: 'ID of the Wall', type: Number })
   @ApiResponse({ status: 200, description: 'Wall details retrieved' })
   @ApiResponse({ status: 404, description: 'Wall not found' })
-  async getWallById(@Param('id') id: number, @Request() req) {
-    return await this.wallService.getWallById(id, req);
+  async getWallById(@Param('id') id: number, @User() user) {
+    return await this.wallService.getWallById(id, user);
   }
 
   @Post(':wallId/generate-link')
@@ -69,8 +71,8 @@ export class WallController {
   @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
   @ApiResponse({ status: 200, description: 'Shareable link generated' })
   @ApiResponse({ status: 404, description: 'Wall not found' })
-  async generateLink(@Param('wallId') wallId: number, @Request() req) {
-    return await this.wallService.generateLinks(wallId, req);
+  async generateLink(@Param('wallId') wallId: number, @User() user) {
+    return await this.wallService.generateLinks(wallId, user);
   }
 
   // Get Wall by sharable link
@@ -95,8 +97,8 @@ export class WallController {
   @ApiParam({ name: 'id', description: 'ID of the Wall', type: Number })
   @ApiResponse({ status: 200, description: 'Wall deleted successfully' })
   @ApiResponse({ status: 404, description: 'Wall not found' })
-  async deleteWall(@Param('id') id: number, @Request() req) {
-    return await this.wallService.deleteWall(id, req);
+  async deleteWall(@Param('id') id: number,@User() user) {
+    return await this.wallService.deleteWall(id, user);
   }
 
   //Update a wall by ID
@@ -111,10 +113,10 @@ export class WallController {
   async updateWall(
     @Param('id') id: number,
     @Body() updateWallDto: UpdateWallDto,
-    @Request() req,
+    @User() user,
     @UploadedFile() logo?: Express.Multer.File,
   ) {
-    return await this.wallService.updateWall(id, updateWallDto, req, logo);
+    return await this.wallService.updateWall(id, updateWallDto, user, logo);
   }
 
   @Post('total-data')
@@ -125,7 +127,7 @@ export class WallController {
   })
   @ApiResponse({ status: 400, description: 'Invalid request parameters' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getTotaData(@Request() req) {
-    return await this.wallService.getTotalData(req);
+  async getTotaData(@User() user) {
+    return await this.wallService.getTotalData(user);
   }
 }

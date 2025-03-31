@@ -9,6 +9,7 @@ import {
   Request,
   UseInterceptors,
   ClassSerializerInterceptor,
+  Query,
 } from '@nestjs/common';
 import { TweetService } from './service/tweet.service';
 import {
@@ -18,7 +19,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-
+import { User } from '../common/decorator/user.decorater';
 @ApiTags('Tweets')
 @Controller('api/walls')
 export class TweetController {
@@ -45,9 +46,9 @@ export class TweetController {
   async addTweet(
     @Param('wallId') wallId: number,
     @Body('tweetUrl') tweetUrl: string,
-    @Request() req: Request,
+    @User() user,
   ) {
-    return await this.tweetService.addTweetToWall(tweetUrl, wallId, req);
+    return await this.tweetService.addTweetToWall(tweetUrl, wallId, user);
   }
 
   @Get(':wallId/tweets')
@@ -55,11 +56,8 @@ export class TweetController {
   @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
   @ApiResponse({ status: 200, description: 'List of tweets retrieved' })
   @ApiResponse({ status: 404, description: 'Wall not found' })
-  async getAllTweetsByWall(
-    @Param('wallId') wallId: number,
-    @Request() req: Request,
-  ) {
-    return await this.tweetService.getAllTweetsByWall(wallId, req);
+  async getAllTweetsByWall(@Param('wallId') wallId: number, @User() user) {
+    return await this.tweetService.getAllTweetsByWall(wallId, user);
   }
 
   @Delete(':wallId/tweets/:tweetId')
@@ -101,15 +99,29 @@ export class TweetController {
   @ApiResponse({ status: 400, description: 'Invalid tweet order request' })
   async reorderTweets(
     @Param('wallId') wallId: number,
-    @Request() req: Request,
+    @User() user,
     @Body('orderedTweetIds') orderedTweetIds?: number[],
     @Body('randomize') randomize?: boolean,
   ) {
     return this.tweetService.reorderTweets(
       wallId,
-      req,
+      user,
       orderedTweetIds,
       randomize,
     );
+  }
+  @Get(':wallId/tweet')
+  @UseInterceptors(ClassSerializerInterceptor)
+  @ApiOperation({
+    summary: 'Get all tweets for a specific wall or search tweets by keyword',
+  })
+  @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
+  @ApiResponse({ status: 200, description: 'List of tweets retrieved' })
+  async getAllTweets(
+    @Param('wallId') wallId: number,
+    @Query('search') keyword: string,
+   @User() user,
+  ) {
+    return await this.tweetService.searchTweets(wallId, keyword, user);
   }
 }

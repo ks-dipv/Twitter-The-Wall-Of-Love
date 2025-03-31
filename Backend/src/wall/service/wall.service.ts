@@ -18,7 +18,7 @@ import { DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WallVisibility } from '../enum/wall-visibility.enum';
 import { v4 as uuidv4 } from 'uuid';
-
+import { User } from 'src/common/decorator/user.decorater';
 @Injectable()
 export class WallService {
   constructor(
@@ -69,7 +69,7 @@ export class WallService {
   // Create wall
   async createWall(
     createWallDto: CreateWallDto,
-    req: Request,
+    @User() user, // Using the custom decorator to get user
     wallLogo?: Express.Multer.File,
   ) {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -77,7 +77,6 @@ export class WallService {
     await queryRunner.startTransaction();
 
     try {
-      const user = req[REQUEST_USER_KEY];
       if (!user) {
         throw new UnauthorizedException('User not authenticated');
       }
@@ -167,10 +166,8 @@ export class WallService {
     }
   }
 
-  async getAllWalls(req: Request): Promise<Wall[]> {
+  async getAllWalls(user): Promise<Wall[]> {
     try {
-      const user = req[REQUEST_USER_KEY];
-
       if (!user) {
         throw new UnauthorizedException('User not authenticated');
       }
@@ -189,10 +186,8 @@ export class WallService {
   }
 
   // Get wall by ID
-  async getWallById(id: number, req: Request): Promise<Wall> {
+  async getWallById(id: number, user): Promise<Wall> {
     try {
-      const user = req[REQUEST_USER_KEY];
-
       if (!user) {
         throw new UnauthorizedException('User not authenticated');
       }
@@ -241,10 +236,8 @@ export class WallService {
     }
   }
 
-  async deleteWall(id: number, req: Request) {
+  async deleteWall(id: number, user) {
     try {
-      const user = req[REQUEST_USER_KEY];
-
       if (!user) {
         throw new UnauthorizedException('User not authenticated');
       }
@@ -275,7 +268,7 @@ export class WallService {
   async updateWall(
     id: number,
     updateWallDto: UpdateWallDto,
-    req: Request,
+    user,
     logo?: Express.Multer.File,
   ): Promise<Wall> {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -283,8 +276,6 @@ export class WallService {
     await queryRunner.startTransaction();
 
     try {
-      const user = req[REQUEST_USER_KEY];
-
       if (!user) {
         throw new UnauthorizedException('User not authenticated');
       }
@@ -415,9 +406,8 @@ export class WallService {
     }
   }
 
-  async getTotalData(req: Request) {
-    const user = req[REQUEST_USER_KEY];
-
+  async getTotalData(user) {
+   
     if (!user) {
       throw new UnauthorizedException('User not authenticated');
     }
