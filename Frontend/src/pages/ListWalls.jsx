@@ -12,6 +12,7 @@ const ListWalls = () => {
   const [error, setError] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [wallToDelete, setWallToDelete] = useState(null);
+  const [searchQuery, setSearchQuery] = useState(""); // state to store search query
   const navigate = useNavigate();
   useEffect(() => {
     const fetchWalls = async () => {
@@ -54,6 +55,12 @@ const ListWalls = () => {
     }
   };
 
+  const filteredWalls = walls.filter(
+    (wall) =>
+      wall.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      wall.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   if (loading) return <div className="text-center mt-10">Loading walls...</div>;
   if (error)
     return <div className="text-center text-red-500 mt-10">{error}</div>;
@@ -65,9 +72,21 @@ const ListWalls = () => {
         <nav className="bg-gray-300 p-4 text-black flex justify-between mb-5">
           <h1 className="text-lg font-bold">Your walls</h1>
         </nav>
-        {Array.isArray(walls) && walls.length > 0 ? (
+
+        {/* Search Box */}
+        <div className="mb-5">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by title or description..."
+            className="w-full p-2 border rounded-lg shadow-sm focus:ring-blue-400 focus:border-blue-400"
+          />
+        </div>
+
+        {Array.isArray(filteredWalls) && filteredWalls.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {walls.map((wall) => (
+            {filteredWalls.map((wall) => (
               <motion.div
                 key={wall.id}
                 className="bg-white p-4 rounded-lg shadow-md relative min-h-[300px] sm:min-h-[350px] flex flex-col transition-all cursor-pointer hover:shadow-lg"
