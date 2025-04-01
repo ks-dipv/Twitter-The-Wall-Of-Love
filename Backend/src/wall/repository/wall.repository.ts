@@ -44,4 +44,12 @@ export class WallRepository extends Repository<Wall> {
       privateWalls,
     };
   }
+ 
+  async searchWallsByKeyword(keyword: string): Promise<Wall[]> {
+    return await this.createQueryBuilder('wall')
+      .where('wall.title LIKE :keyword OR wall.description LIKE :keyword', {
+        keyword: `%${keyword}%`,
+      })
+      .getMany();
+  }
 }

@@ -398,4 +398,23 @@ export class WallService {
 
     return result;
   }
+
+  // Search for walls based on the provided keyword
+  async searchWalls(keyword: string, user): Promise<Wall[]> {
+    try {
+      const existingUser = await this.userRepository.getByEmail(user.email);
+
+    if (!existingUser) {
+      throw new NotFoundException("User doesn't exist");
+    }
+      if (!keyword) {
+        throw new BadRequestException('Search keyword is required');
+      }
+
+      const walls = await this.wallRepository.searchWallsByKeyword(keyword);
+      return walls;
+    } catch (error) {
+      throw new BadRequestException(error.message || 'Failed to search walls');
+    }
+  }
 }
