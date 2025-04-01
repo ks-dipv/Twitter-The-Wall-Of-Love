@@ -55,11 +55,18 @@ const ListWalls = () => {
     }
   };
 
-  const filteredWalls = walls.filter(
-    (wall) =>
-      wall.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      wall.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // First, filter for title matches, then for description matches
+  const filteredWalls = walls
+    .filter((wall) =>
+      wall.title.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .concat(
+      walls.filter(
+        (wall) =>
+          wall.description.toLowerCase().includes(searchQuery.toLowerCase()) &&
+          !wall.title.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    );
 
   if (loading) return <div className="text-center mt-10">Loading walls...</div>;
   if (error)
@@ -74,13 +81,13 @@ const ListWalls = () => {
         </nav>
 
         {/* Search Box */}
-        <div className="mb-5">
+        <div className="mb-5 flex justify-center">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by title or description..."
-            className="w-full p-2 border rounded-lg shadow-sm focus:ring-blue-400 focus:border-blue-400"
+            className="w-96 p-2 border rounded-lg shadow-sm focus:ring-blue-400 focus:border-blue-400"
           />
         </div>
 
