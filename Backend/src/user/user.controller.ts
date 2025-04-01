@@ -6,10 +6,9 @@ import {
   Post,
   Put,
   UploadedFile,
-  UseInterceptors,
   Response,
-  ClassSerializerInterceptor,
   Get,
+  UseInterceptors,
 } from '@nestjs/common';
 import { SignUpDto } from './dtos/signup.dto';
 import { UserService } from './services/user.service';
@@ -17,65 +16,63 @@ import { SignInDto } from './dtos/signin.dto';
 import { AuthType } from '../common/enum/auth-type.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateDto } from './dtos/update.dto';
-import {
-  ApiOperation,
-  ApiBody,
-  ApiResponse,
-  ApiTags,
-  ApiParam,
-  ApiConsumes,
-} from '@nestjs/swagger';
+import { ApiTags, ApiConsumes, ApiBody, ApiParam } from '@nestjs/swagger';
 import { Auth } from '../common/decorator/auth.decorator';
-import { UsePipes } from '@nestjs/common';
-import { ValidationPipe } from '@nestjs/common';
+import { UsePipes, ValidationPipe } from '@nestjs/common';
 import { SuccessDto } from 'src/common/dtos/success.dto';
 import { User } from 'src/common/decorator/user.decorater';
+import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
+
 @ApiTags('Users')
 @Controller('api')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('auth/signup')
-  @ApiOperation({ summary: 'User signup' })
+  @CommonApiDecorators({
+    summary: 'User signup',
+    successStatus: 201,
+    successDescription: 'User signed up successfully',
+  })
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: SignUpDto })
-  @ApiResponse({ status: 201, description: 'User signed up successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid input data' })
   @Auth(AuthType.None)
-  @UseInterceptors(FileInterceptor('profile_pic'), ClassSerializerInterceptor)
+  @UseInterceptors(FileInterceptor('profile_pic'))
   public entry(
     @Body() signupDto: SignUpDto,
     @UploadedFile() profileImage?: Express.Multer.File,
   ) {
     this.userService.signup(signupDto, profileImage);
-
     return new SuccessDto(
       'Signup successful. Please check your email to verify your account.',
     );
   }
 
   @Post('auth/verify-email/resend')
+  @CommonApiDecorators({ summary: 'Resend verification email' })
   @Auth(AuthType.None)
   async resendEmail(@Body('email') email: string) {
     this.userService.resendVerificationEmail(email);
-
     return new SuccessDto(
       'Verification email has been resent. Please check your inbox.',
     );
   }
 
   @Post('auth/verify-email/:token')
+  @CommonApiDecorators({ summary: 'Verify email with token' })
   @Auth(AuthType.None)
-  @UseInterceptors(ClassSerializerInterceptor)
   async verifyEmail(@Param('token') token: string) {
     return this.userService.verifyEmail(token);
   }
 
   @Post('auth/signin')
-  @ApiOperation({ summary: 'User sign-in' })
+  @CommonApiDecorators({
+    summary: 'User sign-in',
+    successDescription: 'User signed in successfully',
+    errorStatus: 401,
+    errorDescription: 'Invalid credentials',
+  })
   @ApiBody({ type: SignInDto })
-  @ApiResponse({ status: 200, description: 'User signed in successfully' })
-  @ApiResponse({ status: 401, description: 'Invalid credentials' })
   @Auth(AuthType.None)
   public signin(
     @Body() signInDto: SignInDto,
@@ -85,16 +82,19 @@ export class UserController {
   }
 
   @Get('user')
-  @ApiOperation({ summary: 'fetch login user data' })
-  @ApiResponse({ status: 200, description: 'get user data successfully' })
-  @UseInterceptors(ClassSerializerInterceptor)
+  @CommonApiDecorators({
+    summary: 'Fetch login user data',
+    successDescription: 'Get user data successfully',
+  })
   public getUser(@User() user) {
     return this.userService.getUserById(user);
   }
 
   @Post('auth/logout')
-  @ApiOperation({ summary: 'Logout the user' })
-  @ApiResponse({ status: 200, description: 'Logged out successfully' })
+  @CommonApiDecorators({
+    summary: 'Logout the user',
+    successDescription: 'Logged out successfully',
+  })
   @Auth(AuthType.Bearer)
   public logout(@Response({ passthrough: true }) res) {
     res.clearCookie('access_token');
@@ -102,13 +102,14 @@ export class UserController {
   }
 
   @Put('user/profile')
-  @ApiOperation({ summary: 'Update user details' })
+  @CommonApiDecorators({
+    summary: 'Update user details',
+    successDescription: 'User updated successfully',
+  })
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: UpdateDto })
-  @ApiResponse({ status: 200, description: 'User updated successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid input data' })
   @Auth(AuthType.Bearer)
-  @UseInterceptors(FileInterceptor('profileImage'), ClassSerializerInterceptor)
+  @UseInterceptors(FileInterceptor('profileImage'))
   @UsePipes(new ValidationPipe({ transform: true }))
   public update(
     @User() user,
@@ -119,39 +120,43 @@ export class UserController {
   }
 
   @Delete('user')
-  @Auth(AuthType.Bearer)
-  @ApiOperation({ summary: 'Delete user account' })
-  @ApiResponse({ status: 200, description: 'User deleted successfully' })
-  @ApiResponse({ status: 404, description: 'User not found' })
+  @CommonApiDecorators({
+    summary: 'Delete user account',
+    successDescription: 'User deleted successfully',
+    errorStatus: 404,
+    errorDescription: 'User not found',
+  })
   @Auth(AuthType.Bearer)
   public remove(@User() user) {
     this.userService.remove(user);
-
     return new SuccessDto('User Deleted Successfully');
   }
 
   @Post('auth/reset-password/request')
-  @ApiOperation({ summary: 'Request password reset' })
+  @CommonApiDecorators({
+    summary: 'Request password reset',
+    successDescription: 'Password reset email sent',
+    errorStatus: 404,
+    errorDescription: 'User not found',
+  })
   @ApiBody({
     schema: {
       type: 'object',
-      properties: {
-        email: { type: 'string', example: 'user@example.com' },
-      },
+      properties: { email: { type: 'string', example: 'user@example.com' } },
     },
   })
-  @ApiResponse({ status: 200, description: 'Password reset email sent' })
-  @ApiResponse({ status: 404, description: 'User not found' })
   @Auth(AuthType.None)
   public resetPasswordRequest(@Body() resetPassword: UpdateDto) {
     const { email } = resetPassword;
     this.userService.resetPasswordRequest(email);
-
     return new SuccessDto('Reset Password Email Sent Successfully');
   }
 
   @Post('auth/reset-password/:token')
-  @ApiOperation({ summary: 'Reset password using token' })
+  @CommonApiDecorators({
+    summary: 'Reset password using token',
+    successDescription: 'Password reset successful',
+  })
   @ApiParam({
     name: 'token',
     description: 'Password reset token',
@@ -160,13 +165,9 @@ export class UserController {
   @ApiBody({
     schema: {
       type: 'object',
-      properties: {
-        password: { type: 'string', example: 'newPassword123' },
-      },
+      properties: { password: { type: 'string', example: 'newPassword123' } },
     },
   })
-  @ApiResponse({ status: 200, description: 'Password reset successful' })
-  @ApiResponse({ status: 400, description: 'Invalid token or password' })
   @Auth(AuthType.None)
   public resetPassword(
     @Param('token') token: string,
@@ -174,13 +175,14 @@ export class UserController {
   ) {
     const { password } = updatePassword;
     this.userService.resetPassword(token, password);
-
     return new SuccessDto('Password Reset Successfully');
   }
 
   @Post('developer/api-token')
-  @ApiOperation({ summary: 'Generate API token for developers' })
-  @ApiResponse({ status: 200, description: 'API token generated successfully' })
+  @CommonApiDecorators({
+    summary: 'Generate API token for developers',
+    successDescription: 'API token generated successfully',
+  })
   async apiKeyGenerate(@User() user) {
     return this.userService.apiKeyGenerate(user);
   }
