@@ -8,7 +8,6 @@ import {
   UploadedFile,
   UseInterceptors,
   Response,
-  Request,
   ClassSerializerInterceptor,
   Get,
 } from '@nestjs/common';
@@ -30,6 +29,7 @@ import { Auth } from '../common/decorator/auth.decorator';
 import { UsePipes } from '@nestjs/common';
 import { ValidationPipe } from '@nestjs/common';
 import { SuccessDto } from 'src/common/dtos/success.dto';
+import { User } from 'src/common/decorator/user.decorater';
 @ApiTags('Users')
 @Controller('api')
 export class UserController {
@@ -88,8 +88,8 @@ export class UserController {
   @ApiOperation({ summary: 'fetch login user data' })
   @ApiResponse({ status: 200, description: 'get user data successfully' })
   @UseInterceptors(ClassSerializerInterceptor)
-  public getUser(@Request() req) {
-    return this.userService.getUserById(req);
+  public getUser(@User() user) {
+    return this.userService.getUserById(user);
   }
 
   @Post('auth/logout')
@@ -111,11 +111,11 @@ export class UserController {
   @UseInterceptors(FileInterceptor('profileImage'), ClassSerializerInterceptor)
   @UsePipes(new ValidationPipe({ transform: true }))
   public update(
-    @Request() req,
+    @User() user,
     @Body() updateDto: UpdateDto,
     @UploadedFile() profileImage?: Express.Multer.File,
   ) {
-    return this.userService.update(req, updateDto, profileImage);
+    return this.userService.update(user, updateDto, profileImage);
   }
 
   @Delete('user')
@@ -124,8 +124,8 @@ export class UserController {
   @ApiResponse({ status: 200, description: 'User deleted successfully' })
   @ApiResponse({ status: 404, description: 'User not found' })
   @Auth(AuthType.Bearer)
-  public remove(@Request() req) {
-    this.userService.remove(req);
+  public remove(@User() user) {
+    this.userService.remove(user);
 
     return new SuccessDto('User Deleted Successfully');
   }
@@ -181,7 +181,7 @@ export class UserController {
   @Post('developer/api-token')
   @ApiOperation({ summary: 'Generate API token for developers' })
   @ApiResponse({ status: 200, description: 'API token generated successfully' })
-  async apiKeyGenerate(@Request() req) {
-    return this.userService.apiKeyGenerate(req);
+  async apiKeyGenerate(@User() user) {
+    return this.userService.apiKeyGenerate(user);
   }
 }

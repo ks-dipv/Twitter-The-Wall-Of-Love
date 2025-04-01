@@ -13,7 +13,6 @@ import { UploadService } from '../../common/services/upload.service';
 import { UpdateDto } from '../dtos/update.dto';
 import { MailService } from './mail.service';
 import { UserRepository } from '../repositories/user.repository';
-import { REQUEST_USER_KEY } from '../../common/constants/auth.constant';
 import { ConfigService } from '@nestjs/config';
 import { User } from '../entity/user.entity';
 
@@ -163,11 +162,8 @@ export class UserService {
     }
   }
 
-  public async getUserById(req: Request): Promise<User> {
+  public async getUserById(user): Promise<User> {
     try {
-      const user = req[REQUEST_USER_KEY];
-      if (!user) throw new UnauthorizedException('User not authenticated');
-
       const existUser = await this.userRepository.getById(user.sub);
       if (!existUser) throw new NotFoundException("User doesn't exist");
 
@@ -184,14 +180,11 @@ export class UserService {
   }
 
   public async update(
-    req: Request,
+    user,
     updateDto: UpdateDto,
     profileImage?: Express.Multer.File,
   ): Promise<User> {
     try {
-      const user = req[REQUEST_USER_KEY];
-      if (!user) throw new UnauthorizedException('User not authenticated');
-
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) throw new NotFoundException("User doesn't exist");
 
@@ -225,11 +218,8 @@ export class UserService {
     }
   }
 
-  public async remove(req: Request): Promise<void> {
+  public async remove(user): Promise<void> {
     try {
-      const user = req[REQUEST_USER_KEY];
-      if (!user) throw new UnauthorizedException('User not authenticated');
-
       const existUser = await this.userRepository.getById(user.sub);
       if (!existUser) throw new NotFoundException("User doesn't exist");
 
@@ -296,11 +286,8 @@ export class UserService {
     }
   }
 
-  public async apiKeyGenerate(req: Request) {
+  public async apiKeyGenerate(user) {
     try {
-      const user = req[REQUEST_USER_KEY];
-      if (!user) throw new UnauthorizedException('User not authenticated');
-
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) throw new NotFoundException("User doesn't exist");
 

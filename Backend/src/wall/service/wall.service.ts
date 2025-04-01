@@ -9,7 +9,6 @@ import { WallRepository } from '../repository/wall.repository';
 import { CreateWallDto } from '../dtos/create-wall.dto';
 import { Wall } from '../entity/wall.entity';
 import { UpdateWallDto } from '../dtos/update-wall.dto';
-import { REQUEST_USER_KEY } from '../../common/constants/auth.constant';
 import { UserRepository } from '../../user/repositories/user.repository';
 import { UploadService } from '../../common/services/upload.service';
 import { SocialLink } from '../entity/social-links.entity';
@@ -75,10 +74,6 @@ export class WallService {
     await queryRunner.startTransaction();
 
     try {
-      if (!user) {
-        throw new UnauthorizedException('User not authenticated');
-      }
-
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) {
         throw new NotFoundException('User not found');
@@ -166,10 +161,6 @@ export class WallService {
 
   async getAllWalls(user): Promise<Wall[]> {
     try {
-      if (!user) {
-        throw new UnauthorizedException('User not authenticated');
-      }
-
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) {
         throw new NotFoundException("User doesn't exist");
@@ -186,10 +177,6 @@ export class WallService {
   // Get wall by ID
   async getWallById(id: number, user): Promise<Wall> {
     try {
-      if (!user) {
-        throw new UnauthorizedException('User not authenticated');
-      }
-
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) {
         throw new NotFoundException("User doesn't exist");
@@ -236,10 +223,6 @@ export class WallService {
 
   async deleteWall(id: number, user) {
     try {
-      if (!user) {
-        throw new UnauthorizedException('User not authenticated');
-      }
-
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) {
         throw new NotFoundException("User doesn't exist");
@@ -274,10 +257,6 @@ export class WallService {
     await queryRunner.startTransaction();
 
     try {
-      if (!user) {
-        throw new UnauthorizedException('User not authenticated');
-      }
-
       const existingUser = await this.userRepository.getByEmail(user.email);
 
       if (!existingUser) {
@@ -405,10 +384,6 @@ export class WallService {
   }
 
   async getTotalData(user) {
-    if (!user) {
-      throw new UnauthorizedException('User not authenticated');
-    }
-
     const existingUser = await this.userRepository.getByEmail(user.email);
 
     if (!existingUser) {
