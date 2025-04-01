@@ -40,7 +40,6 @@
     "cookie-parser": "^1.4.7",
     "ejs": "^3.1.10",
     "express-session": "^1.18.1",
-    "google-auth-library": "^9.15.1",
     "install": "^0.13.0",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",

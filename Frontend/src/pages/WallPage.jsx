@@ -38,7 +38,9 @@ const WallPage = () => {
   }, [id]);
 
   const handleDelete = async (tweetId) => {
+
     if (!tweetId) return; 
+
     try {
       await deleteTweet(wall.id, tweetId);
       setTweets((prevTweets) =>
@@ -51,10 +53,13 @@ const WallPage = () => {
 
   const handleReorder = async (startIndex, endIndex) => {
     if (startIndex === endIndex) return;
+
     // Create a new array with the reordered items
     const reorderedTweets = arrayMove(tweets, startIndex, endIndex);
+
     // Update the state with the new order
     setTweets(reorderedTweets);
+
     // Save the new order to the server
     setIsSaving(true);
     try {
@@ -72,6 +77,7 @@ const WallPage = () => {
 
   const handleShuffle = async () => {
     if (isSaving) return;
+
     // Shuffle tweets using Fisher-Yates algorithm
     const shuffledTweets = [...tweets];
     for (let i = shuffledTweets.length - 1; i > 0; i--) {
@@ -81,7 +87,9 @@ const WallPage = () => {
         shuffledTweets[i],
       ];
     }
+
     setTweets(shuffledTweets);
+
     setIsSaving(true);
     try {
       const orderedTweetIds = shuffledTweets.map((tweet) => tweet.id);
@@ -108,6 +116,7 @@ const WallPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar logo={wall.logo} wallId={wall.id} />
+
       <main className="flex-grow flex flex-col items-center p-6">
         {/* Header Section with Title and Animated Description */}
         <motion.div
