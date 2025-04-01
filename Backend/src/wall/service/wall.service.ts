@@ -9,7 +9,6 @@ import { WallRepository } from '../repository/wall.repository';
 import { CreateWallDto } from '../dtos/create-wall.dto';
 import { Wall } from '../entity/wall.entity';
 import { UpdateWallDto } from '../dtos/update-wall.dto';
-import { REQUEST_USER_KEY } from '../../common/constants/auth.constant';
 import { UserRepository } from '../../user/repositories/user.repository';
 import { UploadService } from '../../common/services/upload.service';
 import { SocialLink } from '../entity/social-links.entity';
@@ -19,6 +18,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { WallVisibility } from '../enum/wall-visibility.enum';
 import { v4 as uuidv4 } from 'uuid';
 import { User } from 'src/common/decorator/user.decorater';
+
+import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class WallService {
   constructor(
@@ -30,13 +31,12 @@ export class WallService {
     private readonly socialLinkRepository: Repository<SocialLink>,
 
     private readonly dataSource: DataSource,
+    private readonly configService: ConfigService,
   ) {}
 
   // Generate links
-  public async generateLinks(wallId: number, req: Request) {
+  public async generateLinks(wallId: number, user) {
     try {
-      const user = req[REQUEST_USER_KEY];
-
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) {
         throw new NotFoundException('User not found');
@@ -51,7 +51,7 @@ export class WallService {
       }
 
       const uniqueId = uuidv4();
-      const baseUrl = 'http://localhost:5173';
+      const baseUrl = this.configService.get('appConfig.baseUrl');
       const shareable_link = `${baseUrl}/walls/${wallId}/link/${uniqueId}`;
       const embed_link = `<iframe src="${baseUrl}/walls/${wallId}/link/${uniqueId}" width="600" height="400"></iframe>`;
 
@@ -77,10 +77,6 @@ export class WallService {
     await queryRunner.startTransaction();
 
     try {
-      if (!user) {
-        throw new UnauthorizedException('User not authenticated');
-      }
-
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) {
         throw new NotFoundException('User not found');
@@ -119,6 +115,7 @@ export class WallService {
         try {
           social_links = JSON.parse(social_links);
         } catch (error) {
+          console.error('Error parsing social_links:', error);
           throw new BadRequestException('Invalid format for social_links');
         }
       }
@@ -168,10 +165,6 @@ export class WallService {
 
   async getAllWalls(user): Promise<Wall[]> {
     try {
-      if (!user) {
-        throw new UnauthorizedException('User not authenticated');
-      }
-
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) {
         throw new NotFoundException("User doesn't exist");
@@ -188,10 +181,6 @@ export class WallService {
   // Get wall by ID
   async getWallById(id: number, user): Promise<Wall> {
     try {
-      if (!user) {
-        throw new UnauthorizedException('User not authenticated');
-      }
-
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) {
         throw new NotFoundException("User doesn't exist");
@@ -238,10 +227,6 @@ export class WallService {
 
   async deleteWall(id: number, user) {
     try {
-      if (!user) {
-        throw new UnauthorizedException('User not authenticated');
-      }
-
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) {
         throw new NotFoundException("User doesn't exist");
@@ -276,10 +261,6 @@ export class WallService {
     await queryRunner.startTransaction();
 
     try {
-      if (!user) {
-        throw new UnauthorizedException('User not authenticated');
-      }
-
       const existingUser = await this.userRepository.getByEmail(user.email);
 
       if (!existingUser) {
@@ -338,6 +319,7 @@ export class WallService {
         try {
           updateWallDto.social_links = JSON.parse(updateWallDto.social_links);
         } catch (error) {
+          console.error('Error parsing social_links:', error);
           throw new BadRequestException('Invalid format for social_links');
         }
       }
@@ -407,11 +389,6 @@ export class WallService {
   }
 
   async getTotalData(user) {
-   
-    if (!user) {
-      throw new UnauthorizedException('User not authenticated');
-    }
-
     const existingUser = await this.userRepository.getByEmail(user.email);
 
     if (!existingUser) {
@@ -421,5 +398,24 @@ export class WallService {
     const result = await this.wallRepository.getTotalData(existingUser.id);
 
     return result;
+  }
+
+  // Search for walls based on the provided keyword
+  async searchWalls(keyword: string, user): Promise<Wall[]> {
+    try {
+      const existingUser = await this.userRepository.getByEmail(user.email);
+
+      if (!existingUser) {
+        throw new NotFoundException("User doesn't exist");
+      }
+      if (!keyword) {
+        throw new BadRequestException('Search keyword is required');
+      }
+
+      const walls = await this.wallRepository.searchWallsByKeyword(keyword);
+      return walls;
+    } catch (error) {
+      throw new BadRequestException(error.message || 'Failed to search walls');
+    }
   }
 }

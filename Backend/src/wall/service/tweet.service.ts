@@ -9,7 +9,6 @@ import { TweetRepository } from '../repository/tweet.repository';
 import { WallRepository } from '../repository/wall.repository';
 import { TwitterService } from './twitter.service';
 import { Tweets } from '../entity/tweets.entity';
-import { REQUEST_USER_KEY } from '../../common/constants/auth.constant';
 import { UserRepository } from '../../user/repositories/user.repository';
 import { Cron } from '@nestjs/schedule';
 
@@ -24,8 +23,6 @@ export class TweetService {
 
   async addTweetToWall(tweetUrl: string, wallId: number, user) {
     try {
-      if (!user) throw new UnauthorizedException('User not authenticated');
-
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) throw new BadRequestException("User doesn't exist");
 
@@ -55,8 +52,6 @@ export class TweetService {
 
   async getAllTweetsByWall(wallId: number, user): Promise<Tweets[]> {
     try {
-      if (!user) throw new UnauthorizedException('User not authenticated');
-
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) throw new BadRequestException("User doesn't exist");
 
@@ -81,15 +76,8 @@ export class TweetService {
 
   async deleteTweetByWall(tweetId: number, wallId: number, user) {
     try {
-      if (!user) throw new UnauthorizedException('User not authenticated');
-
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) throw new BadRequestException("User doesn't exist");
-
-      const wall = await this.wallRepository.getWallByIdAndUser(
-        wallId,
-        existingUser.id,
-      );
 
       const tweet = await this.tweetRepository.getTweetByIdAndWall(
         tweetId,
@@ -118,8 +106,6 @@ export class TweetService {
     randomize?: boolean,
   ) {
     try {
-      if (!user) throw new UnauthorizedException('User not authenticated');
-
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) throw new BadRequestException("User doesn't exist");
 
@@ -199,11 +185,6 @@ export class TweetService {
   }
   async searchTweets(wallId: number, keyword: string, user): Promise<Tweets[]> {
     try {
-      // Validate the request user
-
-      if (!user) {
-        throw new UnauthorizedException('User not authenticated');
-      }
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) {
         throw new BadRequestException("User doesn't exist");
