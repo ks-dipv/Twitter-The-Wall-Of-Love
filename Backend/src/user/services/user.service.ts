@@ -60,8 +60,8 @@ export class UserService {
       await this.userRepository.save(newUser);
 
       // Send Verification Email
-      const baseUrl = this.configService.get<string>('VERIFICATION_BASE_URL'); 
-      const verificationUrl = `${baseUrl}/${verificationToken}`;
+      const baseUrl = this.configService.get('appConfig.baseUrl');
+      const verificationUrl = `${baseUrl}/verify-email/${verificationToken}`;
       await this.mailService.sendVerificationEmail(
         verificationUrl,
         signupDto.email,
@@ -97,8 +97,8 @@ export class UserService {
       await this.userRepository.save(user);
 
       // Send the verification email
-      const baseUrl = this.configService.get<string>('VERIFICATION_BASE_URL'); 
-      const verificationUrl = `${baseUrl}/${verificationToken}`;
+      const baseUrl = this.configService.get('appConfig.baseUrl');
+      const verificationUrl = `${baseUrl}/verify-email/${verificationToken}`;
       await this.mailService.sendVerificationEmail(verificationUrl, email);
     } catch (error) {
       console.log(error);
@@ -255,8 +255,8 @@ export class UserService {
           'Failed to generate reset password token',
         );
 
-      const baseUrl = this.configService.get<string>('RESET_PASSWORD_URL'); 
-      const url = `${baseUrl}/${token}`;
+      const baseUrl = this.configService.get('appConfig.baseUrl');
+      const url = `${baseUrl}/reset-password/${token}`;
       const arrayToken = token.split('.');
       const tokenPayload = JSON.parse(atob(arrayToken[1]));
       const userEmail = tokenPayload.email;

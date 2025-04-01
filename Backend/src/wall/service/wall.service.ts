@@ -18,6 +18,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { WallVisibility } from '../enum/wall-visibility.enum';
 import { v4 as uuidv4 } from 'uuid';
 import { User } from 'src/common/decorator/user.decorater';
+import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class WallService {
   constructor(
@@ -29,6 +30,7 @@ export class WallService {
     private readonly socialLinkRepository: Repository<SocialLink>,
 
     private readonly dataSource: DataSource,
+    private readonly configService: ConfigService,
   ) {}
 
   // Generate links
@@ -48,7 +50,7 @@ export class WallService {
       }
 
       const uniqueId = uuidv4();
-      const baseUrl = 'http://localhost:5173';
+      const baseUrl = this.configService.get('appConfig.baseUrl');
       const shareable_link = `${baseUrl}/walls/${wallId}/link/${uniqueId}`;
       const embed_link = `<iframe src="${baseUrl}/walls/${wallId}/link/${uniqueId}" width="600" height="400"></iframe>`;
 
@@ -112,6 +114,7 @@ export class WallService {
         try {
           social_links = JSON.parse(social_links);
         } catch (error) {
+          console.error('Error parsing social_links:', error);
           throw new BadRequestException('Invalid format for social_links');
         }
       }
@@ -315,6 +318,7 @@ export class WallService {
         try {
           updateWallDto.social_links = JSON.parse(updateWallDto.social_links);
         } catch (error) {
+          console.error('Error parsing social_links:', error);
           throw new BadRequestException('Invalid format for social_links');
         }
       }
