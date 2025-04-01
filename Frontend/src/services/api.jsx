@@ -115,4 +115,8 @@ export const getApiToken = async () => {
   return api.post("/developer/api-token");
 };
 
+export const searchTweets = async (wallId, query) => {
+  return await axios.get(`/api/walls/${wallId}/tweet?search=${query}`);
+};
+
 export default api;

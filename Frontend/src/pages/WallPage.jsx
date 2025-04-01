@@ -11,7 +11,6 @@ import Footer from "../components/Footer";
 import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
 import { toast } from "react-toastify";
-import axios from "axios";
 
 const WallPage = () => {
   const { id } = useParams();
@@ -19,7 +18,6 @@ const WallPage = () => {
   const [tweets, setTweets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
     const fetchWallData = async () => {
@@ -40,7 +38,7 @@ const WallPage = () => {
   }, [id]);
 
   const handleDelete = async (tweetId) => {
-    if (!tweetId) return;
+    if (!tweetId) return; 
     try {
       await deleteTweet(wall.id, tweetId);
       setTweets((prevTweets) =>
@@ -103,25 +101,6 @@ const WallPage = () => {
     return newArray;
   };
 
-  // Handle search submission
-  const handleSearchSubmit = async (e) => {
-    e.preventDefault();
-    if (searchText.trim() === "") return;
-    try {
-      const response = await axios.get(
-        `/api/walls/${wall.id}/tweet?search=${encodeURIComponent(searchText)}`
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setTweets(data);
-      } else {
-        console.error("Search error", response.status);
-      }
-    } catch (error) {
-      console.error("Error during search", error);
-    }
-  };
-
   if (loading) return <p className="text-center mt-10">Loading...</p>;
   if (!wall)
     return <p className="text-center mt-10 text-red-500">Wall not found.</p>;
@@ -148,25 +127,6 @@ const WallPage = () => {
             dangerouslySetInnerHTML={{ __html: wall.description }}
           ></motion.p>
         </motion.div>
-
-        {/* Search Box */}
-        <div className="w-full max-w-xl mb-6">
-          <form onSubmit={handleSearchSubmit} className="flex items-center">
-            <input
-              type="text"
-              placeholder="Search tweets..."
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              className="p-2 border rounded-l w-full"
-            />
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded-r hover:bg-blue-600 transition"
-            >
-              Search
-            </button>
-          </form>
-        </div>
 
         {/* Action Section with Shuffle Button aligned to the right */}
         <div className="w-full flex justify-end mb-4">
