@@ -18,6 +18,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { WallVisibility } from '../enum/wall-visibility.enum';
 import { v4 as uuidv4 } from 'uuid';
 import { User } from 'src/common/decorator/user.decorater';
+
 import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class WallService {
@@ -404,9 +405,9 @@ export class WallService {
     try {
       const existingUser = await this.userRepository.getByEmail(user.email);
 
-    if (!existingUser) {
-      throw new NotFoundException("User doesn't exist");
-    }
+      if (!existingUser) {
+        throw new NotFoundException("User doesn't exist");
+      }
       if (!keyword) {
         throw new BadRequestException('Search keyword is required');
       }

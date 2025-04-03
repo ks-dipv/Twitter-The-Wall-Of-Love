@@ -40,6 +40,7 @@ export class WallController {
   async createWall(
     @Body() createWallDto: CreateWallDto,
     @User() user,
+
     @UploadedFile() logo?: Express.Multer.File,
   ) {
     return await this.wallService.createWall(createWallDto, user, logo);
@@ -146,6 +147,6 @@ export class WallController {
     type: String,
   })
   async searchWalls(@Query('q') keyword: string, @User() user) {
-    return await this.wallService.searchWalls(keyword,user);
+    return await this.wallService.searchWalls(keyword, user);
   }
 }

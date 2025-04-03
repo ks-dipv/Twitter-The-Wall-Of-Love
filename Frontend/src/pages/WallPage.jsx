@@ -38,7 +38,8 @@ const WallPage = () => {
   }, [id]);
 
   const handleDelete = async (tweetId) => {
-    if (!tweetId) return;
+
+    if (!tweetId) return; 
 
     try {
       await deleteTweet(wall.id, tweetId);

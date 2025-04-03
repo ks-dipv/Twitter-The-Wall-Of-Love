@@ -110,6 +110,12 @@ const SortableTweet = ({ tweet, onDelete }) => {
 
 const TweetList = ({ tweets, onDelete, onReorder }) => {
   const isShare = !location.pathname.includes("/link");
+  const [searchQuery, setSearchQuery] = useState(""); // Search state
+
+  const filteredTweets = tweets.filter((tweet) =>
+    tweet.content.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -140,6 +146,17 @@ const TweetList = ({ tweets, onDelete, onReorder }) => {
       {/* Toast Notifications */}
       <ToastContainer autoClose={1000} hideProgressBar />
 
+      {/* Search Box */}
+      <div className="w-full max-w-2xl mx-auto mb-4">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search tweets..."
+          className="w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-blue-400 focus:border-blue-400"
+        />
+      </div>
+
       {isShare ? (
         <DndContext
           sensors={sensors}
@@ -151,21 +168,33 @@ const TweetList = ({ tweets, onDelete, onReorder }) => {
             strategy={rectSortingStrategy}
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4">
-              {tweets.map((tweet) => (
-                <SortableTweet
-                  key={tweet.id}
-                  tweet={tweet}
-                  onDelete={onDelete}
-                />
-              ))}
+              {filteredTweets.length > 0 ? (
+                filteredTweets.map((tweet) => (
+                  <SortableTweet
+                    key={tweet.id}
+                    tweet={tweet}
+                    onDelete={onDelete}
+                  />
+                ))
+              ) : (
+                <p className="text-center text-gray-500 col-span-3">
+                  No matching tweets found
+                </p>
+              )}
             </div>
           </SortableContext>
         </DndContext>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4">
-          {tweets.map((tweet) => (
-            <SortableTweet key={tweet.id} tweet={tweet} />
-          ))}
+          {filteredTweets.length > 0 ? (
+            filteredTweets.map((tweet) => (
+              <SortableTweet key={tweet.id} tweet={tweet} />
+            ))
+          ) : (
+            <p className="text-center text-gray-500 col-span-3">
+              No matching tweets found
+            </p>
+          )}
         </div>
       )}
     </div>

@@ -32,6 +32,7 @@ export class TweetRepository extends Repository<Tweets> {
       })
       .getMany();
   }
+
   async filterTweetsByDateRange(
     wallId: number,
     startDate?: Date,
@@ -55,4 +56,6 @@ export class TweetRepository extends Repository<Tweets> {
 
     return await query.orderBy('tweets.created_at', 'DESC').getMany();
   }
+
+  
 }
