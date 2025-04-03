@@ -79,7 +79,7 @@ const Navbar = ({ logo, wallId }) => {
         <div className="hidden md:flex gap-4">
           {/* Add Tweet Button */}
           <button
-            className="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition"
+            className="px-4 py-2 bg-[#334155] text-white font-semibold  hover:bg-[#94A3B8] transition"
             onClick={() => navigate(`/admin/walls/${wallId}/add-tweet`)}
           >
             + Add Tweet
@@ -88,7 +88,7 @@ const Navbar = ({ logo, wallId }) => {
           {/* Wall Settings Button */}
           <div className="relative" ref={dropdownRef}>
             <button
-              className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition"
+              className="px-4 py-2 bg-[#334155] text-white font-semibold  shadow-md hover:bg-[#94A3B8] transition"
               onClick={() => setDropdownOpen((prev) => !prev)}
             >
               <FaCog className="inline mr-2" />Wall Settings

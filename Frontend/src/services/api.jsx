@@ -119,4 +119,12 @@ export const searchTweets = async (wallId, query) => {
   return await axios.get(`/api/walls/${wallId}/tweet?search=${query}`);
 };
 
+export const getFilteredTweetsByWall = async (wallId, startDate, endDate) => {
+  return await axios.get(
+    `/api/walls/${wallId}/filter?startDate=${startDate}&endDate=${endDate}`
+  );
+};
+
+
+
 export default api;
