@@ -120,17 +120,9 @@ export const searchTweets = async (wallId, query) => {
 };
 
 export const getFilteredTweetsByWall = async (wallId, startDate, endDate) => {
-  if (!wallId) {
-    console.error("Error: wallId is undefined in getFilteredTweetsByWall");
-    return Promise.reject(new Error("Wall ID is required"));
-  }
-
   return await axios.get(
     `/api/walls/${wallId}/filter?startDate=${startDate}&endDate=${endDate}`
   );
 };
-
-
-
 
 export default api;
