@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useParams } from "react-router-dom";
 import {
   DndContext,
   closestCenter,
@@ -15,6 +16,7 @@ import {
 } from "@dnd-kit/sortable";
 import { toast, ToastContainer } from "react-toastify";
 import ConfirmationDialog from "../components/ConfirmationDialog";
+import { getFilteredTweetsByWall } from "../services/api";
 
 const SortableTweet = ({ tweet, onDelete }) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -109,12 +111,31 @@ const SortableTweet = ({ tweet, onDelete }) => {
 };
 
 const TweetList = ({ tweets, onDelete, onReorder }) => {
+  const { id } = useParams();
   const isShare = !location.pathname.includes("/link");
-  const [searchQuery, setSearchQuery] = useState(""); // Search state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [filteredTweets, setFilteredTweets] = useState(tweets);
 
-  const filteredTweets = tweets.filter((tweet) =>
+  const displayedTweets = filteredTweets.filter((tweet) =>
     tweet.content.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleFilter = async () => {
+    if (!startDate || !endDate) {
+      toast.error("Please select both start and end dates.");
+      return;
+    }
+
+    try {
+      const response = await getFilteredTweetsByWall(id, startDate, endDate);
+      setFilteredTweets(response.data);
+    } catch (error) {
+      console.error("Error filtering tweets:", error);
+      toast.error("Failed to fetch filtered tweets.");
+    }
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -146,8 +167,8 @@ const TweetList = ({ tweets, onDelete, onReorder }) => {
       {/* Toast Notifications */}
       <ToastContainer autoClose={1000} hideProgressBar />
 
-      {/* Search Box */}
-      <div className="w-full max-w-2xl mx-auto mb-4">
+      {/* Search & Date Filters */}
+      <div className="w-full max-w-2xl mx-auto mb-8 flex space-x-2">
         <input
           type="text"
           value={searchQuery}
@@ -155,6 +176,24 @@ const TweetList = ({ tweets, onDelete, onReorder }) => {
           placeholder="Search tweets..."
           className="w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-blue-400 focus:border-blue-400"
         />
+        <input
+          type="date"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+          className="px-2 py-2 border rounded-lg"
+        />
+        <input
+          type="date"
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+          className="px-2 py-2 border rounded-lg"
+        />
+        <button
+          onClick={handleFilter}
+          className="p-2 bg-[#334155] text-white  rounded md transition-all duration-300 hover:bg-[#94A3B8] "
+        >
+          🔍
+        </button>
       </div>
 
       {isShare ? (
@@ -168,8 +207,8 @@ const TweetList = ({ tweets, onDelete, onReorder }) => {
             strategy={rectSortingStrategy}
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4">
-              {filteredTweets.length > 0 ? (
-                filteredTweets.map((tweet) => (
+            {displayedTweets.length > 0 ? (
+                displayedTweets.map((tweet) => (
                   <SortableTweet
                     key={tweet.id}
                     tweet={tweet}

@@ -11,16 +11,15 @@ import Footer from "../components/Footer";
 import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
 import { toast } from "react-toastify";
-import { getFilteredTweetsByWall } from "../services/api";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faShuffle } from "@fortawesome/free-solid-svg-icons";
 const WallPage = () => {
   const { id } = useParams();
   const [wall, setWall] = useState(null);
   const [tweets, setTweets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-
+  
   useEffect(() => {
     const fetchWallData = async () => {
       try {
@@ -38,21 +37,6 @@ const WallPage = () => {
 
     fetchWallData();
   }, [id]);
-
-  const handleFilter = async () => {
-    if (!startDate || !endDate) {
-      toast.error("Please select both start and end dates.");
-      return;
-    }
-
-    try {
-      const response = await getFilteredTweetsByWall(id, startDate, endDate);
-      setTweets(response.data);
-    } catch (error) {
-      console.error("Error filtering tweets:", error);
-      toast.error("Failed to fetch filtered tweets.");
-    }
-  };
 
   const handleDelete = async (tweetId) => {
     if (!tweetId) return;
@@ -155,47 +139,17 @@ const WallPage = () => {
 
         {/* Action Section with Shuffle Button */}
         <div className="w-full flex justify-end mb-4">
-          <div className="flex flex-col items-end space-y-2">
-            {/* Shuffle Button */}
-            <button
-              onClick={handleShuffle}
-              disabled={isSaving}
-              className="px-5 py-2 bg-[#334155] text-white font-medium rounded transition-all duration-300 hover:bg-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-blue-400"
-            >
-              🔀 Shuffle Tweets
-            </button>
-
-            {/* Filter Section - Small Box with 'From' & 'To' Labels */}
-            <div className="flex flex-col items-end">
-              <div className="bg-white p-3 -lg shadow-md flex items-center space-x-3 border border-gray-300">
-                <div className="flex flex-col">
-                  <label className="text-gray-600 text-sm">From</label>
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="border border-gray-300 -md px-2 py-1 text-sm focus:ring focus:ring-blue-400"
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <label className="text-gray-600 text-sm">To</label>
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="border border-gray-300 -md px-2 py-1 text-sm focus:ring focus:ring-blue-400"
-                  />
-                </div>
-                <button
-                  onClick={handleFilter}
-                  className="p-2 bg-[#334155] text-white  rounded md transition-all duration-300 hover:bg-[#94A3B8] "
-                >
-                  🔍
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+  <div className="flex flex-col items-end space-y-2">
+    {/* Shuffle Button with Icon */}
+    <button
+      onClick={handleShuffle}
+      disabled={isSaving}
+      className="px-5 py-2 bg-[#334155] text-white font-medium rounded transition-all duration-300 hover:bg-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-blue-400 flex items-center gap-2"
+    >
+      <FontAwesomeIcon icon={faShuffle} /> Shuffle Tweets
+    </button>
+  </div>
+</div>
 
         {/* Tweets Section */}
         <div className="w-full">
