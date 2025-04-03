@@ -244,7 +244,7 @@ const UpdateWallPage = () => {
           <div className="flex space-x-4 pt-4">
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white p-3 rounded hover:bg-blue-600"
+              className="w-full bg-[#334155] text-white p-3 rounded hover:bg-[#94A3B8]"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Updating..." : "Update Wall"}

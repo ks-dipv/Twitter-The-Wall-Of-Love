@@ -64,7 +64,7 @@ const VerifyEmail = () => {
           <>
             <button
               onClick={handleVerify}
-              className="w-full bg-blue-500 text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-600 transition"
+              className="w-full bg-[#94A3B8] text-white font-semibold px-6 py-3 rounded-lg hover:bg-[#94A3B8] transition"
             >
               Verify Email
             </button>

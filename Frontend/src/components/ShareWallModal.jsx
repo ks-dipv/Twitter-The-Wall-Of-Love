@@ -125,9 +125,9 @@ const ShareWallModal = ({ wallId, isOpen, onClose }) => {
                 className={`px-3 py-2 rounded-lg text-white flex items-center justify-center transition-colors w-full sm:w-auto ${
                   links.shareable_link
                     ? copied.shareable
-                      ? "bg-green-500"
-                      : "bg-blue-500"
-                    : "bg-blue-500 hover:bg-blue-600"
+                      ? "bg-[#334155]"
+                      : "bg-[#94A3B8]"
+                    : "bg-[#334155] hover:bg-[#94A3B8]"
                 }`}
               >
                 {links.shareable_link ? <FaCopy className="mr-1" /> : null}
@@ -166,9 +166,9 @@ const ShareWallModal = ({ wallId, isOpen, onClose }) => {
                 className={`px-3 py-2 rounded-lg text-white flex items-center justify-center transition-colors w-full sm:w-auto ${
                   links.embed_link
                     ? copied.embed
-                      ? "bg-green-500"
-                      : "bg-blue-500"
-                    : "bg-blue-500 hover:bg-blue-600"
+                      ? "bg-[#334155]"
+                      : "bg-[#94A3B8]"
+                    : "bg-[#334155] hover:bg-[#94A3B8]"
                 }`}
               >
                 {links.embed_link ? <FaCopy className="mr-1" /> : null}

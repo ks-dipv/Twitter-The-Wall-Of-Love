@@ -160,7 +160,7 @@ const WallPage = () => {
             <button
               onClick={handleShuffle}
               disabled={isSaving}
-              className="px-5 py-2 bg-[#334155] text-white font-medium  transition-all duration-300 hover:bg-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="px-5 py-2 bg-[#334155] text-white font-medium rounded transition-all duration-300 hover:bg-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
               🔀 Shuffle Tweets
             </button>
@@ -188,7 +188,7 @@ const WallPage = () => {
                 </div>
                 <button
                   onClick={handleFilter}
-                  className="p-2 bg-[#334155] text-white -md transition-all duration-300 hover:bg-[#94A3B8] "
+                  className="p-2 bg-[#334155] text-white  rounded md transition-all duration-300 hover:bg-[#94A3B8] "
                 >
                   🔍
                 </button>

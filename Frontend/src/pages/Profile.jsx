@@ -148,7 +148,7 @@ export default function ProfilePage() {
                 />
                 <button
                   onClick={handleUpdate}
-                  className="bg-green-500 text-white px-4 py-2 rounded mt-2"
+                  className="bg-[#334155] text-white px-4 py-2 rounded mt-2"
                 >
                   Save Changes
                 </button>
@@ -159,7 +159,7 @@ export default function ProfilePage() {
                 <p className="text-gray-600">{user.email}</p>
                 <button
                   onClick={() => setEditing(true)}
-                  className="bg-blue-500 text-white px-4 py-2 rounded mt-4"
+                  className="bg-[#334155] text-white px-4 py-2 rounded mt-4"
                 >
                   Edit Profile
                 </button>
@@ -200,7 +200,7 @@ export default function ProfilePage() {
                   onClick={handleGenerateToken}
                   disabled={isGeneratingToken}
                   className={`${
-                    apiToken ? "bg-gray-500" : "bg-blue-500"
+                    apiToken ? "bg-[#94A3B8]" : "bg-[#334155]"
                   } text-white px-4 py-2 rounded flex items-center justify-center`}
                 >
                   {isGeneratingToken

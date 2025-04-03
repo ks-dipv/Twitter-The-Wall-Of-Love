@@ -71,7 +71,7 @@ const ResendEmail = () => {
           className={`w-full px-6 py-3 rounded-lg text-white font-semibold transition ${
             isButtonDisabled
               ? "bg-gray-400 dark:bg-gray-700 cursor-not-allowed"
-              : "bg-blue-500 hover:bg-blue-600"
+              : "bg-[#94A3B8]  hover:bg-[#D1D5DB]"
           }`}
         >
           {isButtonDisabled ? `Resend Email (${seconds}s)` : "Resend Email"}

@@ -56,7 +56,7 @@ const AddTweet = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center bg-blue-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-blue-700 transition"
+            className="w-full flex items-center justify-center bg-[#334155] text-white px-4 py-3 rounded-xl font-semibold hover:bg-[#94A3B8] transition"
           >
             {loading ? (
               <Loader2 className="animate-spin w-5 h-5" />
