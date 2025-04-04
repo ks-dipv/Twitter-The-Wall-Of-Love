@@ -24,6 +24,6 @@ import { GenerateTokenProvider } from 'src/common/services/generate-token.provid
     UploadService,
     UserRepository,
   ],
-  exports: [UserModule, UserRepository],
+  exports: [UserService, UserRepository],
 })
 export class UserModule {}

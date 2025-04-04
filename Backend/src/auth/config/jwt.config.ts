@@ -10,5 +10,7 @@ export default registerAs('jwt', () => {
       10,
     ),
     apiTokenTtl: parseInt(process.env.API_ACCESS_TOKEN_TTL ?? '31557600', 10),
+    googleClientId: process.env.GOOGLE_CLIENT_ID,
+    googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
   };
 });
