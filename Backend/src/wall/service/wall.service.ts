@@ -210,13 +210,6 @@ export class WallService {
         throw new NotFoundException('Wall not found');
       }
 
-      // Check if wall is private
-      if (wall.visibility === WallVisibility.PRIVATE) {
-        throw new UnauthorizedException(
-          'This Wall is private and cannot be accessed via sharable link',
-        );
-      }
-
       return wall;
     } catch (error) {
       throw new BadRequestException(
