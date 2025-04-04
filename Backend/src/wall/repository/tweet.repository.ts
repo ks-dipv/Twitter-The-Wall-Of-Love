@@ -20,7 +20,7 @@ export class TweetRepository extends Repository<Tweets> {
       where: { id: tweetId, wall: { id: wallId } },
     });
   }
-   async searchTweetsByKeyword(
+  async searchTweetsByKeyword(
     wallId: number,
     keyword: string,
   ): Promise<Tweets[]> {
@@ -32,4 +32,30 @@ export class TweetRepository extends Repository<Tweets> {
       })
       .getMany();
   }
+
+  async filterTweetsByDateRange(
+    wallId: number,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<Tweets[]> {
+    const query = this.createQueryBuilder('tweets')
+      .leftJoin('tweets.wall', 'wall')
+      .where('wall.id = :wallId', { wallId });
+
+    if (startDate) {
+      query.andWhere('tweets.created_at >= :startDate', {
+        startDate: startDate.toISOString(),
+      });
+    }
+
+    if (endDate) {
+      query.andWhere('tweets.created_at <= :endDate', {
+        endDate: endDate.toISOString(),
+      });
+    }
+
+    return await query.orderBy('tweets.created_at', 'DESC').getMany();
+  }
+
+  
 }

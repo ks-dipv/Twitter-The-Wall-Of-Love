@@ -10,7 +10,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { TweetService } from './service/tweet.service';
-import { ApiTags, ApiParam, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiParam, ApiBody, ApiQuery } from '@nestjs/swagger';
 import { User } from '../common/decorator/user.decorater';
 import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
 
@@ -120,4 +120,22 @@ export class TweetController {
   ) {
     return await this.tweetService.searchTweets(wallId, keyword, user);
   }
+
+  @Get(':wallId/filter')
+@CommonApiDecorators({
+  summary: 'Get all tweets for a wall with optional date filtering',
+  successDescription: 'List of tweets retrieved',
+})
+@ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
+@ApiQuery({ name: 'startDate', required: false, type: String, description: 'Start date for filtering tweets' })
+@ApiQuery({ name: 'endDate', required: false, type: String, description: 'End date for filtering tweets' })
+async getTweetsByDate(
+  @Param('wallId') wallId: number,
+  @User() user,
+  @Query('startDate') startDate?: string,
+  @Query('endDate') endDate?: string
+) {
+  return await this.tweetService.filterTweetsByDate(wallId, user, startDate, endDate);
+}
+
 }

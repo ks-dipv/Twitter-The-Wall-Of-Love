@@ -8,12 +8,19 @@ import {
   Put,
   UploadedFile,
   UseInterceptors,
+  Query,
 } from '@nestjs/common';
 import { WallService } from './service/wall.service';
 import { CreateWallDto } from './dtos/create-wall.dto';
 import { UpdateWallDto } from './dtos/update-wall.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiParam, ApiBody, ApiConsumes } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiParam,
+  ApiBody,
+  ApiConsumes,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { User } from 'src/common/decorator/user.decorater';
 import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
 
@@ -33,6 +40,7 @@ export class WallController {
   async createWall(
     @Body() createWallDto: CreateWallDto,
     @User() user,
+
     @UploadedFile() logo?: Express.Multer.File,
   ) {
     return await this.wallService.createWall(createWallDto, user, logo);
@@ -129,5 +137,16 @@ export class WallController {
   })
   async getTotaData(@User() user) {
     return await this.wallService.getTotalData(user);
+  }
+
+  @Post('/search')
+  @ApiQuery({
+    name: 'search',
+    description: 'Keyword to search in wall title or description',
+    required: true,
+    type: String,
+  })
+  async searchWalls(@Query('q') keyword: string, @User() user) {
+    return await this.wallService.searchWalls(keyword, user);
   }
 }
