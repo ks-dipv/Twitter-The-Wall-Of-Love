@@ -131,7 +131,7 @@ export class WallService {
       const savedWall = await queryRunner.manager.save(wall);
 
       // Handle social links if provided
-      if (social_links.length > 0) {
+      if (social_links && social_links.length > 0) {
         const socialLinksEntities = social_links.map((link) =>
           queryRunner.manager.create(SocialLink, {
             platform: link.platform as SocialPlatform,
@@ -333,7 +333,7 @@ export class WallService {
       const updatedWall = await queryRunner.manager.save(wall);
 
       // Handle Social Links (Update, Add, Delete)
-      if (updateWallDto.social_links) {
+      if (updateWallDto.social_links && updateWallDto.social_links.length > 0) {
         const updatedLinks = updateWallDto.social_links.map(
           (linkDto) => linkDto.platform,
         );
