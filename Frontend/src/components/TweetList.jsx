@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useParams } from "react-router-dom";
 import {
   DndContext,
   closestCenter,
@@ -16,7 +15,6 @@ import {
 } from "@dnd-kit/sortable";
 import { toast, ToastContainer } from "react-toastify";
 import ConfirmationDialog from "../components/ConfirmationDialog";
-import { getFilteredTweetsByWall } from "../services/api";
 
 const SortableTweet = ({ tweet, onDelete }) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -62,7 +60,6 @@ const SortableTweet = ({ tweet, onDelete }) => {
         </button>
       )}
 
-      {/* Author Section */}
       <div className="flex items-center space-x-3 mb-2">
         <img
           src={tweet.author_profile_pic}
@@ -82,7 +79,6 @@ const SortableTweet = ({ tweet, onDelete }) => {
         </div>
       </div>
 
-      {/* Tweet Content */}
       <p
         className="text-gray-800 flex-grow"
         onClick={() => window.open(tweet.tweet_url, "_blank")}
@@ -90,13 +86,11 @@ const SortableTweet = ({ tweet, onDelete }) => {
         {tweet.content}
       </p>
 
-      {/* Tweet Stats */}
       <div className="flex justify-between text-gray-500 text-sm mt-4 pt-2">
         <span>❤️ {tweet.likes}</span>
         <span>💬 {tweet.comments}</span>
       </div>
 
-      {/* Delete Confirmation Dialog */}
       <ConfirmationDialog
         isOpen={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}
@@ -111,31 +105,7 @@ const SortableTweet = ({ tweet, onDelete }) => {
 };
 
 const TweetList = ({ tweets, onDelete, onReorder }) => {
-  const { id } = useParams();
   const isShare = !location.pathname.includes("/link");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [filteredTweets, setFilteredTweets] = useState(tweets);
-
-  const displayedTweets = filteredTweets.filter((tweet) =>
-    tweet.content.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleFilter = async () => {
-    if (!startDate || !endDate) {
-      toast.error("Please select both start and end dates.");
-      return;
-    }
-
-    try {
-      const response = await getFilteredTweetsByWall(id, startDate, endDate);
-      setFilteredTweets(response.data);
-    } catch (error) {
-      console.error("Error filtering tweets:", error);
-      toast.error("Failed to fetch filtered tweets.");
-    }
-  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -164,37 +134,7 @@ const TweetList = ({ tweets, onDelete, onReorder }) => {
 
   return (
     <div>
-      {/* Toast Notifications */}
       <ToastContainer autoClose={1000} hideProgressBar />
-
-      {/* Search & Date Filters */}
-      <div className="w-full max-w-2xl mx-auto mb-8 flex space-x-2">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search tweets..."
-          className="w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-blue-400 focus:border-blue-400"
-        />
-        <input
-          type="date"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          className="px-2 py-2 border rounded-lg"
-        />
-        <input
-          type="date"
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-          className="px-2 py-2 border rounded-lg"
-        />
-        <button
-          onClick={handleFilter}
-          className="p-2 bg-[#334155] text-white  rounded md transition-all duration-300 hover:bg-[#94A3B8] "
-        >
-          🔍
-        </button>
-      </div>
 
       {isShare ? (
         <DndContext
@@ -207,8 +147,8 @@ const TweetList = ({ tweets, onDelete, onReorder }) => {
             strategy={rectSortingStrategy}
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4">
-            {displayedTweets.length > 0 ? (
-                displayedTweets.map((tweet) => (
+              {tweets.length > 0 ? (
+                tweets.map((tweet) => (
                   <SortableTweet
                     key={tweet.id}
                     tweet={tweet}
@@ -217,7 +157,7 @@ const TweetList = ({ tweets, onDelete, onReorder }) => {
                 ))
               ) : (
                 <p className="text-center text-gray-500 col-span-3">
-                  No matching tweets found
+                  No tweets available
                 </p>
               )}
             </div>
@@ -225,13 +165,13 @@ const TweetList = ({ tweets, onDelete, onReorder }) => {
         </DndContext>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4">
-          {filteredTweets.length > 0 ? (
-            filteredTweets.map((tweet) => (
+          {tweets.length > 0 ? (
+            tweets.map((tweet) => (
               <SortableTweet key={tweet.id} tweet={tweet} />
             ))
           ) : (
             <p className="text-center text-gray-500 col-span-3">
-              No matching tweets found
+              No tweets available
             </p>
           )}
         </div>

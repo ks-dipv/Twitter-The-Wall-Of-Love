@@ -5,6 +5,7 @@ import {
   getTweetsByWall,
   deleteTweet,
   reorderTweets,
+  getFilteredTweetsByWall,
 } from "../services/api";
 import TweetList from "../components/TweetList";
 import Footer from "../components/Footer";
@@ -13,13 +14,17 @@ import Navbar from "../components/Navbar";
 import { toast } from "react-toastify";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShuffle } from "@fortawesome/free-solid-svg-icons";
+
 const WallPage = () => {
   const { id } = useParams();
   const [wall, setWall] = useState(null);
   const [tweets, setTweets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  
+  const [searchQuery, setSearchQuery] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
   useEffect(() => {
     const fetchWallData = async () => {
       try {
@@ -54,20 +59,15 @@ const WallPage = () => {
   const handleReorder = async (startIndex, endIndex) => {
     if (startIndex === endIndex) return;
 
-    // Create a new array with the reordered items
     const reorderedTweets = arrayMove(tweets, startIndex, endIndex);
-
-    // Update the state with the new order
     setTweets(reorderedTweets);
 
-    // Save the new order to the server
     setIsSaving(true);
     try {
       const orderedTweetIds = reorderedTweets.map((tweet) => tweet.id);
       await reorderTweets(wall.id, orderedTweetIds);
     } catch (error) {
       toast.error("Error reordering tweets:", error);
-      // Optionally revert the order in case of error
       const tweetsResponse = await getTweetsByWall(id);
       setTweets(tweetsResponse.data);
     } finally {
@@ -78,7 +78,6 @@ const WallPage = () => {
   const handleShuffle = async () => {
     if (isSaving) return;
 
-    // Shuffle tweets using Fisher-Yates algorithm
     const shuffledTweets = [...tweets];
     for (let i = shuffledTweets.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -101,7 +100,25 @@ const WallPage = () => {
     }
   };
 
-  // Helper function to move array items
+  const handleFilter = async () => {
+    if (!startDate || !endDate) {
+      toast.error("Please select both start and end dates.");
+      return;
+    }
+
+    try {
+      const response = await getFilteredTweetsByWall(id, startDate, endDate);
+      setTweets(response.data);
+    } catch (error) {
+      console.error("Error filtering tweets:", error);
+      toast.error("Failed to fetch filtered tweets.");
+    }
+  };
+
+  const filteredTweets = tweets.filter((tweet) =>
+    tweet.content.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const arrayMove = (array, from, to) => {
     const newArray = [...array];
     const [movedItem] = newArray.splice(from, 1);
@@ -118,7 +135,6 @@ const WallPage = () => {
       <Navbar logo={wall.logo} wallId={wall.id} />
 
       <main className="flex-grow flex flex-col items-center p-6">
-        {/* Header Section with Title and Animated Description */}
         <motion.div
           className="text-center mb-6 w-full"
           initial={{ opacity: 0, y: 20 }}
@@ -137,41 +153,49 @@ const WallPage = () => {
           ></motion.p>
         </motion.div>
 
-        {/* Action Section with Shuffle Button */}
-        <div className="w-full flex justify-end mb-4">
-  <div className="flex flex-col items-end space-y-2">
-    {/* Shuffle Button with Icon */}
-    <button
-      onClick={handleShuffle}
-      disabled={isSaving}
-      className="px-5 py-2 bg-[#334155] text-white font-medium rounded transition-all duration-300 hover:bg-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-blue-400 flex items-center gap-2"
-    >
-      <FontAwesomeIcon icon={faShuffle} /> Shuffle Tweets
-    </button>
-  </div>
-</div>
-
-        {/* Tweets Section */}
-        <div className="w-full">
-          {tweets.length > 0 ? (
-            <TweetList
-              tweets={tweets}
-              onDelete={handleDelete}
-              onReorder={handleReorder}
+        <div className="w-full flex justify-between items-center mb-4">
+          <div className="flex justify-center items-center flex-grow space-x-2">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search tweets..."
+              className="px-4 py-2 border rounded-lg shadow-sm focus:ring-blue-400 focus:border-blue-400"
             />
-          ) : (
-            <motion.div
-              className="text-center py-12 bg-gray-50 rounded-lg shadow-inner"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 1 }}
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="px-2 py-2 border rounded-lg"
+            />
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="px-2 py-2 border rounded-lg"
+            />
+            <button
+              onClick={handleFilter}
+              className="p-2 bg-[#334155] text-white rounded transition-all duration-300 hover:bg-[#94A3B8]"
             >
-              <p className="text-xl text-gray-500">No tweets available</p>
-              <p className="text-gray-400 mt-2">
-                Tweets added to this wall will appear here
-              </p>
-            </motion.div>
-          )}
+              🔍
+            </button>
+          </div>
+          <button
+            onClick={handleShuffle}
+            disabled={isSaving}
+            className="px-5 py-2 bg-[#334155] text-white font-medium rounded transition-all duration-300 hover:bg-[#94A3B8] flex items-center gap-2"
+          >
+            <FontAwesomeIcon icon={faShuffle} /> Shuffle Tweets
+          </button>
+        </div>
+
+        <div className="w-full">
+          <TweetList
+            tweets={filteredTweets}
+            onDelete={handleDelete}
+            onReorder={handleReorder}
+          />
         </div>
       </main>
       <Footer socialLinks={wall.social_links} />
