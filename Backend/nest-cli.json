@@ -6,7 +6,7 @@
     "deleteOutDir": true,
     "assets": [
       {
-        "include": "./user/templates",
+        "include": "./auth/templates",
         "outDir": "dist/",
         "watchAssets": true
       }

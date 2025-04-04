@@ -5,118 +5,148 @@ import {
   Param,
   Delete,
   Body,
-  Request,
-  UseInterceptors,
-  UploadedFile,
   Put,
+  UploadedFile,
+  UseInterceptors,
+  Query,
 } from '@nestjs/common';
 import { WallService } from './service/wall.service';
 import { CreateWallDto } from './dtos/create-wall.dto';
 import { UpdateWallDto } from './dtos/update-wall.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
-  ApiOperation,
-  ApiResponse,
   ApiTags,
   ApiParam,
   ApiBody,
+  ApiConsumes,
+  ApiQuery,
 } from '@nestjs/swagger';
+import { User } from 'src/common/decorator/user.decorater';
+import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
 
 @ApiTags('Walls')
 @Controller('api/walls')
 export class WallController {
   constructor(private readonly wallService: WallService) {}
 
-  // Create a new Wall
-  @Post('entry')
-  @ApiOperation({ summary: 'Create a new Wall' })
-  @ApiResponse({ status: 201, description: 'Wall created successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid input data' })
+  @Post()
+  @CommonApiDecorators({
+    summary: 'Create a new Wall',
+    successStatus: 201,
+    successDescription: 'Wall created successfully',
+  })
+  @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('logo'))
   async createWall(
     @Body() createWallDto: CreateWallDto,
-    @Request() req,
+    @User() user,
+
     @UploadedFile() logo?: Express.Multer.File,
   ) {
-    return await this.wallService.createWall(createWallDto, req, logo);
+    return await this.wallService.createWall(createWallDto, user, logo);
   }
 
-  // Get all Walls for the logged-in user
-  @Get('list')
-  @ApiOperation({ summary: 'Get all Walls for the logged-in user' })
-  @ApiResponse({ status: 200, description: 'List of walls retrieved' })
-  async getAllWalls(@Request() req) {
-    return await this.wallService.getAllWalls(req);
+  @Get()
+  @CommonApiDecorators({
+    summary: 'Get all Walls for the logged-in user',
+    successDescription: 'List of walls retrieved',
+  })
+  async getAllWalls(@User() user) {
+    return await this.wallService.getAllWalls(user);
   }
 
-  // Get a specific Wall by ID
-  @Get('fetch/:id')
-  @ApiOperation({ summary: 'Get a specific Wall by ID' })
+  @Get(':id')
+  @CommonApiDecorators({
+    summary: 'Get a specific Wall by ID',
+    successDescription: 'Wall details retrieved',
+    errorStatus: 404,
+    errorDescription: 'Wall not found',
+  })
   @ApiParam({ name: 'id', description: 'ID of the Wall', type: Number })
-  @ApiResponse({ status: 200, description: 'Wall details retrieved' })
-  @ApiResponse({ status: 404, description: 'Wall not found' })
-  async getWallById(@Param('id') id: number, @Request() req) {
-    return await this.wallService.getWallById(id, req);
+  async getWallById(@Param('id') id: number, @User() user) {
+    return await this.wallService.getWallById(id, user);
   }
 
   @Post(':wallId/generate-link')
-  @ApiOperation({ summary: 'Generate a shareable link for a Wall' })
+  @CommonApiDecorators({
+    summary: 'Generate a shareable link for a Wall',
+    successDescription: 'Shareable link generated',
+    errorStatus: 404,
+    errorDescription: 'Wall not found',
+  })
   @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
-  @ApiResponse({ status: 200, description: 'Shareable link generated' })
-  @ApiResponse({ status: 404, description: 'Wall not found' })
-  async generateLink(@Param('wallId') wallId: number, @Request() req) {
-    return await this.wallService.generateLinks(wallId, req);
+  async generateLink(@Param('wallId') wallId: number, @User() user) {
+    return await this.wallService.generateLinks(wallId, user);
   }
 
-  // Get Wall by sharable link
   @Get(':wallId/link/:uuid')
-  @ApiOperation({ summary: 'Get a Wall by shareable link' })
+  @CommonApiDecorators({
+    summary: 'Get a Wall by shareable link',
+    successDescription: 'Wall details retrieved',
+    errorStatus: 404,
+    errorDescription: 'Wall not found',
+  })
   @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
   @ApiParam({
     name: 'uuid',
     description: 'Unique identifier for the shareable link',
     type: String,
   })
-  @ApiResponse({ status: 200, description: 'Wall details retrieved' })
-  @ApiResponse({ status: 404, description: 'Wall not found' })
   async getWallBySharableLink(@Param('wallId') wallId: number) {
     return await this.wallService.getWallBySharableLink(wallId);
   }
 
-  // Delete a Wall by ID
-  @Delete('remove/:id')
-  @ApiOperation({ summary: 'Delete a Wall by ID' })
+  @Delete(':id')
+  @CommonApiDecorators({
+    summary: 'Delete a Wall by ID',
+    successDescription: 'Wall deleted successfully',
+    errorStatus: 404,
+    errorDescription: 'Wall not found',
+  })
   @ApiParam({ name: 'id', description: 'ID of the Wall', type: Number })
-  @ApiResponse({ status: 200, description: 'Wall deleted successfully' })
-  @ApiResponse({ status: 404, description: 'Wall not found' })
-  async deleteWall(@Param('id') id: number, @Request() req) {
-    return await this.wallService.deleteWall(id, req);
+  async deleteWall(@Param('id') id: number, @User() user) {
+    return await this.wallService.deleteWall(id, user);
   }
 
-  //Update a wall by ID
-  @Put('update/:id')
-  @ApiOperation({ summary: 'Update a Wall by ID' })
+  @Put(':id')
+  @CommonApiDecorators({
+    summary: 'Update a Wall by ID',
+    successDescription: 'Wall updated successfully',
+    errorStatus: 404,
+    errorDescription: 'Wall not found',
+  })
+  @ApiConsumes('multipart/form-data')
   @ApiParam({ name: 'id', description: 'ID of the Wall', type: Number })
   @ApiBody({ type: UpdateWallDto })
-  @ApiResponse({ status: 200, description: 'Wall updated successfully' })
-  @ApiResponse({ status: 404, description: 'Wall not found' })
   @UseInterceptors(FileInterceptor('logo'))
   async updateWall(
     @Param('id') id: number,
     @Body() updateWallDto: UpdateWallDto,
-    @Request() req,
+    @User() user,
     @UploadedFile() logo?: Express.Multer.File,
   ) {
-    return await this.wallService.updateWall(id, updateWallDto, req, logo);
+    return await this.wallService.updateWall(id, updateWallDto, user, logo);
   }
 
-  //Delete a social link
-  @Delete('social-link/:id')
-  @ApiOperation({ summary: 'Delete a social link' })
-  @ApiParam({ name: 'id', description: 'ID of the Social Link', type: Number })
-  @ApiResponse({ status: 200, description: 'Social link deleted successfully' })
-  @ApiResponse({ status: 404, description: 'Social link not found' })
-  async deleteSocialLink(@Param('id') id: number, @Request() req) {
-    return await this.wallService.deleteSocialLink(id, req);
+  @Post('total-data')
+  @CommonApiDecorators({
+    summary: 'Get total data of walls',
+    successDescription: 'Total data retrieved successfully',
+    errorStatus: 401,
+    errorDescription: 'Unauthorized',
+  })
+  async getTotaData(@User() user) {
+    return await this.wallService.getTotalData(user);
+  }
+
+  @Post('/search')
+  @ApiQuery({
+    name: 'search',
+    description: 'Keyword to search in wall title or description',
+    required: true,
+    type: String,
+  })
+  async searchWalls(@Query('q') keyword: string, @User() user) {
+    return await this.wallService.searchWalls(keyword, user);
   }
 }

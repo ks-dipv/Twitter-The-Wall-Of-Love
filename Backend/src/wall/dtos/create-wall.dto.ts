@@ -1,11 +1,10 @@
 import {
   IsEnum,
   IsNotEmpty,
-  IsArray,
-  ValidateNested,
   IsOptional,
   IsString,
   MaxLength,
+  Matches,
 } from 'class-validator';
 import { WallVisibility } from '../enum/wall-visibility.enum';
 import { SocialLinkDto } from './social-link.dto';
@@ -26,10 +25,15 @@ export class CreateWallDto {
   @ApiPropertyOptional({
     description: 'The URL of the wall logo',
     example: 'https://example.com/logo.png',
+    type: 'file',
+    format: 'binary',
   })
   @IsOptional()
   @IsString()
-  logo?: string;
+  @Matches(/\.(jpg|jpeg|png)$/i, {
+    message: 'Logo must be in JPG, JPEG, or PNG format',
+  })
+  logo?: any;
 
   @ApiPropertyOptional({
     description: 'A short description of the wall',
@@ -38,7 +42,6 @@ export class CreateWallDto {
   })
   @IsOptional()
   @IsString()
-  @MaxLength(250)
   description?: string;
 
   @ApiPropertyOptional({
@@ -55,8 +58,6 @@ export class CreateWallDto {
     type: [SocialLinkDto],
   })
   @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
   @Type(() => SocialLinkDto)
   social_links?: SocialLinkDto[];
 }

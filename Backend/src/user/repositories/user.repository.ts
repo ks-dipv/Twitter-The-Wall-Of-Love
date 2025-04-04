@@ -27,4 +27,8 @@ export class UserRepository extends Repository<User> {
       },
     });
   }
+
+  async findOneByGoogleId(googleId: string) {
+    return await this.findOneBy({ googleId });
+  }
 }

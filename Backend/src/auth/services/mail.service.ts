@@ -17,4 +17,20 @@ export class MailService {
       },
     });
   }
+
+  public async sendVerificationEmail(
+    url: string,
+    email: string,
+  ): Promise<void> {
+    await this.mailerservices.sendMail({
+      to: email,
+      from: `Support Team <support@twitter.com>`,
+      subject: 'Email Verification',
+      template: './verify-email',
+      context: {
+        email: email,
+        verificationUrl: url,
+      },
+    });
+  }
 }

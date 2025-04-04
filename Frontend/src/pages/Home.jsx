@@ -22,9 +22,9 @@ const Home = () => {
         {/* Logo & Title */}
         <div className="flex items-center space-x-3">
           <img
-            src="https://cdn-icons-png.flaticon.com/128/2297/2297921.png" // Replace with your logo URL or local file
+            src="https://cdn-icons-png.flaticon.com/128/2297/2297921.png" 
             alt="Wall of Love Logo"
-            className="h-10 w-auto" // Adjust the size if needed
+            className="h-10 w-auto" 
           />
           <h1 className="text-white text-2xl font-bold">Wall of Love</h1>
         </div>
@@ -66,7 +66,7 @@ const Home = () => {
         <div className="space-x-4">
           <RouterLink
             to="/signin"
-            className="relative px-6 py-2 text-white text-lg font-semibold rounded-lg overflow-hidden bg-gradient-to-r from-blue-500 to-blue-700 shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl"
+            className="relative px-6 py-2 text-white text-lg font-semibold rounded-lg overflow-hidden bg-gradient-to-r bg-[#334155] shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl"
           >
             Sign In
             <span className="absolute inset-0 bg-blue-600 opacity-0 transition-opacity duration-300 hover:opacity-20"></span>
@@ -74,7 +74,7 @@ const Home = () => {
 
           <RouterLink
             to="/signup"
-            className="relative px-6 py-2 text-white text-lg font-semibold rounded-lg overflow-hidden bg-gradient-to-r from-green-500 to-green-700 shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl"
+            className="relative px-6 py-2 text-white text-lg font-semibold rounded-lg overflow-hidden bg-gradient-to-r bg-[#334155] shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl"
           >
             Sign Up
             <span className="absolute inset-0 bg-green-600 opacity-0 transition-opacity duration-300 hover:opacity-20"></span>
@@ -140,9 +140,9 @@ const Home = () => {
             onClick={() => navigate("/signin")}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
-            className="px-6 py-3 text-lg font-semibold rounded-full bg-white text-blue-600 hover:bg-blue-500 hover:text-white transition-all duration-300 shadow-lg shadow-blue-500/50"
+            className="px-6 py-3  bg-[#334155] font-semibold rounded-full  text-white hover:bg-[#94A3B8] hover:text-white transition-all duration-300 shadow-lg shadow-[#94A3B8]"
           >
-            🚀 Get Started
+            Get Started
           </motion.button>
         </div>
       </motion.div>

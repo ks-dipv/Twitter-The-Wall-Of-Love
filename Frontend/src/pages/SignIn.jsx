@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import { loginWithGoogle } from "../services/api";
+import { GoogleLogin } from "@react-oauth/google";
 
 const SignIn = () => {
   const { login } = useAuth();
@@ -18,9 +20,25 @@ const SignIn = () => {
     setError("");
     try {
       await login(credentials);
-      navigate("/walls");
+      toast.success("Login successful! 🚀");
+      setTimeout(() => {
+        navigate("/admin/dashboard");
+      }, 2000);
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed, try again.");
+      toast.error(err.response?.data?.message || "Login failed, try again.");
+    }
+  };
+
+  const handleGoogleSuccess = async (response) => {
+    try {
+      const googleToken = response.credential; // Google ID token
+      const result = await loginWithGoogle(googleToken); // Call backend API
+      login(result.data); // Store authentication data
+      toast.success("Logged in successfully! 🎉");
+      navigate("/admin/dashboard"); // Redirect user
+    } catch (error) {
+      console.error("Google Login Error:", error);
+      toast.error("Google login failed, try again.");
     }
   };
 
@@ -32,6 +50,8 @@ const SignIn = () => {
           "url('https://img.freepik.com/free-vector/realistic-luxury-background_23-2149354608.jpg')",
       }}
     >
+      <ToastContainer hideProgressBar />
+
       <div className="bg-gradient-to-br from-white to-gray-100 dark:from-gray-900 dark:to-gray-800 p-8 rounded-xl shadow-2xl border border-gray-300 dark:border-gray-700 w-full max-w-md">
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">
           Sign In
@@ -41,10 +61,11 @@ const SignIn = () => {
             {error}
           </div>
         )}
+
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-gray-700 dark:text-gray-300 mb-2">
-              Email
+              Email <span className="text-red-500">*</span>
             </label>
             <input
               type="email"
@@ -58,7 +79,7 @@ const SignIn = () => {
           </div>
           <div className="mb-4">
             <label className="block text-gray-700 dark:text-gray-300 mb-2">
-              Password
+              Password <span className="text-red-500">*</span>
             </label>
             <input
               type="password"
@@ -72,11 +93,19 @@ const SignIn = () => {
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white p-3 rounded hover:bg-blue-600 transition"
+            className="w-full bg-[#94A3B8] text-white p-3 rounded hover:bg-[#D1D5DB] transition"
           >
             Sign In
           </button>
         </form>
+
+        <p className="text-center my-4 text-white">OR</p>
+
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          onError={() => toast.error("Google Sign-In failed")}
+        />
+
         <p className="text-center mt-4">
           <Link to="/forgot-password" className="text-blue-500 hover:underline">
             Forgot Password?
@@ -88,10 +117,13 @@ const SignIn = () => {
             Sign Up
           </Link>
         </p>
+        <p className="text-center mt-4">
+          <Link to="/" className="text-blue-500 hover:underline">
+            &larr; Back to Home
+          </Link>
+        </p>
       </div>
     </div>
-
-    // </div>
   );
 };
 

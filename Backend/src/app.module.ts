@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -11,9 +11,10 @@ import appConfig from './common/config/app.config';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthenticationGuard } from './common/guards/authentication/authentication.guard';
 import { AccessTokenGuard } from './common/guards/access-token/access-token.guard';
-import jwtConfig from './user/config/jwt.config';
+import jwtConfig from './auth/config/jwt.config';
 import { JwtModule } from '@nestjs/jwt';
 import { ScheduleModule } from '@nestjs/schedule';
+import { AuthModule } from './auth/auth.module';
 const ENV = process.env.NODE_ENV;
 
 @Module({
@@ -43,6 +44,7 @@ const ENV = process.env.NODE_ENV;
     WallModule,
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
@@ -54,4 +56,6 @@ const ENV = process.env.NODE_ENV;
     AccessTokenGuard,
   ],
 })
-export class AppModule {}
+export class AppModule {
+
+}
