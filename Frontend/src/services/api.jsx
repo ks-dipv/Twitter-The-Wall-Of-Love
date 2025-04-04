@@ -17,6 +17,10 @@ export const registerUser = async (userData) => {
   });
 };
 
+export const loginWithGoogle = async (token) => {
+  return api.post("auth/google-authentication", { token: token });
+};
+
 // Login Request (Sign In)
 export const loginUser = async (userData) => {
   return api.post("/auth/signin", userData);

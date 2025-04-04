@@ -14,6 +14,8 @@ import { GenerateTokenProvider } from 'src/common/services/generate-token.provid
 import { UploadService } from 'src/common/services/upload.service';
 import { MailService } from './services/mail.service';
 import { UserRepository } from 'src/user/repositories/user.repository';
+import { GoogleAuthenticationService } from './services/google-authentication.service';
+import { UserService } from 'src/user/services/user.service';
 
 @Module({
   imports: [
@@ -50,12 +52,14 @@ import { UserRepository } from 'src/user/repositories/user.repository';
 
   controllers: [AuthController],
   providers: [
+    UserService,
     UserRepository,
     AuthService,
     HashingProvider,
     GenerateTokenProvider,
     UploadService,
     MailService,
+    GoogleAuthenticationService,
   ],
 })
 export class AuthModule {}

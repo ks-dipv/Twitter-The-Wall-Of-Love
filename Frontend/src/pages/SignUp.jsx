@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { registerUser } from "../services/api";
 import { Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
+import { loginWithGoogle } from "../services/api";
+import { GoogleLogin } from "@react-oauth/google";
 
 const SignUp = () => {
   const { signup } = useAuth();
@@ -121,6 +123,19 @@ const SignUp = () => {
     }
   };
 
+  const handleGoogleSuccess = async (response) => {
+    try {
+      const googleToken = response.credential; // Google ID token
+      const result = await loginWithGoogle(googleToken); // Call backend API
+      signup(result.data); // Store authentication data
+      toast.success("Logged in successfully! 🎉");
+      navigate("/admin/dashboard"); // Redirect user
+    } catch (error) {
+      console.error("Google Login Error:", error);
+      toast.error("Google login failed, try again.");
+    }
+  };
+
   return (
     <div
       className="min-h-screen flex items-center justify-center bg-cover bg-center"
@@ -211,6 +226,13 @@ const SignUp = () => {
             Sign Up
           </button>
         </form>
+
+        <p className="text-center my-4 text-white">OR</p>
+
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          onError={() => toast.error("Google Sign-In failed")}
+        />
 
         <p className="mt-4 text-center text-gray-600 dark:text-gray-300">
           Already have an account?{" "}

@@ -17,10 +17,15 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { SuccessDto } from 'src/common/dtos/success.dto';
 import { SignInDto } from './dtos/signin.dto';
 import { UpdateDto } from 'src/user/dtos/update.dto';
+import { GoogleAuthenticationService } from './services/google-authentication.service';
+import { GoogleTokenDto } from './dtos/google-token.dto';
 
 @Controller('api')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly googleAuthenticationService: GoogleAuthenticationService,
+  ) {}
 
   @Post('auth/signup')
   @CommonApiDecorators({
@@ -40,6 +45,15 @@ export class AuthController {
     return new SuccessDto(
       'Signup successful. Please check your email to verify your account.',
     );
+  }
+
+  @Post('auth/google-authentication')
+  @Auth(AuthType.None)
+  public authenticate(
+    @Body() googleTokenDto: GoogleTokenDto,
+    @Response({ passthrough: true }) res,
+  ) {
+    return this.googleAuthenticationService.authentication(googleTokenDto, res);
   }
 
   @Post('auth/verify-email/resend')

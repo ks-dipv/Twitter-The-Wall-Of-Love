@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
+import { loginWithGoogle } from "../services/api";
+import { GoogleLogin } from "@react-oauth/google";
 
 const SignIn = () => {
   const { login } = useAuth();
@@ -27,6 +29,19 @@ const SignIn = () => {
     }
   };
 
+  const handleGoogleSuccess = async (response) => {
+    try {
+      const googleToken = response.credential; // Google ID token
+      const result = await loginWithGoogle(googleToken); // Call backend API
+      login(result.data); // Store authentication data
+      toast.success("Logged in successfully! 🎉");
+      navigate("/admin/dashboard"); // Redirect user
+    } catch (error) {
+      console.error("Google Login Error:", error);
+      toast.error("Google login failed, try again.");
+    }
+  };
+
   return (
     <div
       className="min-h-screen flex items-center justify-center bg-cover bg-center"
@@ -46,6 +61,7 @@ const SignIn = () => {
             {error}
           </div>
         )}
+
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-gray-700 dark:text-gray-300 mb-2">
@@ -82,6 +98,14 @@ const SignIn = () => {
             Sign In
           </button>
         </form>
+
+        <p className="text-center my-4 text-white">OR</p>
+
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          onError={() => toast.error("Google Sign-In failed")}
+        />
+
         <p className="text-center mt-4">
           <Link to="/forgot-password" className="text-blue-500 hover:underline">
             Forgot Password?

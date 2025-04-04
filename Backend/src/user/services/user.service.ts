@@ -4,6 +4,7 @@ import {
   UnauthorizedException,
   InternalServerErrorException,
   NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 
 import { UploadService } from '../../common/services/upload.service';
@@ -11,6 +12,7 @@ import { UpdateDto } from '../dtos/update.dto';
 import { UserRepository } from '../repositories/user.repository';
 import { User } from '../entity/user.entity';
 import { GenerateTokenProvider } from 'src/common/services/generate-token.provider';
+import { GoogleUser } from '../interfaces/google-user.interface';
 
 @Injectable()
 export class UserService {
@@ -19,6 +21,25 @@ export class UserService {
     private readonly generateTokenProvider: GenerateTokenProvider,
     private readonly uploadService: UploadService,
   ) {}
+
+  public async createGoogleUser(googleUser: GoogleUser) {
+    try {
+      const user = this.userRepository.create(googleUser);
+      return await this.userRepository.save(user);
+    } catch (error) {
+      throw new ConflictException(error, {
+        description: 'Could not create a new user',
+      });
+    }
+  }
+
+  public async findOneByGoogleId(googleId: string) {
+    return await this.userRepository.findOne({
+      where: {
+        googleId: googleId,
+      },
+    });
+  }
 
   public async getUserById(user): Promise<User> {
     try {
