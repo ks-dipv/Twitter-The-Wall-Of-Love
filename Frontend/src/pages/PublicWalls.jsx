@@ -20,6 +20,10 @@ const PublicWalls = () => {
     fetchWalls();
   }, []);
 
+  const navigateToHomeSection = (sectionId) => {
+    navigate(`/#${sectionId}`);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       {/* Navbar */}
@@ -38,12 +42,29 @@ const PublicWalls = () => {
         </div>
 
         <div className="space-x-6">
-          <RouterLink
-            to="/"
+          <button
+            onClick={() => navigateToHomeSection("about")}
             className="text-white font-semibold text-lg tracking-wide hover:text-blue-400 transition-all duration-300 relative"
           >
-            Home
-          </RouterLink>
+            About
+            <span className="block h-0.5 bg-blue-400 scale-x-0 hover:scale-x-100 transition-transform duration-300 absolute bottom-0 left-0 right-0"></span>
+          </button>
+
+          <button
+            onClick={() => navigateToHomeSection("features")}
+            className="text-white font-semibold text-lg tracking-wide hover:text-blue-400 transition-all duration-300 relative"
+          >
+            Features
+            <span className="block h-0.5 bg-blue-400 scale-x-0 hover:scale-x-100 transition-transform duration-300 absolute bottom-0 left-0 right-0"></span>
+          </button>
+
+          <button
+            onClick={() => navigateToHomeSection("contact")}
+            className="text-white font-semibold text-lg tracking-wide hover:text-blue-400 transition-all duration-300 relative"
+          >
+            Contact Us
+            <span className="block h-0.5 bg-blue-400 scale-x-0 hover:scale-x-100 transition-transform duration-300 absolute bottom-0 left-0 right-0"></span>
+          </button>
 
           <RouterLink
             to="/public-walls"

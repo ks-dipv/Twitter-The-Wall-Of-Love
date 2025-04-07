@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { Link } from "react-scroll";
 import { motion } from "framer-motion";
@@ -6,6 +6,17 @@ import { FaTwitter, FaFacebookF, FaYoutube, FaInstagram } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 const Home = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if there's a hash in the URL
+    if (window.location.hash) {
+      const id = window.location.hash.substring(1); // Remove the '#' symbol
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, []);
   return (
     <div
       className="min-h-screen flex flex-col bg-cover bg-center relative"
