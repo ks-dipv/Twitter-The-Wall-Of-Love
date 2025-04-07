@@ -141,14 +141,14 @@ const PublicWalls = () => {
                 ></p>
                 {/* User Info */}
                 {wall.user && (
-                  <div className="flex items-center space-x-2 mt-auto">
+                  <div className="flex items-center space-x-2 mt-auto gap-14 ">
                     <img
-                      src={wall.user.profile_pic} // fallback image
+                      src={wall.user.profile_pic} 
                       alt={wall.user.name}
-                      className="w-10 h-10 rounded-full object-cover border"
+                      className="w-10 h-10  rounded-full object-cover border"
                     />
-                    <span className="text-gray-700 font-medium">
-                      {wall.user.name}
+                    <span className="text-gray-500 font-medium">
+                      ~{wall.user.name}
                     </span>
                   </div>
                 )}
