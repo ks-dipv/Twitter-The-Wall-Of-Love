@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { getPublicWalls } from "../services/api";
+import { FaTwitter, FaFacebookF, FaYoutube, FaInstagram } from "react-icons/fa";
 
 const PublicWalls = () => {
   const [walls, setWalls] = useState([]);
@@ -72,10 +73,6 @@ const PublicWalls = () => {
 
       {/* Public Walls Content */}
       <div className="max-w-7xl mx-auto px-4 py-32">
-        <h1 className="text-3xl font-bold mb-8 text-center text-gray-900">
-          Explore Public Walls
-        </h1>
-
         {walls.length === 0 ? (
           <p className="text-center text-gray-500">No walls found.</p>
         ) : (
@@ -122,7 +119,7 @@ const PublicWalls = () => {
                 {wall.user && (
                   <div className="flex items-center space-x-2 mt-auto gap-14 ">
                     <img
-                      src={wall.user.profile_pic} 
+                      src={wall.user.profile_pic}
                       alt={wall.user.name}
                       className="w-10 h-10  rounded-full object-cover border"
                     />
@@ -135,6 +132,55 @@ const PublicWalls = () => {
             ))}
           </div>
         )}
+        {/* Footer */}
+        <footer className="bg-white mt-10">
+          {/* Top Border Line */}
+          <div className="border-t border-gray-300"></div>
+
+          <div className="container mx-auto text-center py-6">
+            <h3 className="text-xl font-bold mb-2 text-black">Follow Us</h3>
+
+            {/* Social Media Links */}
+            <div className="flex justify-center space-x-6 mt-4">
+              <a
+                href="https://twitter.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-600 hover:text-blue-600 transition text-2xl"
+              >
+                <FaTwitter />
+              </a>
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-600 hover:text-blue-600 transition text-2xl"
+              >
+                <FaFacebookF />
+              </a>
+              <a
+                href="https://youtube.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-600 hover:text-red-600 transition text-2xl"
+              >
+                <FaYoutube />
+              </a>
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-600 hover:text-pink-500 transition text-2xl"
+              >
+                <FaInstagram />
+              </a>
+            </div>
+
+            <p className="text-gray-500 mt-4">
+              &copy; 2025 Wall of Love. All rights reserved.
+            </p>
+          </div>
+        </footer>
       </div>
     </div>
   );
