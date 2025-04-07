@@ -178,6 +178,14 @@ export class WallService {
     }
   }
 
+  async getPublicWall(): Promise<Wall[]> {
+    return await this.wallRepository.find({
+      where: {
+        visibility: WallVisibility.PUBLIC,
+      },
+    });
+  }
+
   // Get wall by ID
   async getWallById(id: number, user): Promise<Wall> {
     try {

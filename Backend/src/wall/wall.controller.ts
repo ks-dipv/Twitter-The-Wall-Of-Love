@@ -23,6 +23,8 @@ import {
 } from '@nestjs/swagger';
 import { User } from 'src/common/decorator/user.decorater';
 import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
+import { Auth } from 'src/common/decorator/auth.decorator';
+import { AuthType } from 'src/common/enum/auth-type.enum';
 
 @ApiTags('Walls')
 @Controller('api/walls')
@@ -53,6 +55,16 @@ export class WallController {
   })
   async getAllWalls(@User() user) {
     return await this.wallService.getAllWalls(user);
+  }
+
+  @Get('public')
+  @CommonApiDecorators({
+    summary: 'Get all public Walls',
+    successDescription: 'List of walls retrieved',
+  })
+  @Auth(AuthType.None)
+  async getPublicWalls() {
+    return await this.wallService.getPublicWall();
   }
 
   @Get(':id')
