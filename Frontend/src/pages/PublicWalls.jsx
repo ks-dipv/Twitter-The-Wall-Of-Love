@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { Link as RouterLink } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { getPublicWalls } from "../services/api";
 
 const PublicWalls = () => {
   const [walls, setWalls] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchWalls = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:3000/api/walls/public"
-        );
+        const response = await getPublicWalls();
         setWalls(response.data);
       } catch (error) {
         console.error("Failed to fetch walls:", error);
@@ -91,13 +91,32 @@ const PublicWalls = () => {
                     src={wall.logo}
                     alt={wall.title}
                     className="w-full h-24 sm:h-32 object-cover rounded-md mb-3"
+                    onClick={() =>
+                      navigate(
+                        `/walls/${wall.id}/link/71d0623b-013f-4bbb-8fe1-1f0168abd68a`
+                      )
+                    }
                   />
                 )}
 
-                <h2 className="text-xl font-semibold mb-2">{wall.title}</h2>
+                <h2
+                  className="text-xl font-semibold mb-2"
+                  onClick={() =>
+                    navigate(
+                      `/walls/${wall.id}/link/71d0623b-013f-4bbb-8fe1-1f0168abd68a`
+                    )
+                  }
+                >
+                  {wall.title}
+                </h2>
                 <p
                   className="text-gray-600 line-clamp-2"
                   dangerouslySetInnerHTML={{ __html: wall.description }}
+                  onClick={() =>
+                    navigate(
+                      `/walls/${wall.id}/link/71d0623b-013f-4bbb-8fe1-1f0168abd68a`
+                    )
+                  }
                 ></p>
                 {/* User Info */}
                 {wall.user && (

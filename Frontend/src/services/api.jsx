@@ -129,4 +129,8 @@ export const getFilteredTweetsByWall = async (wallId, startDate, endDate) => {
   );
 };
 
+export const getPublicWalls = async () => {
+  return await api.get("/walls/public");
+};
+
 export default api;

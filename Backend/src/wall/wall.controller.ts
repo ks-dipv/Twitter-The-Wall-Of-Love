@@ -104,6 +104,7 @@ export class WallController {
     description: 'Unique identifier for the shareable link',
     type: String,
   })
+  @Auth(AuthType.None)
   async getWallBySharableLink(@Param('wallId') wallId: number) {
     return await this.wallService.getWallBySharableLink(wallId);
   }
