@@ -8,7 +8,9 @@ const PublicWalls = () => {
   useEffect(() => {
     const fetchWalls = async () => {
       try {
-        const response = await axios.get("/api/public-walls");
+        const response = await axios.get(
+          "http://localhost:3000/api/walls/public"
+        );
         setWalls(response.data);
       } catch (error) {
         console.error("Failed to fetch walls:", error);
@@ -77,9 +79,40 @@ const PublicWalls = () => {
         {walls.length === 0 ? (
           <p className="text-center text-gray-500">No walls found.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
             {walls.map((wall) => (
-              <WallCard key={wall.id} wall={wall} />
+              <div
+                key={wall.id}
+                className="bg-white p-4 rounded-xl shadow-lg border hover:scale-105 transition-all duration-300 flex flex-col items-center text-center"
+              >
+                {/* Wall Logo */}
+                {wall.logo && (
+                  <img
+                    src={wall.logo}
+                    alt={wall.title}
+                    className="w-full h-24 sm:h-32 object-cover rounded-md mb-3"
+                  />
+                )}
+
+                <h2 className="text-xl font-semibold mb-2">{wall.title}</h2>
+                <p
+                  className="text-gray-600 line-clamp-2"
+                  dangerouslySetInnerHTML={{ __html: wall.description }}
+                ></p>
+                {/* User Info */}
+                {wall.user && (
+                  <div className="flex items-center space-x-2 mt-auto">
+                    <img
+                      src={wall.user.profile_pic} // fallback image
+                      alt={wall.user.name}
+                      className="w-10 h-10 rounded-full object-cover border"
+                    />
+                    <span className="text-gray-700 font-medium">
+                      {wall.user.name}
+                    </span>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         )}
