@@ -222,26 +222,22 @@ export class TweetService {
     wallId: number,
     user,
     startDate?: string,
-    endDate?: string,
+    endDate?: string
   ): Promise<Tweets[]> {
     try {
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) throw new BadRequestException("User doesn't exist");
-
+  
       const wall = await this.wallRepository.getWallByIdAndUser(
         wallId,
-        existingUser.id,
+        existingUser.id
       );
       if (!wall) throw new NotFoundException('Wall not found or access denied');
-
+  
       const start = startDate ? new Date(startDate) : undefined;
       const end = endDate ? new Date(endDate) : undefined;
-
-      return await this.tweetRepository.filterTweetsByDateRange(
-        wallId,
-        start,
-        end,
-      );
+  
+      return await this.tweetRepository.filterTweetsByDateRange(wallId, start, end);
     } catch (error) {
       if (
         error instanceof UnauthorizedException ||
@@ -253,4 +249,6 @@ export class TweetService {
       throw new InternalServerErrorException('Failed to filter tweets by date');
     }
   }
+  
+  
 }
