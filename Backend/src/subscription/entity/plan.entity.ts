@@ -3,12 +3,15 @@ import {
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { Subscription } from './subscription.entity';
 
 @Entity('plans')
 export class Plan {
   @PrimaryGeneratedColumn()
   id: number;
+
   @Column({ type: 'varchar', length: 100 })
   name: string;
 
@@ -23,4 +26,7 @@ export class Plan {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @OneToMany(() => Subscription, (subscription) => subscription.plan)
+  subscriptions: Subscription[];
 }

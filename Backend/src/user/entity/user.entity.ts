@@ -8,6 +8,7 @@ import {
 import { Wall } from 'src/wall/entity/wall.entity';
 import { OneToMany } from 'typeorm';
 import { Exclude } from 'class-transformer';
+import { Subscription } from 'src/subscription/entity/subscription.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -56,4 +57,7 @@ export class User {
 
   @OneToMany(() => Wall, (wall) => wall.user)
   walls: Wall[];
+
+  @OneToMany(() => Subscription, (subscription) => subscription.user)
+  subscriptions: Subscription[];
 }

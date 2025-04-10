@@ -1,43 +1,42 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  CreateDateColumn,
+} from 'typeorm';
+import { User } from '../../user/entity/user.entity';
 import { Plan } from './plan.entity';
-import {  User } from 'src/user/entity/user.entity';
+import { SubscriptionStatus } from '../enum/subscriptionstatus.enum';
 
-export enum SubscriptionStatus {
-  SUCCESS = 'success',
-  PENDING = 'pending',
-  FAIL = 'fail',
-}
-
-@Entity('subscriptions')
+@Entity()
 export class Subscription {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column()
-  userId: string;
+  stripe_subscription_id: string;
 
-  @Column()
-  planId: string;
-
-  @Column({ type: 'varchar', length: 255 })
-  stripeSubscriptionId: string;
-
-  @Column({ type: 'enum', enum: SubscriptionStatus, default: SubscriptionStatus.PENDING })
+  @Column({
+    type: 'enum',
+    enum: SubscriptionStatus,
+    default: SubscriptionStatus.PENDING,
+  })
   status: SubscriptionStatus;
 
   @Column({ type: 'timestamp', nullable: true })
-  endDate: Date;
+  end_date: Date;
 
   @CreateDateColumn()
-  createdAt: Date;
+  created_at: Date;
 
-  // Relations
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'userId' })
-  user:User;
+  @ManyToOne(() => User, (user) => user.subscriptions, {
+    eager: true,
+  })
+  user: User;
 
-  @ManyToOne(() => Plan)
-  @JoinColumn({ name: 'planId' })
+  @ManyToOne(() => Plan, (plan) => plan.subscriptions, {
+    eager: true,
+  })
   plan: Plan;
 }
