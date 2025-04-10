@@ -15,6 +15,9 @@ import jwtConfig from './auth/config/jwt.config';
 import { JwtModule } from '@nestjs/jwt';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from './auth/auth.module';
+import { SubscriptionController } from './subscription/subscription.controller';
+import { SubscriptionModule } from './subscription/subscription.module';
+import { SubscriptionService } from './subscription/service/subscription.service';
 const ENV = process.env.NODE_ENV;
 
 @Module({
@@ -45,8 +48,9 @@ const ENV = process.env.NODE_ENV;
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
     AuthModule,
+    SubscriptionModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, SubscriptionController],
   providers: [
     AppService,
     {
@@ -54,6 +58,7 @@ const ENV = process.env.NODE_ENV;
       useClass: AuthenticationGuard,
     },
     AccessTokenGuard,
+    SubscriptionService,
   ],
 })
 export class AppModule {

@@ -7,7 +7,6 @@ import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { UploadService } from '../common/services/upload.service';
 import jwtConfig from '../auth/config/jwt.config';
-
 import { UserRepository } from './repositories/user.repository';
 import { GenerateTokenProvider } from 'src/common/services/generate-token.provider';
 
