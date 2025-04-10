@@ -8,6 +8,7 @@ import WallPage from "./WallPage";
 import ListWalls from "./ListWalls";
 import AddTweet from "./AddTweet";
 import UpdateWallPage from "./UpdateWallPage";
+import SubscriptionPage from "./SubscriptionPage";
 const AdminDashboard = () => {
   return (
     <div className="flex">
@@ -22,6 +23,7 @@ const AdminDashboard = () => {
           <Route path="walls/:id/update" element={<UpdateWallPage />} />
           <Route path="list-walls" element={<ListWalls />} />
           <Route path="walls/:wallId/add-tweet" element={<AddTweet />} />
+          <Route path="subscription" element={<SubscriptionPage />} />
         </Routes>
       </div>
     </div>

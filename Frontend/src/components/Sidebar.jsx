@@ -193,6 +193,21 @@ const Sidebar = () => {
                 {isOpen && <span className="truncate">List of Walls</span>}
               </Link>
             </li>
+            {/* Subscription Menu Item */}
+    <li>
+      <Link
+        to="/admin/subscription"
+        className={`flex items-center gap-2 p-2 rounded ${
+          isActive("/admin/subscription")
+            ? "bg-gray-400"
+            : "hover:bg-gray-700"
+        }`}
+        onClick={() => isMobile && setIsOpen(false)}
+      >
+       
+        {isOpen && <span className="truncate">Subscription</span>}
+      </Link>
+    </li>
           </ul>
         </div>
 
