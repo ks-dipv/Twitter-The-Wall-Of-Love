@@ -9,7 +9,7 @@ import { User } from '../../user/entity/user.entity';
 import { Plan } from './plan.entity';
 import { SubscriptionStatus } from '../enum/subscriptionstatus.enum';
 
-@Entity()
+@Entity('subscriptions')
 export class Subscription {
   @PrimaryGeneratedColumn()
   id: number;
