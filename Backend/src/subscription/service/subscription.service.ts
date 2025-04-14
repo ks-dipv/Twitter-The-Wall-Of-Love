@@ -5,13 +5,20 @@ import { Repository } from 'typeorm';
 import Stripe from 'stripe';
 import { Plan } from '../entity/plan.entity';
 import { ConfigService } from '@nestjs/config';
+import { Subscription } from '../entity/subscription.entity';
+import { SubscriptionStatus } from '../enum/subscriptionstatus.enum';
+import { UserRepository } from 'src/user/repositories/user.repository';
 @Injectable()
 export class SubscriptionService {
   private stripe: Stripe;
 
   constructor(
+    @InjectRepository(UserRepository)
+    private readonly userRepository: UserRepository,
     @InjectRepository(Plan)
     private readonly planRepository: Repository<Plan>,
+    @InjectRepository(Subscription)
+    private readonly subscriptionRepository: Repository<Subscription>,
     private readonly configService: ConfigService,
   ) {
     this.stripe = new Stripe(this.configService.get('STRIPE_SECRET_KEY'), {});
@@ -73,25 +80,66 @@ export class SubscriptionService {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
 
-        console.log('Payment Success for UserId:', session.metadata.userId);
-        console.log('Subscribed PlanId:', session.metadata.planId);
+        console.log(' Received checkout.session.completed');
+        console.log(' Metadata:', session.metadata);
 
-        // TODO: Store payment in DB
-        // TODO: Update User Subscription Status
+        const userId = Number(session.metadata?.userId);
+        const planId = Number(session.metadata?.planId);
+        const stripeSubscriptionId = session.subscription as string;
+
+        if (!userId || !planId || !stripeSubscriptionId) {
+          console.log(' Missing metadata or subscription ID');
+          return;
+        }
+
+        //  Fetch user and plan entities
+        const user = await this.userRepository.findOne({
+          where: { id: userId },
+        });
+        const plan = await this.planRepository.findOne({
+          where: { id: planId },
+        });
+
+        if (!user || !plan) {
+          console.log(' User or Plan not found in database');
+          return;
+        }
+
+        //  Create subscription entity
+        const subscription = this.subscriptionRepository.create({
+          stripe_subscription_id: stripeSubscriptionId,
+          status: SubscriptionStatus.SUCCESS,
+          user,
+          plan,
+        });
+
+        await this.subscriptionRepository.save(subscription);
+
+        console.log(` Subscription saved for user ${user.id}, plan ${plan.id}`);
         break;
       }
 
       case 'invoice.payment_failed': {
-        const session = event.data.object as Stripe.Invoice;
+        const invoice = event.data.object as any;
 
-        console.log('Payment Failed for Customer:', session.customer_email);
+        console.log(' Payment Failed for Invoice');
 
-        // TODO: Update user subscription as failed
+        const stripeSubscriptionId = invoice.subscription as string;
+
+        if (stripeSubscriptionId) {
+          await this.subscriptionRepository.update(
+            { stripe_subscription_id: stripeSubscriptionId },
+            { status: SubscriptionStatus.FAIL },
+          );
+
+          console.log(` Marked subscription ${stripeSubscriptionId} as FAILED`);
+        }
+
         break;
       }
 
       default:
-        console.log(`Unhandled Event Type ${event.type}`);
+        console.log(`Unhandled event type ${event.type}`);
     }
   }
 }
