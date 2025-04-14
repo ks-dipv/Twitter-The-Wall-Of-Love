@@ -52,14 +52,14 @@ export class SubscriptionService {
     });
 
     return {
-      url: session.url, 
+      url: session.url,
     };
   }
 
   getStripeWebhookSecret() {
     return this.configService.get('STRIPE_WEBHOOK_SECRET');
   }
-  
+
   verifyStripeWebhook(body: any, sig: string, webhookSecret: string) {
     return this.stripe.webhooks.constructEvent(
       JSON.stringify(body),
@@ -67,32 +67,31 @@ export class SubscriptionService {
       webhookSecret,
     );
   }
-  
+
   async handleWebhookEvent(event: Stripe.Event) {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
-  
+
         console.log('Payment Success for UserId:', session.metadata.userId);
         console.log('Subscribed PlanId:', session.metadata.planId);
-  
+
         // TODO: Store payment in DB
         // TODO: Update User Subscription Status
         break;
       }
-  
+
       case 'invoice.payment_failed': {
         const session = event.data.object as Stripe.Invoice;
-  
+
         console.log('Payment Failed for Customer:', session.customer_email);
-  
+
         // TODO: Update user subscription as failed
         break;
       }
-  
+
       default:
         console.log(`Unhandled Event Type ${event.type}`);
     }
   }
-  
 }
