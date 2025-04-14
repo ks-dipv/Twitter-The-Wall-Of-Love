@@ -3,7 +3,6 @@ import axios from "axios";
 
 const SubscriptionPage = () => {
   const [plans, setPlans] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   const getAllPlans = async () => {
     try {

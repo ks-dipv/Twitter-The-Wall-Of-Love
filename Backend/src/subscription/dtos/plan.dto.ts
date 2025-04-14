@@ -1,4 +1,4 @@
-import { IsNotEmpty, Min,IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, Min, IsNumber, IsString } from 'class-validator';
 
 export class CreatePlanDto {
   @IsString()
@@ -11,8 +11,8 @@ export class CreatePlanDto {
 
   @IsString()
   @IsNotEmpty()
-  stripePriceId: string; 
+  stripe_price_id: string;
 
   @IsNumber()
-  wallLimit: number;
+  wall_limit: number;
 }
