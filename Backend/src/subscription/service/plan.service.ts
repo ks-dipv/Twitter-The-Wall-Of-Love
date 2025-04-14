@@ -9,8 +9,8 @@ export class PlanService {
     @InjectRepository(Plan)
     private readonly planRepository: Repository<Plan>,
   ) {}
-
   async findAll(): Promise<Plan[]> {
     return this.planRepository.find();
-  }
+
+}
 }

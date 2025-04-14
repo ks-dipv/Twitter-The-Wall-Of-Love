@@ -19,13 +19,13 @@ export class Plan {
   price: number;
 
   @Column({ type: 'varchar', length: 255 })
-  stripePriceId: string;
+  stripe_price_id: string;
 
   @Column({ type: 'int' })
-  wallLimit: number;
+  wall_limit: number;
 
   @CreateDateColumn()
-  createdAt: Date;
+  created_at: Date;
 
   @OneToMany(() => Subscription, (subscription) => subscription.plan)
   subscriptions: Subscription[];
