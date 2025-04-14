@@ -3,7 +3,8 @@ import { Post, Param, Body,Req, Headers, BadRequestException } from '@nestjs/com
 import { SubscriptionService } from './service/subscription.service';
 import { User } from 'src/common/decorator/user.decorater';
 import Stripe from 'stripe';
-@Controller('subscription')
+
+@Controller('api/subscription')
 export class SubscriptionController {
 
     constructor(private readonly subscriptionService: SubscriptionService) {}

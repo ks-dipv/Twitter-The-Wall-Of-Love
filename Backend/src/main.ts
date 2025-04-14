@@ -6,6 +6,7 @@ import * as passport from 'passport';
 import * as cookieParser from 'cookie-parser';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { HttpExceptionFilter } from './common/exception-filter/http-exception.filter';
+import * as bodyParser from 'body-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -53,6 +54,7 @@ async function bootstrap() {
   app.use(passport.initialize());
   app.use(passport.session());
 
+  app.use('/api/subscription/webhook', bodyParser.raw({ type: '*/*' }));
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
