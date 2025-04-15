@@ -17,7 +17,7 @@ import { DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WallVisibility } from '../enum/wall-visibility.enum';
 import { v4 as uuidv4 } from 'uuid';
-import { User } from 'src/common/decorator/user.decorater';
+import { User } from 'src/common/decorator/user.decorator';
 
 import { ConfigService } from '@nestjs/config';
 @Injectable()

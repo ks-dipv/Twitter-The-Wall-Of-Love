@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { Subscription } from './subscription.entity';
 
-@Entity('plans')
+@Entity()
 export class Plan {
   @PrimaryGeneratedColumn()
   id: number;
@@ -18,7 +18,7 @@ export class Plan {
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   price: number;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   stripe_price_id: string;
 
   @Column({ type: 'int' })

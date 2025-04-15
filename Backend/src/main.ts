@@ -6,9 +6,12 @@ import * as passport from 'passport';
 import * as cookieParser from 'cookie-parser';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { HttpExceptionFilter } from './common/exception-filter/http-exception.filter';
-import * as bodyParser from 'body-parser';
+
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: ['log', 'error', 'warn', 'debug', 'verbose'],
+    rawBody: true, // Critical for RawBodyRequest
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -45,16 +48,17 @@ async function bootstrap() {
   app.use(cookieParser());
 
   app.enableCors({
-    origin: 'http://localhost:5173',
+    origin: [
+      'http://localhost:5173',
+      'https://6086-103-240-76-181.ngrok-free.app',
+    ],
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   // Initialize Passport
   app.use(passport.initialize());
   app.use(passport.session());
 
-  app.use('/api/subscription/webhook', bodyParser.raw({ type: '*/*' }));
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

@@ -1,4 +1,4 @@
-import { Module, MiddlewareConsumer } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -16,6 +16,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from './auth/auth.module';
 import { SubscriptionModule } from './subscription/subscription.module';
+import * as bodyParser from 'body-parser';
 const ENV = process.env.NODE_ENV;
 
 @Module({
@@ -56,9 +57,13 @@ const ENV = process.env.NODE_ENV;
       useClass: AuthenticationGuard,
     },
     AccessTokenGuard,
-    
   ],
 })
 export class AppModule {
-
+  configure(consumer) {
+    consumer
+      .apply(bodyParser.raw({ type: 'application/json' }))
+      .forRoutes('api/subscription/webhook');
+    consumer.apply(bodyParser.json()).forRoutes('*');
+  }
 }

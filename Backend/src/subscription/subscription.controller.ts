@@ -1,14 +1,10 @@
-import { Controller } from '@nestjs/common';
-import {
-  Post,
-  Param,
-  Body,
-  Headers,
-  BadRequestException,
-} from '@nestjs/common';
+import { Controller, RawBodyRequest, Req } from '@nestjs/common';
+import { Post, Param } from '@nestjs/common';
 import { SubscriptionService } from './service/subscription.service';
-import { User } from 'src/common/decorator/user.decorater';
-import Stripe from 'stripe';
+import { User } from 'src/common/decorator/user.decorator';
+import { Auth } from 'src/common/decorator/auth.decorator';
+import { AuthType } from 'src/common/enum/auth-type.enum';
+
 @Controller('api/subscription')
 export class SubscriptionController {
   constructor(private readonly subscriptionService: SubscriptionService) {}
@@ -19,27 +15,8 @@ export class SubscriptionController {
   }
 
   @Post('webhook')
-  async handleStripeWebhook(
-    @Body() body: any,
-    @Headers('stripe-signature') sig: string,
-  ) {
-    const webhookSecret = this.subscriptionService.getStripeWebhookSecret();
-
-    let event: Stripe.Event;
-
-    try {
-      event = this.subscriptionService.verifyStripeWebhook(
-        body,
-        sig,
-        webhookSecret,
-      );
-    } catch (err) {
-      console.log('Webhook Error:', err.message);
-      throw new BadRequestException(`Webhook Error: ${err.message}`);
-    }
-
-    await this.subscriptionService.handleWebhookEvent(event);
-
-    return { received: true };
+  @Auth(AuthType.None)
+  handleWebhook(@Req() request: RawBodyRequest<Request>) {
+    return this.subscriptionService.handleWebhook(request);
   }
 }

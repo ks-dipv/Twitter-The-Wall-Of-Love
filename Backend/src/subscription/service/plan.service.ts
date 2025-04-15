@@ -11,6 +11,5 @@ export class PlanService {
   ) {}
   async findAll(): Promise<Plan[]> {
     return this.planRepository.find();
-
-}
+  }
 }
