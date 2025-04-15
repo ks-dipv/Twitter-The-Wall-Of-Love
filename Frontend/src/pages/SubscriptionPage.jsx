@@ -68,6 +68,10 @@ const SubscriptionPage = () => {
                   <CheckCircle className="text-green-500" size={18} />
                   Wall Limit: {plan.wall_limit}
                 </li>
+                <li className="flex items-center gap-2">
+                <CheckCircle className="text-green-500" size={18} />
+                  Subscription is valid for 1 month
+                </li>
               </ul>
 
               <button
