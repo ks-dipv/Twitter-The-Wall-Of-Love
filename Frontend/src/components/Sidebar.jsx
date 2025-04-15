@@ -8,6 +8,7 @@ import {
   Menu,
   LayoutDashboard,
   X,
+  CreditCard,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import ConfirmationDialog from "./ConfirmationDialog";
@@ -194,20 +195,20 @@ const Sidebar = () => {
               </Link>
             </li>
             {/* Subscription Menu Item */}
-    <li>
-      <Link
-        to="/admin/subscription"
-        className={`flex items-center gap-2 p-2 rounded ${
-          isActive("/admin/subscription")
-            ? "bg-gray-400"
-            : "hover:bg-gray-700"
-        }`}
-        onClick={() => isMobile && setIsOpen(false)}
-      >
-       
-        {isOpen && <span className="truncate">Subscription</span>}
-      </Link>
-    </li>
+            <li>
+              <Link
+                to="/admin/subscription"
+                className={`flex items-center gap-2 p-2 rounded ${
+                  isActive("/admin/subscription")
+                    ? "bg-gray-400"
+                    : "hover:bg-gray-700"
+                }`}
+                onClick={() => isMobile && setIsOpen(false)}
+              >
+                <CreditCard className="w-5 h-5 flex-shrink-0" />
+                {isOpen && <span className="truncate">Subscription</span>}
+              </Link>
+            </li>
           </ul>
         </div>
 
