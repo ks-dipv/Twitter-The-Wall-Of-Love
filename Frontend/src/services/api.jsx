@@ -133,4 +133,12 @@ export const getPublicWalls = async () => {
   return await api.get("/walls/public");
 };
 
+export const getCheckoutSessionUrl = async (planId) => {
+  return api.post(`/subscription/checkout/${planId}`);
+};
+
+export const getAllPlan = async () => {
+  return api.get("/plans");
+};
+
 export default api;
