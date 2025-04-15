@@ -11,6 +11,7 @@ import ShareableWallPage from "./pages/ShareableWallPage";
 import VerifyEmail from "./pages/VerifyEmail";
 import ResendEmail from "./pages/ResendEmail";
 import PublicWalls from "./pages/PublicWalls";
+import PaymentSuccess from "./pages/PaymentSuccess";
 function App() {
   return (
     <AuthProvider>
@@ -24,6 +25,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/resend-email" element={<ResendEmail />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route
             path="/walls/:wallId/link/:uniqueId"
             element={<ShareableWallPage />}
