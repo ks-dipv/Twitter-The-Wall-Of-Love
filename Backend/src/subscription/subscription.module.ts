@@ -7,9 +7,11 @@ import { Subscription } from './entity/subscription.entity';
 import { PlanController } from './plan.controller';
 import { PlanService } from './service/plan.service';
 import { UserModule } from 'src/user/user.module';
+import { SubscriptionRepository } from './repository/subscription.repository';
 @Module({
   imports: [TypeOrmModule.forFeature([Plan, Subscription]), UserModule],
   controllers: [SubscriptionController, PlanController],
-  providers: [SubscriptionService, PlanService],
+  providers: [SubscriptionService, PlanService,SubscriptionRepository],
+  exports: [SubscriptionService],
 })
 export class SubscriptionModule {}

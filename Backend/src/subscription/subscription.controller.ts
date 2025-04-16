@@ -1,5 +1,5 @@
 import { Controller, RawBodyRequest, Req } from '@nestjs/common';
-import { Post, Param } from '@nestjs/common';
+import { Post, Param, Get } from '@nestjs/common';
 import { SubscriptionService } from './service/subscription.service';
 import { User } from 'src/common/decorator/user.decorator';
 import { Auth } from 'src/common/decorator/auth.decorator';
@@ -18,5 +18,10 @@ export class SubscriptionController {
   @Auth(AuthType.None)
   handleWebhook(@Req() request: RawBodyRequest<Request>) {
     return this.subscriptionService.handleWebhook(request);
+  }
+
+  @Get('history')
+  getPaymentHistory(@User() user) {
+    return this.subscriptionService.getUserPaymentHistory(user.sub);
   }
 }

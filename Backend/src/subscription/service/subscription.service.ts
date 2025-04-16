@@ -11,9 +11,9 @@ import { Repository } from 'typeorm';
 import Stripe from 'stripe';
 import { Plan } from '../entity/plan.entity';
 import { ConfigService } from '@nestjs/config';
-import { Subscription } from '../entity/subscription.entity';
 import { SubscriptionStatus } from '../enum/subscriptionstatus.enum';
 import { UserRepository } from 'src/user/repositories/user.repository';
+import { SubscriptionRepository } from '../repository/subscription.repository'; 
 @Injectable()
 export class SubscriptionService {
   private readonly logger = new Logger(SubscriptionService.name);
@@ -23,8 +23,7 @@ export class SubscriptionService {
     private readonly userRepository: UserRepository,
     @InjectRepository(Plan)
     private readonly planRepository: Repository<Plan>,
-    @InjectRepository(Subscription)
-    private readonly subscriptionRepository: Repository<Subscription>,
+    private readonly subscriptionRepository: SubscriptionRepository, 
     private readonly configService: ConfigService,
   ) {
     this.stripe = new Stripe(this.configService.get('STRIPE_SECRET_KEY'), {});
@@ -222,4 +221,9 @@ export class SubscriptionService {
         return SubscriptionStatus.PENDING;
     }
   }
+
+  async getUserPaymentHistory(userId: number) {
+    return this.subscriptionRepository.getUserPaymentHistory(userId);
+  }
+  
 }
