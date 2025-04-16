@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   X,
   CreditCard,
+  History
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import ConfirmationDialog from "./ConfirmationDialog";
@@ -207,6 +208,20 @@ const Sidebar = () => {
               >
                 <CreditCard className="w-5 h-5 flex-shrink-0" />
                 {isOpen && <span className="truncate">Subscription</span>}
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/admin/payment-history"
+                className={`flex items-center gap-2 p-2 rounded ${
+                  isActive("/admin/payment-history")
+                    ? "bg-gray-400"
+                    : "hover:bg-gray-700"
+                }`}
+                onClick={() => isMobile && setIsOpen(false)}
+              >
+                <History className="w-5 h-5 flex-shrink-0" />
+                {isOpen && <span className="truncate">Payment History</span>}
               </Link>
             </li>
           </ul>
