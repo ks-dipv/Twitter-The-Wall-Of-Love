@@ -48,10 +48,7 @@ async function bootstrap() {
   app.use(cookieParser());
 
   app.enableCors({
-    origin: [
-      'http://localhost:5173',
-      '*/ngrok-free.app',
-    ],
+    origin: ['http://localhost:5173', '*/ngrok-free.app'],
     credentials: true,
   });
 
