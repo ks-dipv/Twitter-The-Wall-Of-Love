@@ -1,4 +1,4 @@
-import { Controller, RawBodyRequest, Req } from '@nestjs/common';
+import { Controller, Put, RawBodyRequest, Req } from '@nestjs/common';
 import { Post, Param, Get } from '@nestjs/common';
 import { SubscriptionService } from './service/subscription.service';
 import { User } from 'src/common/decorator/user.decorator';
@@ -23,5 +23,10 @@ export class SubscriptionController {
   @Get('history')
   getPaymentHistory(@User() user) {
     return this.subscriptionService.getUserPaymentHistory(user.sub);
+  }
+  @Get('active')
+  async getActiveSubscription(@Req() req) {
+    const userId = req.user.id;
+    return this.subscriptionService.getActiveSubscription(userId);
   }
 }

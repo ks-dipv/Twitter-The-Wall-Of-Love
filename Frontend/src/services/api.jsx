@@ -141,4 +141,8 @@ export const getAllPlan = async () => {
   return api.get("/plans");
 };
 
+export const getActiveSubscription = async () => {
+  return await axios.get("/api/subscription/active"); 
+};
+
 export default api;

@@ -1,24 +1,38 @@
 import React, { useEffect, useState } from "react";
-import { getAllPlan, getCheckoutSessionUrl } from "../services/api";
-import { Loader2, CheckCircle } from "lucide-react";
+import {
+  getAllPlan,
+  getCheckoutSessionUrl,
+  getActiveSubscription,
+} from "../services/api";
+import { Loader2, CheckCircle, BadgeCheck } from "lucide-react";
 
 const SubscriptionPage = () => {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState(null);
+  const [activePlanId, setActivePlanId] = useState(null);
 
   const getAllPlans = async () => {
     try {
       const res = await getAllPlan();
-      
       setPlans(res.data);
     } catch (error) {
       console.log("Error fetching plans:", error);
     }
   };
 
+  const fetchActivePlan = async () => {
+    try {
+      const res = await getActiveSubscription();
+      setActivePlanId(res.data.plan_id);
+    } catch (err) {
+      console.log("No active plan:", err);
+    }
+  };
+
   useEffect(() => {
     getAllPlans();
+    fetchActivePlan();
   }, []);
 
   const handleSubscribe = async (planId) => {
@@ -54,8 +68,18 @@ const SubscriptionPage = () => {
           {plans.map((plan) => (
             <div
               key={plan.id}
-              className="relative bg-white border border-gray-200 rounded-2xl shadow-xl p-6 hover:shadow-2xl transition duration-300 flex flex-col items-center"
+              className={`relative bg-white border ${
+                plan.id === activePlanId
+                  ? "border-green-500"
+                  : "border-gray-200"
+              } rounded-2xl shadow-xl p-6 hover:shadow-2xl transition duration-300 flex flex-col items-center`}
             >
+              {plan.id === activePlanId && (
+                <div className="absolute top-3 right-3 text-green-600 text-xs font-semibold flex items-center gap-1 bg-green-100 px-2 py-1 rounded-full">
+                  <BadgeCheck size={16} /> Active
+                </div>
+              )}
+
               <h2 className="text-2xl font-bold text-[#334155]">{plan.name}</h2>
 
               <p className="text-4xl font-extrabold text-gray-900 mt-4">
@@ -69,7 +93,7 @@ const SubscriptionPage = () => {
                   Wall Limit: {plan.wall_limit}
                 </li>
                 <li className="flex items-center gap-2">
-                <CheckCircle className="text-green-500" size={18} />
+                  <CheckCircle className="text-green-500" size={18} />
                   Subscription is valid for 1 month
                 </li>
               </ul>
@@ -84,6 +108,8 @@ const SubscriptionPage = () => {
                     <Loader2 className="animate-spin" size={20} />
                     Processing...
                   </div>
+                ) : plan.id === activePlanId ? (
+                  "Current Plan"
                 ) : (
                   "Subscribe"
                 )}

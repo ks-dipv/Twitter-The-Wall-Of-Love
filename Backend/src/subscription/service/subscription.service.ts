@@ -279,4 +279,29 @@ export class SubscriptionService {
 
     return paymentHistory;
   }
+
+  async getActiveSubscription(userId: number) {
+    const activeSub = await this.subscriptionRepository.findOne({
+      where: {
+        user: { id: userId },
+        status: SubscriptionStatus.SUCCESS,
+      },
+      relations: ['plan'],
+      order: { created_at: 'DESC' },
+    });
+
+    if (!activeSub) {
+      throw new NotFoundException('No active subscription found');
+    }
+
+    return {
+      plan_id: activeSub.plan.id,
+      plan_name: activeSub.plan.name,
+      wall_limit: activeSub.plan.wall_limit,
+      price: activeSub.plan.price,
+      start_date: activeSub.created_at,
+      end_date: activeSub.end_date,
+    };
+  }
 }
+
