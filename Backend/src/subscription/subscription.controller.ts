@@ -1,5 +1,5 @@
-import { Controller, Put, RawBodyRequest, Req } from '@nestjs/common';
-import { Post, Param, Get } from '@nestjs/common';
+import { Controller, Put, RawBodyRequest, Req, Body } from '@nestjs/common';
+import { Post, Param, Get, Patch } from '@nestjs/common';
 import { SubscriptionService } from './service/subscription.service';
 import { User } from 'src/common/decorator/user.decorator';
 import { Auth } from 'src/common/decorator/auth.decorator';
@@ -28,5 +28,9 @@ export class SubscriptionController {
   async getActiveSubscription(@Req() req) {
     const userId = req.user.id;
     return this.subscriptionService.getActiveSubscription(userId);
+  }
+  @Patch('cancel')
+  async cancelSubscription(@Req() req) {
+    return this.subscriptionService.cancelUserSubscription(req.user);
   }
 }

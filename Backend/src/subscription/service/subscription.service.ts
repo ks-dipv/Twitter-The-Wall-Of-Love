@@ -287,5 +287,45 @@ export class SubscriptionService {
       end_date: activeSub.end_date,
     };
   }
+  async cancelUserSubscription(user) {
+    if (!user || !user.sub) {
+      throw new UnauthorizedException('Authentication required');
+    }
+  
+    const userId = Number(user.sub);
+  
+    // Fetch active subscription
+    const activeSub = await this.subscriptionRepository.findOne({
+      where: {
+        user: { id: userId },
+        status: SubscriptionStatus.SUCCESS,
+      },
+      order: { created_at: 'DESC' },
+    });
+  
+    if (!activeSub || !activeSub.stripe_subscription_id) {
+      throw new NotFoundException('No active subscription found');
+    }
+  
+    try {
+      // Cancel at the end of the billing period (set to false if you want immediate cancellation)
+      const canceledSubscription = await this.stripe.subscriptions.update(
+        activeSub.stripe_subscription_id,
+        { cancel_at_period_end: true }
+      );
+  
+      // Update DB
+      activeSub.status = SubscriptionStatus.FAIL;
+      await this.subscriptionRepository.save(activeSub);
+  
+      return {
+        message: 'Subscription cancellation scheduled at period end',
+        cancel_at: new Date(canceledSubscription.cancel_at * 1000),
+      };
+    } catch (error) {
+      throw new BadRequestException('Failed to cancel subscription');
+    }
+  }
+  
 }
 
