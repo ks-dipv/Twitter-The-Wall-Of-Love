@@ -331,7 +331,7 @@ export class SubscriptionService {
       );
   
       // Update DB
-      activeSub.status = SubscriptionStatus.FAIL;
+      activeSub.status = SubscriptionStatus.CANCEL;
       await this.subscriptionRepository.save(activeSub);
   
       return {
