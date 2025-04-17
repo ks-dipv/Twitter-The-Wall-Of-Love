@@ -31,6 +31,9 @@ export class User {
   @Exclude()
   googleId?: string;
 
+  @Column({ nullable: true })
+  stripe_customer_id: string;
+
   @Column({ type: 'varchar', nullable: true })
   profile_pic?: string;
 
