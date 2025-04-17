@@ -144,5 +144,7 @@ export const getAllPlan = async () => {
 export const getActiveSubscription = async () => {
   return await axios.get("/api/subscription/active"); 
 };
-
+export const cancelSubscription = () => {
+  return axios.patch('/api/subscription/cancel');
+};
 export default api;

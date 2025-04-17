@@ -3,14 +3,18 @@ import {
   getAllPlan,
   getCheckoutSessionUrl,
   getActiveSubscription,
+  cancelSubscription,
 } from "../services/api";
 import { Loader2, CheckCircle, BadgeCheck } from "lucide-react";
+import ConfirmationDialog from "../components/ConfirmationDialog";
 
 const SubscriptionPage = () => {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState(null);
   const [activePlanId, setActivePlanId] = useState(null);
+  const [canceling, setCanceling] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const getAllPlans = async () => {
     try {
@@ -54,6 +58,22 @@ const SubscriptionPage = () => {
     }
   };
 
+  const handleCancelSubscription = async () => {
+    try {
+      setCanceling(true);
+      await cancelSubscription();
+      alert(
+        "Your subscription will be canceled at the end of the billing period."
+      );
+      setActivePlanId(null);
+    } catch (error) {
+      console.error("Cancellation failed:", error);
+      alert("Failed to cancel subscription.");
+    } finally {
+      setCanceling(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br  py-12 px-6">
       <div className="max-w-6xl mx-auto text-center">
@@ -70,12 +90,12 @@ const SubscriptionPage = () => {
               key={plan.id}
               className={`relative bg-white border ${
                 plan.id === activePlanId
-                  ? "border-green-500"
+                  ? "border-[#334155]"
                   : "border-gray-200"
               } rounded-2xl shadow-xl p-6 hover:shadow-2xl transition duration-300 flex flex-col items-center`}
             >
               {plan.id === activePlanId && (
-                <div className="absolute top-3 right-3 text-green-600 text-xs font-semibold flex items-center gap-1 bg-green-100 px-2 py-1 rounded-full">
+                <div className="absolute top-3 right-3 text-[#334155] text-xs font-semibold flex items-center gap-1 bg-blue-100 px-2 py-1 rounded-full">
                   <BadgeCheck size={16} /> Active
                 </div>
               )}
@@ -84,7 +104,10 @@ const SubscriptionPage = () => {
 
               <p className="text-4xl font-extrabold text-gray-900 mt-4">
                 ₹{plan.price}
-                <span className="text-base font-medium text-gray-500"> /mo</span>
+                <span className="text-base font-medium text-gray-500">
+                  {" "}
+                  /mo
+                </span>
               </p>
 
               <ul className="mt-6 space-y-2 text-gray-600 text-sm w-full text-left">
@@ -100,7 +123,10 @@ const SubscriptionPage = () => {
 
               <button
                 onClick={() => handleSubscribe(plan.id)}
-                disabled={loading && selectedPlanId === plan.id}
+                disabled={
+                  plan.id === activePlanId ||
+                  (loading && selectedPlanId === plan.id)
+                }
                 className="mt-8 w-full px-4 py-2 text-lg font-medium rounded-xl bg-[#334155] text-white hover:bg-[#94A3B8] transition-all disabled:opacity-50"
               >
                 {loading && selectedPlanId === plan.id ? (
@@ -114,10 +140,37 @@ const SubscriptionPage = () => {
                   "Subscribe"
                 )}
               </button>
+
+              {/* Cancel button ONLY inside active plan box */}
+              {plan.id === activePlanId && (
+                <div className="mt-4 w-full">
+                  <button
+                    onClick={() => setShowConfirmDialog(true)}
+                    disabled={canceling}
+                    className="w-full px-4 py-2 text-base font-semibold rounded-xl border border-[#334155] text-[#334155] hover:bg-blue-50 transition-all disabled:opacity-50"
+                  >
+                    {canceling ? "Cancelling..." : "Cancel Subscription"}
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={showConfirmDialog}
+        onClose={() => setShowConfirmDialog(false)}
+        onConfirm={async () => {
+          setShowConfirmDialog(false);
+          await handleCancelSubscription();
+        }}
+        title="Cancel Subscription"
+        message="Are you sure you want to cancel your subscription? It will remain active until the end of the current billing period."
+        confirmText="Yes, Cancel"
+        cancelText="No, Keep It"
+      />
     </div>
   );
 };
