@@ -263,6 +263,7 @@ export class SubscriptionService {
 
     return paymentHistory;
   }
+
   async getActiveSubscription(userId: number) {
     const activeSub = await this.subscriptionRepository.findOne({
       where: {
@@ -287,3 +288,4 @@ export class SubscriptionService {
     };
   }
 }
+

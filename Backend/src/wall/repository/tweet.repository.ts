@@ -56,6 +56,4 @@ export class TweetRepository extends Repository<Tweets> {
 
     return await query.orderBy('tweets.created_at', 'DESC').getMany();
   }
-
-  
 }
