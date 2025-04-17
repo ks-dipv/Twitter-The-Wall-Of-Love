@@ -223,6 +223,44 @@ export class SubscriptionService {
   }
 
   async getUserPaymentHistory(userId: number) {
-    return this.subscriptionRepository.getUserPaymentHistory(userId);
+    const subscriptions =
+      await this.subscriptionRepository.getUserPaymentHistory(userId);
+
+    const paymentHistory = await Promise.all(
+      subscriptions.map(async (sub) => {
+        let invoicePdfUrl: string | null = null;
+
+        try {
+          const stripeSub = await this.stripe.subscriptions.retrieve(
+            sub.stripe_subscription_id,
+            {
+              expand: ['latest_invoice'],
+            },
+          );
+
+          const latestInvoice = stripeSub.latest_invoice as Stripe.Invoice;
+
+          if (latestInvoice?.invoice_pdf) {
+            invoicePdfUrl = latestInvoice.invoice_pdf;
+          }
+        } catch (err) {
+          this.logger.warn(
+            `Could not fetch invoice for subscription ${sub.stripe_subscription_id}: ${err.message}`,
+          );
+        }
+
+        return {
+          plan_name: sub.plan.name,
+          price: Number(sub.plan.price),
+          wall_limit: sub.plan.wall_limit,
+          status: sub.status,
+          created_at: sub.created_at,
+          end_date: sub.end_date,
+          invoice_pdf: invoicePdfUrl,
+        };
+      }),
+    );
+
+    return paymentHistory;
   }
 }

@@ -9,19 +9,11 @@ export class SubscriptionRepository extends Repository<Subscription> {
   }
 
   async getUserPaymentHistory(userId: number) {
-    const subscriptions = await this.find({
+    return this.find({
       where: { user: { id: userId } },
       relations: ['plan'],
       order: { created_at: 'DESC' },
     });
-
-    return subscriptions.map((sub) => ({
-      plan_name: sub.plan.name,
-      price: Number(sub.plan.price),
-      wall_limit: sub.plan.wall_limit,
-      status: sub.status,
-      created_at: sub.created_at,
-      end_date: sub.end_date,
-    }));
   }
+    
 }
