@@ -115,10 +115,6 @@ export const updateProfile = async (formDataObj) => {
   });
 };
 
-export const getApiToken = async () => {
-  return api.post("/developer/api-token");
-};
-
 export const searchTweets = async (wallId, query) => {
   return await axios.get(`/api/walls/${wallId}/tweet?search=${query}`);
 };
@@ -142,7 +138,7 @@ export const getAllPlan = async () => {
 };
 
 export const getActiveSubscription = async () => {
-  return await axios.get("/api/subscription/active"); 
+  return await axios.get("/api/subscription/active");
 };
 
 export default api;
