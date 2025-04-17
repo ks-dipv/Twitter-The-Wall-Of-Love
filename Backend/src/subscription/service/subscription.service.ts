@@ -13,7 +13,7 @@ import { Plan } from '../entity/plan.entity';
 import { ConfigService } from '@nestjs/config';
 import { SubscriptionStatus } from '../enum/subscriptionstatus.enum';
 import { UserRepository } from 'src/user/repositories/user.repository';
-import { SubscriptionRepository } from '../repository/subscription.repository'; 
+import { SubscriptionRepository } from '../repository/subscription.repository';
 @Injectable()
 export class SubscriptionService {
   private readonly logger = new Logger(SubscriptionService.name);
@@ -23,7 +23,7 @@ export class SubscriptionService {
     private readonly userRepository: UserRepository,
     @InjectRepository(Plan)
     private readonly planRepository: Repository<Plan>,
-    private readonly subscriptionRepository: SubscriptionRepository, 
+    private readonly subscriptionRepository: SubscriptionRepository,
     private readonly configService: ConfigService,
   ) {
     this.stripe = new Stripe(this.configService.get('STRIPE_SECRET_KEY'), {});
@@ -223,19 +223,23 @@ export class SubscriptionService {
   }
 
   async getUserPaymentHistory(userId: number) {
-    const subscriptions = await this.subscriptionRepository.getUserPaymentHistory(userId);
-  
+    const subscriptions =
+      await this.subscriptionRepository.getUserPaymentHistory(userId);
+
     const paymentHistory = await Promise.all(
       subscriptions.map(async (sub) => {
         let invoicePdfUrl: string | null = null;
-  
+
         try {
-          const stripeSub = await this.stripe.subscriptions.retrieve(sub.stripe_subscription_id, {
-            expand: ['latest_invoice'],
-          });
-  
+          const stripeSub = await this.stripe.subscriptions.retrieve(
+            sub.stripe_subscription_id,
+            {
+              expand: ['latest_invoice'],
+            },
+          );
+
           const latestInvoice = stripeSub.latest_invoice as Stripe.Invoice;
-  
+
           if (latestInvoice?.invoice_pdf) {
             invoicePdfUrl = latestInvoice.invoice_pdf;
           }
@@ -244,7 +248,7 @@ export class SubscriptionService {
             `Could not fetch invoice for subscription ${sub.stripe_subscription_id}: ${err.message}`,
           );
         }
-  
+
         return {
           plan_name: sub.plan.name,
           price: Number(sub.plan.price),
@@ -256,9 +260,30 @@ export class SubscriptionService {
         };
       }),
     );
-  
+
     return paymentHistory;
   }
-  
-  
+  async getActiveSubscription(userId: number) {
+    const activeSub = await this.subscriptionRepository.findOne({
+      where: {
+        user: { id: userId },
+        status: SubscriptionStatus.SUCCESS,
+      },
+      relations: ['plan'],
+      order: { created_at: 'DESC' },
+    });
+
+    if (!activeSub) {
+      throw new NotFoundException('No active subscription found');
+    }
+
+    return {
+      plan_id: activeSub.plan.id,
+      plan_name: activeSub.plan.name,
+      wall_limit: activeSub.plan.wall_limit,
+      price: activeSub.plan.price,
+      start_date: activeSub.created_at,
+      end_date: activeSub.end_date,
+    };
+  }
 }
