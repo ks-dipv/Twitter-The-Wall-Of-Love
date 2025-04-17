@@ -57,16 +57,6 @@ export class WallController {
     return await this.wallService.getAllWalls(user);
   }
 
-  @Get('public')
-  @CommonApiDecorators({
-    summary: 'Get all public Walls',
-    successDescription: 'List of walls retrieved',
-  })
-  @Auth(AuthType.None)
-  async getPublicWalls() {
-    return await this.wallService.getPublicWall();
-  }
-
   @Get(':id')
   @CommonApiDecorators({
     summary: 'Get a specific Wall by ID',
