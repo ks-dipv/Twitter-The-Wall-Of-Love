@@ -31,6 +31,9 @@ export class User {
   @Exclude()
   googleId?: string;
 
+  @Column({ nullable: true })
+  stripe_customer_id: string;
+
   @Column({ type: 'varchar', nullable: true })
   profile_pic?: string;
 
@@ -44,10 +47,6 @@ export class User {
   @Column({ type: 'varchar', nullable: true })
   @Exclude()
   reset_password_token?: string;
-
-  @Column({ nullable: true, unique: true })
-  @Exclude()
-  api_token?: string;
 
   @CreateDateColumn()
   created_at: Date;

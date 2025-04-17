@@ -35,6 +35,8 @@ export class SubscriptionService {
       throw new UnauthorizedException('Authentication required');
     }
 
+    const existingUser = await this.userRepository.findOneBy({ id: user.sub });
+
     if (!user.sub || !user.email) {
       this.logger.error(`Invalid user object: ${JSON.stringify(user)}`);
       throw new BadRequestException('Invalid user data');
@@ -48,6 +50,20 @@ export class SubscriptionService {
 
     // Use user.sub instead of user.id
     const userId = String(user.sub);
+
+    let stripeCustomerId = existingUser.stripe_customer_id;
+
+    if (!existingUser.stripe_customer_id) {
+      const customer = await this.stripe.customers.create({
+        email: existingUser.email,
+        name: existingUser.name,
+      });
+
+      stripeCustomerId = customer.id;
+
+      existingUser.stripe_customer_id = stripeCustomerId;
+      await this.userRepository.save(existingUser);
+    }
 
     try {
       const session = await this.stripe.checkout.sessions.create({
@@ -68,7 +84,7 @@ export class SubscriptionService {
             quantity: 1,
           },
         ],
-        customer_email: user.email,
+        customer: stripeCustomerId,
         metadata: {
           userId: userId,
           planId: String(planId),
@@ -328,4 +344,3 @@ export class SubscriptionService {
   }
   
 }
-

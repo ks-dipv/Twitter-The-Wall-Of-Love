@@ -118,30 +118,4 @@ export class UserService {
       throw new InternalServerErrorException('Failed to delete user');
     }
   }
-
-  public async apiKeyGenerate(user) {
-    try {
-      const existingUser = await this.userRepository.getByEmail(user.email);
-      if (!existingUser) throw new NotFoundException("User doesn't exist");
-
-      if (existingUser.api_token) return existingUser.api_token;
-
-      const token =
-        await this.generateTokenProvider.generateApiToken(existingUser);
-      existingUser.api_token = token;
-
-      await this.userRepository.save(existingUser);
-      return {
-        token,
-      };
-    } catch (error) {
-      console.log(error);
-      if (
-        error instanceof UnauthorizedException ||
-        error instanceof NotFoundException
-      )
-        throw error;
-      throw new InternalServerErrorException('Failed to generate API key');
-    }
-  }
 }
