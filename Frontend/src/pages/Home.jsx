@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { Link } from "react-scroll";
 import { motion } from "framer-motion";
@@ -6,6 +6,17 @@ import { FaTwitter, FaFacebookF, FaYoutube, FaInstagram } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 const Home = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if there's a hash in the URL
+    if (window.location.hash) {
+      const id = window.location.hash.substring(1); // Remove the '#' symbol
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, []);
   return (
     <div
       className="min-h-screen flex flex-col bg-cover bg-center relative"
@@ -22,9 +33,9 @@ const Home = () => {
         {/* Logo & Title */}
         <div className="flex items-center space-x-3">
           <img
-            src="https://cdn-icons-png.flaticon.com/128/2297/2297921.png" 
+            src="https://cdn-icons-png.flaticon.com/128/2297/2297921.png"
             alt="Wall of Love Logo"
-            className="h-10 w-auto" 
+            className="h-10 w-auto"
           />
           <h1 className="text-white text-2xl font-bold">Wall of Love</h1>
         </div>
@@ -60,6 +71,14 @@ const Home = () => {
             Contact Us
             <span className="block h-0.5 bg-blue-400 scale-x-0 hover:scale-x-100 transition-transform duration-300 absolute bottom-0 left-0 right-0"></span>
           </Link>
+
+          <RouterLink
+            to="/public-walls"
+            className="text-white font-semibold text-lg tracking-wide hover:text-blue-400 transition-all duration-300 relative"
+          >
+            Walls
+            <span className="block h-0.5 bg-blue-400 scale-x-0 hover:scale-x-100 transition-transform duration-300 absolute bottom-0 left-0 right-0"></span>
+            </RouterLink>
         </div>
 
         {/* Sign In & Sign Up Buttons */}

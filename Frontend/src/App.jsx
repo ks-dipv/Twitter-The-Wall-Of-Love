@@ -10,12 +10,14 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ShareableWallPage from "./pages/ShareableWallPage";
 import VerifyEmail from "./pages/VerifyEmail";
 import ResendEmail from "./pages/ResendEmail";
+import PublicWalls from "./pages/PublicWalls";
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/public-walls" element={<PublicWalls />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/admin/*" element={<AdminDashboard />} />

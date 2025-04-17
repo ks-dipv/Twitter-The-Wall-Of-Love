@@ -23,6 +23,8 @@ import {
 } from '@nestjs/swagger';
 import { User } from 'src/common/decorator/user.decorater';
 import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
+import { AuthType } from 'src/common/enum/auth-type.enum';
+import { Auth } from 'src/common/decorator/auth.decorator';
 
 @ApiTags('Walls')
 @Controller('api/walls')
@@ -92,6 +94,7 @@ export class WallController {
     description: 'Unique identifier for the shareable link',
     type: String,
   })
+  @Auth(AuthType.None)
   async getWallBySharableLink(@Param('wallId') wallId: number) {
     return await this.wallService.getWallBySharableLink(wallId);
   }
