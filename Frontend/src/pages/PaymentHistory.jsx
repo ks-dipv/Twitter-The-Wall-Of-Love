@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { CreditCard, Loader } from 'lucide-react'; // Optional: Add more icons as needed
+import { CreditCard, Loader, FileDown } from 'lucide-react'; // FileDown icon for invoice download
 
 const PaymentHistoryPage = () => {
   const [history, setHistory] = useState([]);
@@ -36,7 +36,7 @@ const PaymentHistoryPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
-     <nav className="bg-gray-300 p-4 text-black flex justify-between">
+      <nav className="bg-gray-300 p-4 text-black flex justify-between">
         <h1 className="text-lg font-bold">Payment History</h1>
       </nav>
 
@@ -55,14 +55,12 @@ const PaymentHistoryPage = () => {
                   <th className="px-4 py-3 text-left">Status</th>
                   <th className="px-4 py-3 text-left">Start Date</th>
                   <th className="px-4 py-3 text-left">End Date</th>
+                  <th className="px-4 py-3 text-left">Invoice</th>
                 </tr>
               </thead>
               <tbody>
                 {history.map((item, idx) => (
-                  <tr
-                    key={idx}
-                    className="border-t hover:bg-blue-50 transition-all"
-                  >
+                  <tr key={idx} className="border-t hover:bg-blue-50 transition-all">
                     <td className="px-4 py-3 font-medium text-gray-700">{idx + 1}</td>
                     <td className="px-4 py-3 text-gray-800">{item.plan_name}</td>
                     <td className="px-4 py-3 text-gray-800">₹{item.price?.toFixed(2)}</td>
@@ -80,6 +78,21 @@ const PaymentHistoryPage = () => {
                     </td>
                     <td className="px-4 py-3">{new Date(item.created_at).toLocaleDateString()}</td>
                     <td className="px-4 py-3">{new Date(item.end_date).toLocaleDateString()}</td>
+                    <td className="px-4 py-3">
+                      {item.invoice_pdf ? (
+                        <a
+                          href={item.invoice_pdf}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline flex items-center"
+                        >
+                          <FileDown className="w-4 h-4 mr-1" />
+                          Download
+                        </a>
+                      ) : (
+                        <span className="text-gray-400 text-sm italic">Not Available</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
