@@ -44,10 +44,6 @@ export class User {
   @Exclude()
   reset_password_token?: string;
 
-  @Column({ nullable: true, unique: true })
-  @Exclude()
-  api_token?: string;
-
   @CreateDateColumn()
   created_at: Date;
 

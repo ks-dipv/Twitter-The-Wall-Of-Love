@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Delete,
-  Post,
   Put,
   UploadedFile,
   Get,
@@ -62,14 +61,5 @@ export class UserController {
   public remove(@User() user) {
     this.userService.remove(user);
     return new SuccessDto('User Deleted Successfully');
-  }
-
-  @Post('developer/api-token')
-  @CommonApiDecorators({
-    summary: 'Generate API token for developers',
-    successDescription: 'API token generated successfully',
-  })
-  async apiKeyGenerate(@User() user) {
-    return this.userService.apiKeyGenerate(user);
   }
 }
