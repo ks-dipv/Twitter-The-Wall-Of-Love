@@ -44,18 +44,16 @@ export class TweetRepository extends Repository<Tweets> {
 
     if (startDate) {
       query.andWhere('tweets.created_at >= :startDate', {
-        startDate: startDate.toISOString(),
+        startDate: startDate,
       });
     }
 
     if (endDate) {
       query.andWhere('tweets.created_at <= :endDate', {
-        endDate: endDate.toISOString(),
+        endDate: endDate,
       });
     }
 
     return await query.orderBy('tweets.created_at', 'DESC').getMany();
   }
-
-  
 }

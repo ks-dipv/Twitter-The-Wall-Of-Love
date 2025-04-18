@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { getSharableLink, getFilteredTweetsByWall } from "../services/api";
 import TweetList from "../components/TweetList";
 import Footer from "../components/Footer";
-
+import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 
 const ShareableWallPage = () => {
@@ -35,7 +35,11 @@ const ShareableWallPage = () => {
     }
 
     try {
-      const response = await getFilteredTweetsByWall(wallId, startDate, endDate);
+      const response = await getFilteredTweetsByWall(
+        wallId,
+        startDate,
+        endDate
+      );
       setTweets(response.data);
     } catch (error) {
       console.error("Error filtering tweets:", error);

@@ -124,9 +124,9 @@ export const searchTweets = async (wallId, query) => {
 };
 
 export const getFilteredTweetsByWall = async (wallId, startDate, endDate) => {
-  return await axios.get(
-    `/api/walls/${wallId}/filter?startDate=${startDate}&endDate=${endDate}`
-  );
+  return await axios.get(`/api/walls/${wallId}/filter`, {
+    params: { startDate, endDate },
+  });
 };
 
 export const getPublicWalls = async () => {

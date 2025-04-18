@@ -122,20 +122,32 @@ export class TweetController {
   }
 
   @Get(':wallId/filter')
-@CommonApiDecorators({
-  summary: 'Get all tweets for a wall with optional date filtering',
-  successDescription: 'List of tweets retrieved',
-})
-@ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
-@ApiQuery({ name: 'startDate', required: false, type: String, description: 'Start date for filtering tweets' })
-@ApiQuery({ name: 'endDate', required: false, type: String, description: 'End date for filtering tweets' })
-async getTweetsByDate(
-  @Param('wallId') wallId: number,
-  @User() user,
-  @Query('startDate') startDate?: string,
-  @Query('endDate') endDate?: string
-) {
-  return await this.tweetService.filterTweetsByDate(wallId, user, startDate, endDate);
-}
-
+  @CommonApiDecorators({
+    summary: 'Get all tweets for a wall with optional date filtering',
+    successDescription: 'List of tweets retrieved',
+  })
+  @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    type: String,
+    description: 'Start date for filtering tweets',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    type: String,
+    description: 'End date for filtering tweets',
+  })
+  async getTweetsByDate(
+    @Param('wallId') wallId: number,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    return await this.tweetService.filterTweetsByDate(
+      wallId,
+      startDate,
+      endDate,
+    );
+  }
 }
