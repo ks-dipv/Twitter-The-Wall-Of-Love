@@ -3,19 +3,19 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './services/auth.service';
 import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from 'src/user/entity/user.entity';
+import { User } from '../user/entity/user.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import jwtConfig from './config/jwt.config';
 import { JwtModule } from '@nestjs/jwt';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { join } from 'path';
 import { HashingProvider } from './services/hashing.provider';
-import { GenerateTokenProvider } from 'src/common/services/generate-token.provider';
-import { UploadService } from 'src/common/services/upload.service';
+import { GenerateTokenProvider } from '../common/services/generate-token.provider';
+import { UploadService } from '../common/services/upload.service';
 import { MailService } from './services/mail.service';
-import { UserRepository } from 'src/user/repositories/user.repository';
+import { UserRepository } from '../user/repositories/user.repository';
 import { GoogleAuthenticationService } from './services/google-authentication.service';
-import { UserService } from 'src/user/services/user.service';
+import { UserService } from '../user/services/user.service';
 
 @Module({
   imports: [

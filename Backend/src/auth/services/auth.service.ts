@@ -6,14 +6,14 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { UploadService } from 'src/common/services/upload.service';
-import { UserRepository } from 'src/user/repositories/user.repository';
-import { HashingProvider } from 'src/auth/services/hashing.provider';
-import { MailService } from 'src/auth/services/mail.service';
+import { UploadService } from '../../common/services/upload.service';
+import { UserRepository } from '../../user/repositories/user.repository';
+import { HashingProvider } from '../../auth/services/hashing.provider';
+import { MailService } from '../../auth/services/mail.service';
 import { SignInDto } from '../dtos/signin.dto';
-import { User } from 'src/user/entity/user.entity';
+import { User } from '../../user/entity/user.entity';
 import { SignUpDto } from '../dtos/signup.dto';
-import { GenerateTokenProvider } from 'src/common/services/generate-token.provider';
+import { GenerateTokenProvider } from '../../common/services/generate-token.provider';
 
 @Injectable()
 export class AuthService {

@@ -15,5 +15,4 @@ export class SubscriptionRepository extends Repository<Subscription> {
       order: { created_at: 'DESC' },
     });
   }
-    
 }

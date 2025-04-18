@@ -5,10 +5,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Wall } from 'src/wall/entity/wall.entity';
+import { Wall } from '../../wall/entity/wall.entity';
 import { OneToMany } from 'typeorm';
 import { Exclude } from 'class-transformer';
-import { Subscription } from 'src/subscription/entity/subscription.entity';
+import { Subscription } from '../../subscription/entity/subscription.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()

@@ -2,8 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigType } from '@nestjs/config';
 import { ActiveUserData } from '../../common/interface/active-user.interface';
-import jwtConfig from 'src/auth/config/jwt.config';
-import { User } from 'src/user/entity/user.entity';
+import jwtConfig from '../../auth/config/jwt.config';
+import { User } from '../../user/entity/user.entity';
 
 @Injectable()
 export class GenerateTokenProvider {

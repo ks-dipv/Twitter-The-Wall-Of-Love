@@ -21,10 +21,10 @@ import {
   ApiConsumes,
   ApiQuery,
 } from '@nestjs/swagger';
-import { User } from 'src/common/decorator/user.decorator';
-import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
-import { AuthType } from 'src/common/enum/auth-type.enum';
-import { Auth } from 'src/common/decorator/auth.decorator';
+import { User } from '../common/decorator/user.decorator';
+import { CommonApiDecorators } from '../common/decorator/common-api.decorator';
+import { AuthType } from '../common/enum/auth-type.enum';
+import { Auth } from '../common/decorator/auth.decorator';
 
 @ApiTags('Walls')
 @Controller('api/walls')

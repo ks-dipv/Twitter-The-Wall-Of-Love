@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { PlanService } from './service/plan.service';
-import { Auth } from 'src/common/decorator/auth.decorator';
-import { AuthType } from 'src/common/enum/auth-type.enum';
+import { Auth } from '../common/decorator/auth.decorator';
+import { AuthType } from '../common/enum/auth-type.enum';
 import { Plan } from './entity/plan.entity';
 
 @Controller('api/plans')

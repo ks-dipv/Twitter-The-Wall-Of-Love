@@ -8,15 +8,15 @@ import {
   Response,
 } from '@nestjs/common';
 import { AuthService } from './services/auth.service';
-import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
+import { CommonApiDecorators } from '../common/decorator/common-api.decorator';
 import { ApiBody, ApiConsumes, ApiParam } from '@nestjs/swagger';
 import { SignUpDto } from './dtos/signup.dto';
-import { AuthType } from 'src/common/enum/auth-type.enum';
-import { Auth } from 'src/common/decorator/auth.decorator';
+import { AuthType } from '../common/enum/auth-type.enum';
+import { Auth } from '../common/decorator/auth.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { SuccessDto } from 'src/common/dtos/success.dto';
+import { SuccessDto } from '../common/dtos/success.dto';
 import { SignInDto } from './dtos/signin.dto';
-import { UpdateDto } from 'src/user/dtos/update.dto';
+import { UpdateDto } from '../user/dtos/update.dto';
 import { GoogleAuthenticationService } from './services/google-authentication.service';
 import { GoogleTokenDto } from './dtos/google-token.dto';
 

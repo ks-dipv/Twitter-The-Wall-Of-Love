@@ -12,7 +12,7 @@ import {
 import { TweetService } from './service/tweet.service';
 import { ApiTags, ApiParam, ApiBody, ApiQuery } from '@nestjs/swagger';
 import { User } from '../common/decorator/user.decorator';
-import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
+import { CommonApiDecorators } from '../common/decorator/common-api.decorator';
 
 @ApiTags('Tweets')
 @Controller('api/walls')
@@ -122,20 +122,34 @@ export class TweetController {
   }
 
   @Get(':wallId/filter')
-@CommonApiDecorators({
-  summary: 'Get all tweets for a wall with optional date filtering',
-  successDescription: 'List of tweets retrieved',
-})
-@ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
-@ApiQuery({ name: 'startDate', required: false, type: String, description: 'Start date for filtering tweets' })
-@ApiQuery({ name: 'endDate', required: false, type: String, description: 'End date for filtering tweets' })
-async getTweetsByDate(
-  @Param('wallId') wallId: number,
-  @User() user,
-  @Query('startDate') startDate?: string,
-  @Query('endDate') endDate?: string
-) {
-  return await this.tweetService.filterTweetsByDate(wallId, user, startDate, endDate);
-}
-
+  @CommonApiDecorators({
+    summary: 'Get all tweets for a wall with optional date filtering',
+    successDescription: 'List of tweets retrieved',
+  })
+  @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    type: String,
+    description: 'Start date for filtering tweets',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    type: String,
+    description: 'End date for filtering tweets',
+  })
+  async getTweetsByDate(
+    @Param('wallId') wallId: number,
+    @User() user,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    return await this.tweetService.filterTweetsByDate(
+      wallId,
+      user,
+      startDate,
+      endDate,
+    );
+  }
 }
