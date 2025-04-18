@@ -411,4 +411,12 @@ export class WallService {
       throw new BadRequestException(error.message || 'Failed to search walls');
     }
   }
+
+  async getPublicWall(): Promise<Wall[]> {
+    return await this.wallRepository.find({
+      where: {
+        visibility: WallVisibility.PUBLIC,
+      },
+    });
+  }
 }

@@ -152,4 +152,14 @@ export class WallController {
   async searchWalls(@Query('q') keyword: string, @User() user) {
     return await this.wallService.searchWalls(keyword, user);
   }
+
+  @Post('public')
+  @CommonApiDecorators({
+    summary: 'Get all public Walls',
+    successDescription: 'List of walls retrieved',
+  })
+  @Auth(AuthType.None)
+  async getPublicWalls() {
+    return await this.wallService.getPublicWall();
+  }
 }
