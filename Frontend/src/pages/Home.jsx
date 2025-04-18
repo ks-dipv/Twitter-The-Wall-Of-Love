@@ -4,18 +4,19 @@ import { Link } from "react-scroll";
 import { motion } from "framer-motion";
 import { FaTwitter, FaFacebookF, FaYoutube, FaInstagram } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 const Home = () => {
   const navigate = useNavigate();
-
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   useEffect(() => {
     // Check if there's a hash in the URL
     if (window.location.hash) {
-      const id = window.location.hash.substring(1); 
+      const id = window.location.hash.substring(1);
       const element = document.getElementById(id);
       if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });      
+        element.scrollIntoView({ behavior: "smooth" });
+      }
     }
-  }
   }, []);
   return (
     <div
@@ -27,9 +28,8 @@ const Home = () => {
     >
       {/* Overlay */}
       <div className="absolute inset-0 bg-black bg-opacity-50"></div>
-
       {/* Navbar */}
-      <nav className="relative z-10 flex justify-between items-center p-6 bg-black bg-opacity-60 w-full fixed top-0">
+      <nav className="relative z-10 flex justify-between items-center p-6 bg-black bg-opacity-60 w-full fixed top-0 flex-wrap">
         {/* Logo & Title */}
         <div className="flex items-center space-x-3">
           <img
@@ -40,64 +40,79 @@ const Home = () => {
           <h1 className="text-white text-2xl font-bold">Wall of Love</h1>
         </div>
 
-        {/* Navigation Links */}
-        <div className="space-x-6">
-          <Link
-            to="about"
-            smooth={true}
-            duration={800}
-            className="text-white font-semibold text-lg tracking-wide hover:text-blue-400 transition-all duration-300 relative"
-          >
-            About
-            <span className="block h-0.5 bg-blue-400 scale-x-0 hover:scale-x-100 transition-transform duration-300 absolute bottom-0 left-0 right-0"></span>
-          </Link>
+        {/* Hamburger Icon for Mobile */}
+        <button
+          className="sm:hidden text-white text-3xl focus:outline-none"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          ☰
+        </button>
 
-          <Link
-            to="features"
-            smooth={true}
-            duration={800}
-            className="text-white font-semibold text-lg tracking-wide hover:text-blue-400 transition-all duration-300 relative"
-          >
-            Features
-            <span className="block h-0.5 bg-blue-400 scale-x-0 hover:scale-x-100 transition-transform duration-300 absolute bottom-0 left-0 right-0"></span>
-          </Link>
+        {/* Links and Buttons - hidden on mobile unless toggled */}
+        <div
+          className={`${
+            isMobileMenuOpen ? "flex flex-col" : "hidden"
+          } w-full sm:flex sm:flex-row sm:w-auto sm:items-center sm:space-x-6 mt-4 sm:mt-0`}
+        >
+          {/* Navigation Links */}
+          <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-6">
+            <Link
+              to="about"
+              smooth={true}
+              duration={800}
+              className="text-white font-semibold text-lg tracking-wide hover:text-blue-400 transition-all duration-300 relative"
+            >
+              About
+              <span className="block h-0.5 bg-blue-400 scale-x-0 hover:scale-x-100 transition-transform duration-300 absolute bottom-0 left-0 right-0"></span>
+            </Link>
 
-          <Link
-            to="contact"
-            smooth={true}
-            duration={800}
-            className="text-white font-semibold text-lg tracking-wide hover:text-blue-400 transition-all duration-300 relative"
-          >
-            Contact Us
-            <span className="block h-0.5 bg-blue-400 scale-x-0 hover:scale-x-100 transition-transform duration-300 absolute bottom-0 left-0 right-0"></span>
-          </Link>
+            <Link
+              to="features"
+              smooth={true}
+              duration={800}
+              className="text-white font-semibold text-lg tracking-wide hover:text-blue-400 transition-all duration-300 relative"
+            >
+              Features
+              <span className="block h-0.5 bg-blue-400 scale-x-0 hover:scale-x-100 transition-transform duration-300 absolute bottom-0 left-0 right-0"></span>
+            </Link>
 
-          <RouterLink
-            to="/public-walls"
-            className="text-white font-semibold text-lg tracking-wide hover:text-blue-400 transition-all duration-300 relative"
-          >
-            Walls
-            <span className="block h-0.5 bg-blue-400 scale-x-0 hover:scale-x-100 transition-transform duration-300 absolute bottom-0 left-0 right-0"></span>
-          </RouterLink>
-        </div>
+            <Link
+              to="contact"
+              smooth={true}
+              duration={800}
+              className="text-white font-semibold text-lg tracking-wide hover:text-blue-400 transition-all duration-300 relative"
+            >
+              Contact Us
+              <span className="block h-0.5 bg-blue-400 scale-x-0 hover:scale-x-100 transition-transform duration-300 absolute bottom-0 left-0 right-0"></span>
+            </Link>
 
-        {/* Sign In & Sign Up Buttons */}
-        <div className="space-x-4">
-          <RouterLink
-            to="/signin"
-            className="relative px-6 py-2 text-white text-lg font-semibold rounded-lg overflow-hidden bg-gradient-to-r bg-[#334155] shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl"
-          >
-            Sign In
-            <span className="absolute inset-0 bg-blue-600 opacity-0 transition-opacity duration-300 hover:opacity-20"></span>
-          </RouterLink>
+            <RouterLink
+              to="/public-walls"
+              className="text-white font-semibold text-lg tracking-wide hover:text-blue-400 transition-all duration-300 relative"
+            >
+              Walls
+              <span className="block h-0.5 bg-blue-400 scale-x-0 hover:scale-x-100 transition-transform duration-300 absolute bottom-0 left-0 right-0"></span>
+            </RouterLink>
+          </div>
 
-          <RouterLink
-            to="/signup"
-            className="relative px-6 py-2 text-white text-lg font-semibold rounded-lg overflow-hidden bg-gradient-to-r bg-[#334155] shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl"
-          >
-            Sign Up
-            <span className="absolute inset-0 bg-green-600 opacity-0 transition-opacity duration-300 hover:opacity-20"></span>
-          </RouterLink>
+          {/* Sign In & Sign Up Buttons */}
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 mt-4 sm:mt-0">
+            <RouterLink
+              to="/signin"
+              className="relative px-6 py-2 text-white text-lg font-semibold rounded-lg overflow-hidden bg-gradient-to-r bg-[#334155] shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl"
+            >
+              Sign In
+              <span className="absolute inset-0 bg-blue-600 opacity-0 transition-opacity duration-300 hover:opacity-20"></span>
+            </RouterLink>
+
+            <RouterLink
+              to="/signup"
+              className="relative px-6 py-2 text-white text-lg font-semibold rounded-lg overflow-hidden bg-gradient-to-r bg-[#334155] shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl"
+            >
+              Sign Up
+              <span className="absolute inset-0 bg-green-600 opacity-0 transition-opacity duration-300 hover:opacity-20"></span>
+            </RouterLink>
+          </div>
         </div>
       </nav>
 
@@ -115,7 +130,7 @@ const Home = () => {
         <motion.div
           animate={{ y: [0, -10, 0] }}
           transition={{ repeat: Infinity, duration: 2 }}
-          className="absolute top-20 left-60"
+          className="hidden sm:block absolute top-20 left-10 md:left-60"
         >
           <img
             src="https://cdn-icons-png.flaticon.com/128/15047/15047578.png"
@@ -127,7 +142,7 @@ const Home = () => {
         <motion.div
           animate={{ y: [0, -10, 0] }}
           transition={{ repeat: Infinity, duration: 2, delay: 0.8 }}
-          className="absolute bottom-10 left-10 text-5xl"
+          className="hidden sm:block absolute bottom-10 left-5 md:left-10"
         >
           <img
             src="https://cdn-icons-png.flaticon.com/128/17540/17540879.png"
@@ -139,7 +154,7 @@ const Home = () => {
         <motion.div
           animate={{ y: [0, -10, 0] }}
           transition={{ repeat: Infinity, duration: 2, delay: 0.5 }}
-          className="absolute bottom-10 right-10 text-5xl"
+          className="hidden sm:block absolute bottom-10 right-5 md:right-10"
         >
           <img
             src="https://cdn-icons-png.flaticon.com/128/6711/6711626.png"
@@ -150,7 +165,7 @@ const Home = () => {
         <motion.div
           animate={{ y: [0, -10, 0] }}
           transition={{ repeat: Infinity, duration: 2, delay: 0.8 }}
-          className="absolute top-20 right-60 text-5xl"
+          className="hidden sm:block absolute top-20 right-10 md:right-60"
         >
           <img
             src="https://cdn-icons-png.flaticon.com/128/11210/11210085.png"
@@ -158,7 +173,6 @@ const Home = () => {
             className="w-14 h-14 object-contain"
           />
         </motion.div>
-        
 
         {/* Main Content */}
         <div className="relative z-20">
@@ -166,7 +180,7 @@ const Home = () => {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, ease: "easeOut" }}
-            className="text-6xl font-extrabold mb-4 tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-200 dark:from-gray-100 dark:to-gray-400"
+            className="text-6xl sm:text-4xl font-extrabold mb-4 tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-200 dark:from-gray-100 dark:to-gray-400"
           >
             Twitter Wall of Love
           </motion.h2>
@@ -175,9 +189,9 @@ const Home = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5, duration: 1 }}
-            className="text-xl mb-6 text-gray-200 dark:text-gray-300 font-mono"
+            className="text-xl sm:text-lg mb-6 text-gray-200 dark:text-gray-300 font-mono"
           >
-            Showcase the best tweets about your brand, product, or service! 
+            Showcase the best tweets about your brand, product, or service!
           </motion.p>
 
           {/* CTA Button */}
@@ -185,7 +199,7 @@ const Home = () => {
             onClick={() => navigate("/signin")}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
-            className="px-6 py-3  bg-[#334155] font-semibold rounded-full  text-white hover:bg-[#94A3B8] hover:text-white transition-all duration-300 shadow-lg shadow-[#94A3B8]"
+            className="px-6 py-3 bg-[#334155] font-semibold rounded-full text-white hover:bg-[#94A3B8] hover:text-white transition-all duration-300 shadow-lg shadow-[#94A3B8]"
           >
             Get Started
           </motion.button>
@@ -253,8 +267,8 @@ const Home = () => {
             <li className="flex items-center text-gray-800 dark:text-gray-200 font-semibold">
               *{" "}
               <span className="ml-3 font-sans">
-                Easily <span className="text-">share anywhere</span>{" "}
-                with an embed link
+                Easily <span className="text-">share anywhere</span> with an
+                embed link
               </span>
             </li>
           </ul>
@@ -271,7 +285,7 @@ const Home = () => {
         className="relative z-10 p-12 mx-auto w-4/5 mt-20 shadow-2xl dark:border-gray-700"
       >
         <h2 className="text-5xl font-extrabold text-center text-gray-900 dark:text-white tracking-wide font-serif">
-           Features
+          Features
         </h2>
         <p className="text-center text-gray-700 dark:text-gray-300 mt-4 text-lg font-mono">
           Everything you need to showcase tweets in a{" "}
