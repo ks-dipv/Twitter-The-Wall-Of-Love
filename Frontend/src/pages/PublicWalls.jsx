@@ -138,14 +138,24 @@ const PublicWalls = () => {
                 ></p>
                 {/* User Info */}
                 {wall.user && (
-                  <div className="flex items-center space-x-2 mt-auto gap-14 ">
-                    <img
-                      src={wall.user.profile_pic}
-                      alt={wall.user.name}
-                      className="w-10 h-10  rounded-full object-cover border"
-                    />
-                    <span className="text-gray-500 font-medium">
-                      ~{wall.user.name}
+                  <div className="flex flex-col items-center mt-auto gap-2">
+                    <div className="flex items-center space-x-2 gap-12">
+                      <img
+                        src={wall.user.profile_pic}
+                        alt={wall.user.name}
+                        className="w-10 h-10 rounded-full object-cover border"
+                      />
+                      <span className="text-gray-500 font-medium">
+                        ~{wall.user.name}
+                      </span>
+                    </div>
+                    {/* Show created_at date below user */}
+                    <span className="text-gray-400 text-sm">
+                      {new Date(wall.created_at).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
                     </span>
                   </div>
                 )}
