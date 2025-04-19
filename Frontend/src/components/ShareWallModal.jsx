@@ -149,12 +149,12 @@ const ShareWallModal = ({ wallId, isOpen, onClose }) => {
               <span>Embed Link</span>
             </div>
             <div className="flex flex-col sm:flex-row gap-2">
-              <input
-                type="text"
+              <textarea
                 value={links.embed_link}
                 readOnly
                 placeholder="Generate code to embed this wall"
-                className="flex-grow text-black border border-gray-300 rounded-lg p-2 text-sm bg-gray-50"
+                className="flex-grow text-black border border-gray-300 rounded-lg p-2 text-sm bg-gray-50 min-h-[48px] resize-none overflow-x-auto"
+                rows={3}
               />
               <button
                 onClick={
