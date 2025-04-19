@@ -81,6 +81,18 @@ export class WallController {
     return await this.wallService.generateLinks(wallId, user);
   }
 
+  @Post(':wallId/regenerate-link')
+  @CommonApiDecorators({
+    summary: 'Generate a shareable link for a Wall',
+    successDescription: 'Shareable link generated',
+    errorStatus: 404,
+    errorDescription: 'Wall not found',
+  })
+  @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
+  async reGenerateLink(@Param('wallId') wallId: number, @User() user) {
+    return await this.wallService.regenerateLinks(wallId, user);
+  }
+
   @Get(':wallId/link/:uuid')
   @CommonApiDecorators({
     summary: 'Get a Wall by shareable link',

@@ -83,6 +83,49 @@ export class WallService {
     }
   }
 
+  public async regenerateLinks(wallId: number, user) {
+    try {
+      const existingUser = await this.userRepository.getByEmail(user.email);
+      if (!existingUser) {
+        throw new NotFoundException('User not found');
+      }
+
+      const wall = await this.wallRepository.getWallByIdAndUser(
+        wallId,
+        existingUser.id,
+      );
+      if (!wall || wall.user.id !== existingUser.id) {
+        throw new NotFoundException('Wall not found or access denied');
+      }
+
+      // Regenerate both UUIDs
+      wall.public_uuid = uuidv4();
+      wall.private_uuid = uuidv4();
+
+      // Save the wall with updated UUIDs
+      await this.wallRepository.save(wall);
+
+      const baseUrl = this.configService.get('appConfig.baseUrl');
+
+      // Generate shareable link based on visibility
+      const uuid =
+        wall.visibility === WallVisibility.PRIVATE
+          ? wall.private_uuid
+          : wall.public_uuid;
+      const shareable_link = `${baseUrl}/walls/${wallId}/link/${uuid}`;
+      const embed_link = `<iframe src="${shareable_link}" width="600" height="400"></iframe>`;
+
+      return {
+        shareable_link,
+        embed_link,
+      };
+    } catch (error) {
+      throw new BadRequestException(
+        error.message || 'Failed to regenerate links',
+      );
+    }
+  }
+
   // Create wall
   async createWall(
     createWallDto: CreateWallDto,
