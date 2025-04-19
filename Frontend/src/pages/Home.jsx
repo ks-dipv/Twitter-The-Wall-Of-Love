@@ -1,19 +1,23 @@
-import React, {useEffect} from "react";
+import React, { useEffect } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { Link } from "react-scroll";
 import { motion } from "framer-motion";
 import { FaTwitter, FaFacebookF, FaYoutube, FaInstagram } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link as ScrollLink } from "react-scroll";
+
 const Home = () => {
   const navigate = useNavigate();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     // Check if there's a hash in the URL
     if (window.location.hash) {
-      const id = window.location.hash.substring(1); // Remove the '#' symbol
+      const id = window.location.hash.substring(1);
       const element = document.getElementById(id);
       if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
+        element.scrollIntoView({ behavior: "smooth" });
       }
     }
   }, []);
@@ -29,76 +33,136 @@ const Home = () => {
       <div className="absolute inset-0 bg-black bg-opacity-50"></div>
 
       {/* Navbar */}
-      <nav className="relative z-10 flex justify-between items-center p-6 bg-black bg-opacity-60 w-full fixed top-0">
-        {/* Logo & Title */}
-        <div className="flex items-center space-x-3">
-          <img
-            src="https://cdn-icons-png.flaticon.com/128/2297/2297921.png"
-            alt="Wall of Love Logo"
-            className="h-10 w-auto"
-          />
-          <h1 className="text-white text-2xl font-bold">Wall of Love</h1>
-        </div>
+      <nav className="relative z-10 bg-black bg-opacity-60 w-full fixed top-0 p-6">
+        <div className="flex justify-between items-center">
+          {/* Logo & Title */}
+          <div className="flex items-center space-x-3">
+            <img
+              src="https://cdn-icons-png.flaticon.com/128/2297/2297921.png"
+              alt="Wall of Love Logo"
+              className="h-10 w-auto"
+            />
+            <h1 className="text-white text-2xl font-bold">Wall of Love</h1>
+          </div>
 
-        {/* Navigation Links */}
-        <div className="space-x-6">
-          <Link
-            to="about"
-            smooth={true}
-            duration={800}
-            className="text-white font-semibold text-lg tracking-wide hover:text-blue-400 transition-all duration-300 relative"
+          {/* Hamburger Icon */}
+          <button
+            className="sm:hidden text-white text-3xl focus:outline-none"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
-            About
-            <span className="block h-0.5 bg-blue-400 scale-x-0 hover:scale-x-100 transition-transform duration-300 absolute bottom-0 left-0 right-0"></span>
-          </Link>
+            ☰
+          </button>
 
-          <Link
-            to="features"
-            smooth={true}
-            duration={800}
-            className="text-white font-semibold text-lg tracking-wide hover:text-blue-400 transition-all duration-300 relative"
-          >
-            Features
-            <span className="block h-0.5 bg-blue-400 scale-x-0 hover:scale-x-100 transition-transform duration-300 absolute bottom-0 left-0 right-0"></span>
-          </Link>
-
-          <Link
-            to="contact"
-            smooth={true}
-            duration={800}
-            className="text-white font-semibold text-lg tracking-wide hover:text-blue-400 transition-all duration-300 relative"
-          >
-            Contact Us
-            <span className="block h-0.5 bg-blue-400 scale-x-0 hover:scale-x-100 transition-transform duration-300 absolute bottom-0 left-0 right-0"></span>
-          </Link>
-
-          <RouterLink
-            to="/public-walls"
-            className="text-white font-semibold text-lg tracking-wide hover:text-blue-400 transition-all duration-300 relative"
-          >
-            Walls
-            <span className="block h-0.5 bg-blue-400 scale-x-0 hover:scale-x-100 transition-transform duration-300 absolute bottom-0 left-0 right-0"></span>
+          {/* Desktop Nav */}
+          <div className="hidden sm:flex space-x-6 items-center">
+            <ScrollLink
+              to="about"
+              smooth={true}
+              duration={800}
+              className="text-white font-semibold text-lg tracking-wide hover:text-blue-400 relative cursor-pointer"
+            >
+              About
+              <span className="block h-0.5 bg-blue-400 scale-x-0 hover:scale-x-100 transition-transform duration-300 absolute bottom-0 left-0 right-0"></span>
+            </ScrollLink>
+            <ScrollLink
+              to="features"
+              smooth={true}
+              duration={800}
+              className="text-white font-semibold text-lg tracking-wide hover:text-blue-400 relative cursor-pointer"
+            >
+              Features
+              <span className="block h-0.5 bg-blue-400 scale-x-0 hover:scale-x-100 transition-transform duration-300 absolute bottom-0 left-0 right-0"></span>
+            </ScrollLink>
+            <ScrollLink
+              to="contact"
+              smooth={true}
+              duration={800}
+              className="text-white font-semibold text-lg tracking-wide hover:text-blue-400 relative cursor-pointer"
+            >
+              Contact Us
+              <span className="block h-0.5 bg-blue-400 scale-x-0 hover:scale-x-100 transition-transform duration-300 absolute bottom-0 left-0 right-0"></span>
+            </ScrollLink>
+            <RouterLink
+              to="/public-walls"
+              className="text-white font-semibold text-lg tracking-wide hover:text-blue-400 relative"
+            >
+              Walls
+              <span className="block h-0.5 bg-blue-400 scale-x-0 hover:scale-x-100 transition-transform duration-300 absolute bottom-0 left-0 right-0"></span>
             </RouterLink>
+          </div>
+
+          {/* Sign In/Sign Up - Desktop */}
+          <div className="hidden sm:flex space-x-4">
+            <RouterLink
+              to="/signin"
+              className="relative px-6 py-2 text-white text-lg font-semibold rounded-lg overflow-hidden bg-[#334155] shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl"
+            >
+              Sign In
+              <span className="absolute inset-0 bg-blue-600 opacity-0 transition-opacity duration-300 hover:opacity-20"></span>
+            </RouterLink>
+            <RouterLink
+              to="/signup"
+              className="relative px-6 py-2 text-white text-lg font-semibold rounded-lg overflow-hidden bg-[#334155] shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl"
+            >
+              Sign Up
+              <span className="absolute inset-0 bg-green-600 opacity-0 transition-opacity duration-300 hover:opacity-20"></span>
+            </RouterLink>
+          </div>
         </div>
 
-        {/* Sign In & Sign Up Buttons */}
-        <div className="space-x-4">
-          <RouterLink
-            to="/signin"
-            className="relative px-6 py-2 text-white text-lg font-semibold rounded-lg overflow-hidden bg-gradient-to-r bg-[#334155] shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl"
-          >
-            Sign In
-            <span className="absolute inset-0 bg-blue-600 opacity-0 transition-opacity duration-300 hover:opacity-20"></span>
-          </RouterLink>
-
-          <RouterLink
-            to="/signup"
-            className="relative px-6 py-2 text-white text-lg font-semibold rounded-lg overflow-hidden bg-gradient-to-r bg-[#334155] shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl"
-          >
-            Sign Up
-            <span className="absolute inset-0 bg-green-600 opacity-0 transition-opacity duration-300 hover:opacity-20"></span>
-          </RouterLink>
-        </div>
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="flex flex-col sm:hidden mt-4 space-y-4 text-center">
+            <ScrollLink
+              to="about"
+              smooth={true}
+              duration={800}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-white font-semibold text-lg hover:text-blue-400 cursor-pointer"
+            >
+              About
+            </ScrollLink>
+            <ScrollLink
+              to="features"
+              smooth={true}
+              duration={800}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-white font-semibold text-lg hover:text-blue-400 cursor-pointer"
+            >
+              Features
+            </ScrollLink>
+            <ScrollLink
+              to="contact"
+              smooth={true}
+              duration={800}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-white font-semibold text-lg hover:text-blue-400 cursor-pointer"
+            >
+              Contact Us
+            </ScrollLink>
+            <RouterLink
+              to="/public-walls"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-white font-semibold text-lg hover:text-blue-400"
+            >
+              Walls
+            </RouterLink>
+            <RouterLink
+              to="/signin"
+              className="text-white text-lg font-semibold"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Sign In
+            </RouterLink>
+            <RouterLink
+              to="/signup"
+              className="text-white text-lg font-semibold"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Sign Up
+            </RouterLink>
+          </div>
+        )}
       </nav>
 
       {/* Hero Section */}
@@ -115,35 +179,61 @@ const Home = () => {
         <motion.div
           animate={{ y: [0, -10, 0] }}
           transition={{ repeat: Infinity, duration: 2 }}
-          className="absolute top-10 left-10 text-5xl"
+          className="hidden sm:block absolute top-20 left-60"
         >
-          💜
+          <img
+            src="https://cdn-icons-png.flaticon.com/128/15047/15047578.png"
+            alt="Floating Icon"
+            className="w-14 h-14 object-contain"
+          />
         </motion.div>
-        <motion.div
-          animate={{ y: [0, -10, 0] }}
-          transition={{ repeat: Infinity, duration: 2, delay: 0.5 }}
-          className="absolute bottom-10 right-10 text-5xl"
-        >
-          🚀
-        </motion.div>
+
         <motion.div
           animate={{ y: [0, -10, 0] }}
           transition={{ repeat: Infinity, duration: 2, delay: 0.8 }}
-          className="absolute top-20 right-20 text-5xl"
+          className="hidden sm:block absolute bottom-10 left-10 text-5xl"
         >
-          ✨
+          <img
+            src="https://cdn-icons-png.flaticon.com/128/17540/17540879.png"
+            alt="Floating Icon"
+            className="w-14 h-14 object-contain"
+          />
+        </motion.div>
+
+        <motion.div
+          animate={{ y: [0, -10, 0] }}
+          transition={{ repeat: Infinity, duration: 2, delay: 0.5 }}
+          className="hidden sm:block absolute bottom-10 right-10 text-5xl"
+        >
+          <img
+            src="https://cdn-icons-png.flaticon.com/128/6711/6711626.png"
+            alt="Floating Icon"
+            className="w-14 h-14 object-contain"
+          />
+        </motion.div>
+
+        <motion.div
+          animate={{ y: [0, -10, 0] }}
+          transition={{ repeat: Infinity, duration: 2, delay: 0.8 }}
+          className="hidden sm:block absolute top-20 right-60 text-5xl"
+        >
+          <img
+            src="https://cdn-icons-png.flaticon.com/128/11210/11210085.png"
+            alt="Floating Icon"
+            className="w-14 h-14 object-contain"
+          />
         </motion.div>
 
         {/* Main Content */}
         <div className="relative z-20">
-          <motion.h1
+          <motion.h2
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, ease: "easeOut" }}
             className="text-6xl font-extrabold mb-4 tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-200 dark:from-gray-100 dark:to-gray-400"
           >
-            Twitter Wall of Love 💖
-          </motion.h1>
+            Twitter Wall of Love
+          </motion.h2>
 
           <motion.p
             initial={{ opacity: 0 }}
@@ -151,7 +241,7 @@ const Home = () => {
             transition={{ delay: 0.5, duration: 1 }}
             className="text-xl mb-6 text-gray-200 dark:text-gray-300 font-mono"
           >
-            Showcase the best tweets about your brand, product, or service! 😃
+            Showcase the best tweets about your brand, product, or service!
           </motion.p>
 
           {/* CTA Button */}
@@ -173,12 +263,12 @@ const Home = () => {
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="relative z-10 bg-[#F8FAFC] dark:bg-[#1E293B] rounded-lg p-12 mx-auto w-4/5 mt-20 shadow-2xl flex flex-col md:flex-row items-center"
+        className="relative z-10 p-12 mx-auto w-4/5 mt-20 shadow-2xl flex flex-col md:flex-row items-center"
       >
         {/* Image */}
         <div className="w-full md:w-1/2">
           <img
-            src="https://img.freepik.com/free-vector/social-media-concept-illustration_114360-595.jpg"
+            src="https://cdn.prod.website-files.com/5f1175d8eef44a6c5d6661fb/64d0a537475d468c8b0237e0_engage%20atendees%20x-twitter.png"
             alt="About Wall of Love"
             className="w-full rounded-xl shadow-lg transform transition-all duration-300 hover:scale-105"
           />
@@ -203,49 +293,49 @@ const Home = () => {
           {/* Key Points */}
           <ul className="mt-6 space-y-4 text-lg">
             <li className="flex items-center text-gray-800 dark:text-gray-200 font-semibold">
-              ✅{" "}
+              *{" "}
               <span className="ml-3 font-sans">
                 Showcase tweets in a{" "}
-                <span className="text-blue-500">stunning layout</span>
+                <span className="text-[#cbd5e1]">stunning layout</span>
               </span>
             </li>
             <li className="flex items-center text-gray-800 dark:text-gray-200 font-semibold">
-              🎨{" "}
+              *{" "}
               <span className="ml-3 font-sans">
-                Fully <span className="text-green-500">customizable</span> to
+                Fully <span className="text-[#cbd5e1]">customizable</span> to
                 match your brand
               </span>
             </li>
             <li className="flex items-center text-gray-800 dark:text-gray-200 font-semibold">
-              🔄{" "}
+              *{" "}
               <span className="ml-3 font-sans">
                 Tweets{" "}
-                <span className="text-red-500">update automatically</span> for
+                <span className="text-[#cbd5e1]">update automatically</span> for
                 fresh content
               </span>
             </li>
             <li className="flex items-center text-gray-800 dark:text-gray-200 font-semibold">
-              🌍{" "}
+              *{" "}
               <span className="ml-3 font-sans">
-                Easily <span className="text-purple-500">share anywhere</span>{" "}
-                with an embed link
+                Easily <span className="text-">share anywhere</span> with an
+                embed link
               </span>
             </li>
           </ul>
         </div>
       </motion.section>
 
-      {/* Features Section */}
+      {/*feature section*/}
       <motion.section
         id="features"
         name="features"
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="relative z-10 bg-gradient-to-br from-white to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-xl p-12 mx-auto w-4/5 mt-20 shadow-2xl border border-gray-300 dark:border-gray-700"
+        className="relative z-10 p-12 mx-auto w-4/5 mt-20 shadow-2xl dark:border-gray-700"
       >
         <h2 className="text-5xl font-extrabold text-center text-gray-900 dark:text-white tracking-wide font-serif">
-          🚀 Features
+          Features
         </h2>
         <p className="text-center text-gray-700 dark:text-gray-300 mt-4 text-lg font-mono">
           Everything you need to showcase tweets in a{" "}
@@ -255,57 +345,59 @@ const Home = () => {
           .
         </p>
 
-        {/* Features List */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
-          {[
-            {
-              icon: "📌",
-              title: "Add Tweets Easily",
-              desc: "Paste tweet URLs to instantly add them to your wall.",
-            },
-            {
-              icon: "🎨",
-              title: "Customize Your Wall",
-              desc: "Adjust layout, colors, and branding to match your style.",
-            },
-            {
-              icon: "🌍",
-              title: "Share Anywhere",
-              desc: "Embed on websites or use a direct link to share.",
-            },
-            {
-              icon: "📊",
-              title: "Track Engagement",
-              desc: "See likes, retweets, and engagement in real time.",
-            },
-            {
-              icon: "🔄",
-              title: "Auto Updates",
-              desc: "New tweets are updated daily to keep your wall fresh.",
-            },
-            {
-              icon: "⚡",
-              title: "Fast & Responsive",
-              desc: "Your wall looks great on any device, big or small.",
-            },
-          ].map((feature, index) => (
-            <motion.div
-              key={index}
-              whileHover={{
-                scale: 1.05,
-                boxShadow: "0px 10px 30px rgba(0, 0, 0, 0.1)",
-              }}
-              whileTap={{ scale: 0.95 }}
-              className="p-8 rounded-xl shadow-lg text-center bg-white/90 dark:bg-gray-800/80 border border-gray-300 dark:border-gray-700 backdrop-blur-lg transition-all duration-300 cursor-pointer"
-            >
-              <h3 className="text-3xl font-bold mb-3 text-gray-800 dark:text-white">
-                {feature.icon} {feature.title}
-              </h3>
-              <p className="text-gray-700 dark:text-gray-300 text-lg">
-                {feature.desc}
-              </p>
-            </motion.div>
-          ))}
+        {/* Features Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-12 items-center">
+          {/* Features List */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {[
+              {
+                icon: "📌",
+                title: "Add Tweets Easily",
+                desc: "Paste tweet URLs to instantly add them to your wall.",
+              },
+              {
+                icon: "🎨",
+                title: "Customize Your Wall",
+                desc: "Adjust layout, colors, and branding to match your style.",
+              },
+              {
+                icon: "🌍",
+                title: "Share Anywhere",
+                desc: "Embed on websites or use a direct link to share.",
+              },
+              {
+                icon: "📊",
+                title: "Track Engagement",
+                desc: "See likes, retweets, and engagement in real time.",
+              },
+            ].map((feature, index) => (
+              <motion.div
+                key={index}
+                whileHover={{
+                  scale: 1.05,
+                  boxShadow: "0px 10px 30px rgba(0, 0, 0, 0.1)",
+                }}
+                whileTap={{ scale: 0.95 }}
+                className="p-8 rounded-xl shadow-lg text-center  border border-gray-300 dark:border-gray-700 backdrop-blur-lg transition-all duration-300 cursor-pointer"
+              >
+                <h3 className="text-3xl font-bold mb-3 text-gray-800 dark:text-white">
+                  {feature.icon} {feature.title}
+                </h3>
+                <p className="text-gray-700 dark:text-gray-300 text-lg">
+                  {feature.desc}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Image Right Side */}
+          <div className="flex justify-center">
+            <img
+              src="https://cdn.prod.website-files.com/5f1175d8eef44a6c5d6661fb/64d0a53700efdc84fa2cbda3_user%20generated%20content%20x-twitter.png" // Replace with your image path
+              alt="Features Illustration"
+              className="max-w-full h-auto rounded-xl shadow-xl"
+            />
+          </div>
         </div>
       </motion.section>
 
@@ -315,7 +407,7 @@ const Home = () => {
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="relative z-10 bg-gradient-to-br from-white to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-xl p-12 mx-auto w-3/4 mt-20 shadow-2xl border border-gray-300 dark:border-gray-700"
+        className="relative z-10  p-12 mx-auto w-3/4 mt-20 shadow-2xl border border-gray-300 dark:border-gray-700"
       >
         <h2 className="text-5xl font-extrabold text-center text-gray-900 dark:text-white tracking-wide font-serif">
           📩 Let's Connect!
@@ -327,15 +419,16 @@ const Home = () => {
         {/* Contact Details */}
         <div className="mt-8 flex flex-col items-center space-y-6">
           <div className="p-6 w-full max-w-lg text-center bg-white/90 dark:bg-gray-800/80 backdrop-blur-lg border border-gray-300 dark:border-gray-700 rounded-xl shadow-lg">
-            <p className="text-xl font-semibold text-gray-800 dark:text-white flex items-center justify-center">
-              ✉️ Email us at
-              <a
-                href="mailto:support@walloflove.com"
-                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-bold ml-2 transition-all duration-300"
-              >
-                support@walloflove.com
-              </a>
-            </p>
+          <p className="text-xl font-semibold text-gray-800 dark:text-white flex flex-wrap items-center justify-center text-center px-4 sm:px-0">
+  ✉️ Email us at
+  <a
+    href="mailto:support@walloflove.com"
+    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-bold ml-2 transition-all duration-300 break-all"
+  >
+    support@walloflove.com
+  </a>
+</p>
+
           </div>
 
           <div className="p-6 w-full max-w-lg text-center bg-white/90 dark:bg-gray-800/80 backdrop-blur-lg border border-gray-300 dark:border-gray-700 rounded-xl shadow-lg">
