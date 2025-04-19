@@ -33,6 +33,12 @@ export class Wall {
   })
   visibility: WallVisibility;
 
+  @Column({ type: 'varchar', nullable: true })
+  public_uuid?: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  private_uuid?: string;
+
   @CreateDateColumn()
   created_at: Date;
 
