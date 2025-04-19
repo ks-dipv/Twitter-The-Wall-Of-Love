@@ -50,10 +50,27 @@ export class WallService {
         throw new NotFoundException('Wall not found or access denied');
       }
 
-      const uniqueId = uuidv4();
+      // Generate UUIDs if they don't exist
+      if (!wall.public_uuid) {
+        wall.public_uuid = uuidv4();
+      }
+
+      if (!wall.private_uuid) {
+        wall.private_uuid = uuidv4();
+      }
+
+      // Save the wall with updated UUIDs
+      await this.wallRepository.save(wall);
+
       const baseUrl = this.configService.get('appConfig.baseUrl');
-      const shareable_link = `${baseUrl}/walls/${wallId}/link/${uniqueId}`;
-      const embed_link = `<iframe src="${baseUrl}/walls/${wallId}/link/${uniqueId}" width="600" height="400"></iframe>`;
+
+      // Generate shareable link based on visibility
+      const uuid =
+        wall.visibility === WallVisibility.PRIVATE
+          ? wall.private_uuid
+          : wall.public_uuid;
+      const shareable_link = `${baseUrl}/walls/${wallId}/link/${uuid}`;
+      const embed_link = `<iframe src="${shareable_link}" width="600" height="400"></iframe>`;
 
       return {
         shareable_link,
@@ -199,15 +216,28 @@ export class WallService {
   }
 
   // Get wall by sharable Link
-  async getWallBySharableLink(wallId: number): Promise<Wall> {
+  async getWallBySharableLink(wallId: number, uuid: string): Promise<Wall> {
     try {
+      // Find the wall by ID
       const wall = await this.wallRepository.findOne({
         where: { id: wallId },
-        relations: ['tweets'],
+        relations: ['tweets', 'social_links'],
       });
 
       if (!wall) {
         throw new NotFoundException('Wall not found');
+      }
+
+      // Check if the provided UUID matches based on visibility
+      const validUuid =
+        wall.visibility === WallVisibility.PRIVATE
+          ? wall.private_uuid === uuid
+          : wall.public_uuid === uuid;
+
+      if (!validUuid) {
+        throw new UnauthorizedException(
+          'Invalid link or insufficient permissions',
+        );
       }
 
       return wall;
