@@ -32,11 +32,7 @@ export const logoutUser = async () => {
 };
 
 export const generateSharableLink = async (wallId) => {
-  return api.post(`/walls/${wallId}/generate-link`, {}); 
-};
-
-export const reGenerateSharableLink = async (wallId) => {
-  return api.post(`/walls/${wallId}/regenerate-link`); 
+  return api.post(`/walls/${wallId}/generate-link`, {}); // Send an empty object to match backend expectations
 };
 
 export const getSharableLink = async (wallId, uniqueId) => {

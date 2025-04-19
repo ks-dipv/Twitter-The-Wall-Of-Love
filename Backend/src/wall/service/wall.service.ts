@@ -50,27 +50,10 @@ export class WallService {
         throw new NotFoundException('Wall not found or access denied');
       }
 
-      // Generate UUIDs if they don't exist
-      if (!wall.public_uuid) {
-        wall.public_uuid = uuidv4();
-      }
-
-      if (!wall.private_uuid) {
-        wall.private_uuid = uuidv4();
-      }
-
-      // Save the wall with updated UUIDs
-      await this.wallRepository.save(wall);
-
+      const uniqueId = uuidv4();
       const baseUrl = this.configService.get('appConfig.baseUrl');
-
-      // Generate shareable link based on visibility
-      const uuid =
-        wall.visibility === WallVisibility.PRIVATE
-          ? wall.private_uuid
-          : wall.public_uuid;
-      const shareable_link = `${baseUrl}/walls/${wallId}/link/${uuid}`;
-      const embed_link = `<iframe src="${shareable_link}" width="600" height="400"></iframe>`;
+      const shareable_link = `${baseUrl}/walls/${wallId}/link/${uniqueId}`;
+      const embed_link = `<iframe src="${baseUrl}/walls/${wallId}/link/${uniqueId}" width="600" height="400"></iframe>`;
 
       return {
         shareable_link,
@@ -79,49 +62,6 @@ export class WallService {
     } catch (error) {
       throw new BadRequestException(
         error.message || 'Failed to generate links',
-      );
-    }
-  }
-
-  public async regenerateLinks(wallId: number, user) {
-    try {
-      const existingUser = await this.userRepository.getByEmail(user.email);
-      if (!existingUser) {
-        throw new NotFoundException('User not found');
-      }
-
-      const wall = await this.wallRepository.getWallByIdAndUser(
-        wallId,
-        existingUser.id,
-      );
-      if (!wall || wall.user.id !== existingUser.id) {
-        throw new NotFoundException('Wall not found or access denied');
-      }
-
-      // Regenerate both UUIDs
-      wall.public_uuid = uuidv4();
-      wall.private_uuid = uuidv4();
-
-      // Save the wall with updated UUIDs
-      await this.wallRepository.save(wall);
-
-      const baseUrl = this.configService.get('appConfig.baseUrl');
-
-      // Generate shareable link based on visibility
-      const uuid =
-        wall.visibility === WallVisibility.PRIVATE
-          ? wall.private_uuid
-          : wall.public_uuid;
-      const shareable_link = `${baseUrl}/walls/${wallId}/link/${uuid}`;
-      const embed_link = `<iframe src="${shareable_link}" width="600" height="400"></iframe>`;
-
-      return {
-        shareable_link,
-        embed_link,
-      };
-    } catch (error) {
-      throw new BadRequestException(
-        error.message || 'Failed to regenerate links',
       );
     }
   }
@@ -259,28 +199,15 @@ export class WallService {
   }
 
   // Get wall by sharable Link
-  async getWallBySharableLink(wallId: number, uuid: string): Promise<Wall> {
+  async getWallBySharableLink(wallId: number): Promise<Wall> {
     try {
-      // Find the wall by ID
       const wall = await this.wallRepository.findOne({
         where: { id: wallId },
-        relations: ['tweets', 'social_links'],
+        relations: ['tweets'],
       });
 
       if (!wall) {
         throw new NotFoundException('Wall not found');
-      }
-
-      // Check if the provided UUID matches based on visibility
-      const validUuid =
-        wall.visibility === WallVisibility.PRIVATE
-          ? wall.private_uuid === uuid
-          : wall.public_uuid === uuid;
-
-      if (!validUuid) {
-        throw new UnauthorizedException(
-          'Invalid link or insufficient permissions',
-        );
       }
 
       return wall;

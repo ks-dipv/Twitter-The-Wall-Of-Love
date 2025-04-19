@@ -81,24 +81,12 @@ export class WallController {
     return await this.wallService.generateLinks(wallId, user);
   }
 
-  @Post(':wallId/regenerate-link')
-  @CommonApiDecorators({
-    summary: 'Generate a shareable link for a Wall',
-    successDescription: 'Shareable link generated',
-    errorStatus: 404,
-    errorDescription: 'Wall not found',
-  })
-  @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
-  async reGenerateLink(@Param('wallId') wallId: number, @User() user) {
-    return await this.wallService.regenerateLinks(wallId, user);
-  }
-
   @Get(':wallId/link/:uuid')
   @CommonApiDecorators({
     summary: 'Get a Wall by shareable link',
     successDescription: 'Wall details retrieved',
     errorStatus: 404,
-    errorDescription: 'Wall not found or invalid link',
+    errorDescription: 'Wall not found',
   })
   @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
   @ApiParam({
@@ -107,11 +95,8 @@ export class WallController {
     type: String,
   })
   @Auth(AuthType.None)
-  async getWallBySharableLink(
-    @Param('wallId') wallId: number,
-    @Param('uuid') uuid: string,
-  ) {
-    return await this.wallService.getWallBySharableLink(wallId, uuid);
+  async getWallBySharableLink(@Param('wallId') wallId: number) {
+    return await this.wallService.getWallBySharableLink(wallId);
   }
 
   @Delete(':id')
