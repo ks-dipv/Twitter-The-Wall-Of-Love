@@ -13,6 +13,8 @@ import { TweetService } from './service/tweet.service';
 import { ApiTags, ApiParam, ApiBody, ApiQuery } from '@nestjs/swagger';
 import { User } from '../common/decorator/user.decorater';
 import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
+import { Auth } from 'src/common/decorator/auth.decorator';
+import { AuthType } from 'src/common/enum/auth-type.enum';
 
 @ApiTags('Tweets')
 @Controller('api/walls')
@@ -139,6 +141,7 @@ export class TweetController {
     type: String,
     description: 'End date for filtering tweets',
   })
+  @Auth(AuthType.None)
   async getTweetsByDate(
     @Param('wallId') wallId: number,
     @Query('startDate') startDate?: string,

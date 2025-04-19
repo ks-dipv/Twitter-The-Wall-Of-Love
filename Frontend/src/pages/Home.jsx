@@ -419,16 +419,15 @@ const Home = () => {
         {/* Contact Details */}
         <div className="mt-8 flex flex-col items-center space-y-6">
           <div className="p-6 w-full max-w-lg text-center bg-white/90 dark:bg-gray-800/80 backdrop-blur-lg border border-gray-300 dark:border-gray-700 rounded-xl shadow-lg">
-          <p className="text-xl font-semibold text-gray-800 dark:text-white flex flex-wrap items-center justify-center text-center px-4 sm:px-0">
-  ✉️ Email us at
-  <a
-    href="mailto:support@walloflove.com"
-    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-bold ml-2 transition-all duration-300 break-all"
-  >
-    support@walloflove.com
-  </a>
-</p>
-
+            <p className="text-xl font-semibold text-gray-800 dark:text-white flex flex-wrap items-center justify-center text-center px-4 sm:px-0">
+              ✉️ Email us at
+              <a
+                href="mailto:support@walloflove.com"
+                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-bold ml-2 transition-all duration-300 break-all"
+              >
+                support@walloflove.com
+              </a>
+            </p>
           </div>
 
           <div className="p-6 w-full max-w-lg text-center bg-white/90 dark:bg-gray-800/80 backdrop-blur-lg border border-gray-300 dark:border-gray-700 rounded-xl shadow-lg">
