@@ -195,7 +195,11 @@ export class AuthService {
   public async resetPassword(token: string, password: string): Promise<void> {
     try {
       const user = await this.userRepository.getResetPasswordToken(token);
-      if (!user) throw new NotFoundException('Invalid or expired token');
+
+      // Check if token exists on the user
+      if (!user.reset_password_token) {
+        throw new NotFoundException('This reset link has already been used');
+      }
 
       user.password = await this.hashingProvider.hashPassword(password);
       user.reset_password_token = null;
@@ -205,6 +209,22 @@ export class AuthService {
       console.log(error);
       if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException('Failed to reset password');
+    }
+  }
+
+  public async verifyResetToken(token: string): Promise<void> {
+    try {
+      const user = await this.userRepository.getResetPasswordToken(token);
+      if (!user) throw new NotFoundException('Invalid or expired token');
+
+      // Check if token still exists on the user record
+      if (!user.reset_password_token) {
+        throw new NotFoundException('This reset link has already been used');
+      }
+    } catch (error) {
+      console.log(error);
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Failed to verify token');
     }
   }
 }

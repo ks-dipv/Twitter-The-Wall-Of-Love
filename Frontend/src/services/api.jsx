@@ -51,6 +51,10 @@ export const requestPasswordReset = async (email) => {
   return api.post("/auth/reset-password/request", { email });
 };
 
+export const verifyResetToken = async (token) => {
+  return await api.get(`/auth/verify-reset-token/${token}`);
+};
+
 export const getAllWalls = async () => {
   return api.get("/walls");
 };
