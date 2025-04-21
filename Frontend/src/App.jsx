@@ -11,6 +11,7 @@ import ShareableWallPage from "./pages/ShareableWallPage";
 import VerifyEmail from "./pages/VerifyEmail";
 import ResendEmail from "./pages/ResendEmail";
 import PublicWalls from "./pages/PublicWalls";
+import PublicShareableWallPage from "./pages/PublicShareableWall";
 function App() {
   return (
     <AuthProvider>
@@ -27,6 +28,10 @@ function App() {
           <Route
             path="/walls/:wallId/link/:uniqueId"
             element={<ShareableWallPage />}
+          />
+          <Route
+            path="/walls/:wallId/public"
+            element={<PublicShareableWallPage />}
           />
           <Route
             path="/verify-email/:verificationToken"
