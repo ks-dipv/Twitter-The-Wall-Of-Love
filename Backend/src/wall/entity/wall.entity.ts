@@ -11,6 +11,7 @@ import {
 import { WallVisibility } from '../enum/wall-visibility.enum';
 import { SocialLink } from './social-links.entity';
 import { Tweets } from './tweets.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class Wall {
@@ -34,9 +35,11 @@ export class Wall {
   visibility: WallVisibility;
 
   @Column({ type: 'varchar', nullable: true })
+  @Exclude()
   public_uuid?: string;
 
   @Column({ type: 'varchar', nullable: true })
+  @Exclude()
   private_uuid?: string;
 
   @CreateDateColumn()
