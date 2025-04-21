@@ -99,7 +99,7 @@ export class WallController {
     summary: 'Get a Wall by shareable link',
     successDescription: 'Wall details retrieved',
     errorStatus: 404,
-    errorDescription: 'Wall not found',
+    errorDescription: 'Wall not found or invalid link',
   })
   @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
   @ApiParam({
@@ -108,8 +108,11 @@ export class WallController {
     type: String,
   })
   @Auth(AuthType.None)
-  async getWallBySharableLink(@Param('wallId') wallId: number) {
-    return await this.wallService.getWallBySharableLink(wallId);
+  async getWallBySharableLink(
+    @Param('wallId') wallId: number,
+    @Param('uuid') uuid: string,
+  ) {
+    return await this.wallService.getWallBySharableLink(wallId, uuid);
   }
 
   @Delete(':id')
