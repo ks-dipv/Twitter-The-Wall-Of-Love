@@ -116,8 +116,14 @@ export class AuthService {
     const user = await this.userRepository.findOne({
       where: { email_verification_token: token },
     });
+
     if (!user) {
       throw new BadRequestException('Invalid or expired verification token');
+    }
+
+    // Check if user is already verified
+    if (user.is_email_verified) {
+      throw new BadRequestException('Email has already been verified');
     }
 
     user.is_email_verified = true;
@@ -125,6 +131,22 @@ export class AuthService {
     await this.userRepository.save(user);
 
     return user;
+  }
+
+  // Add a new method to check if the token is valid
+  public async checkVerificationToken(token: string): Promise<void> {
+    const user = await this.userRepository.findOne({
+      where: { email_verification_token: token },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Invalid or expired verification token');
+    }
+
+    // Check if user is already verified
+    if (user.is_email_verified) {
+      throw new BadRequestException('Email has already been verified');
+    }
   }
 
   public async signIn(signInDto: SignInDto, res): Promise<object> {

@@ -74,6 +74,18 @@ export class AuthController {
     return this.authService.verifyEmail(token);
   }
 
+  @Get('auth/check-verification/:token')
+  @CommonApiDecorators({
+    summary: 'Check if verification token is valid',
+    successDescription: 'Token is valid',
+    errorDescription: 'Invalid or expired token',
+  })
+  @Auth(AuthType.None)
+  async checkVerification(@Param('token') token: string) {
+    await this.authService.checkVerificationToken(token);
+    return new SuccessDto('Token is valid');
+  }
+
   @Post('auth/signin')
   @CommonApiDecorators({
     summary: 'User sign-in',
