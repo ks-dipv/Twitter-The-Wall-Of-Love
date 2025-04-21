@@ -215,6 +215,27 @@ export class WallService {
     }
   }
 
+  async getPublicWallById(id: number): Promise<Wall> {
+    try {
+      const wall = await this.wallRepository.findOne({
+        where: { id: id },
+        relations: ['tweets', 'social_links'],
+      });
+
+      if (!wall) {
+        throw new NotFoundException('wall not found');
+      }
+
+      return wall;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new BadRequestException('Failed to fetch wall');
+    }
+  }
+
   // Get wall by sharable Link
   async getWallBySharableLink(wallId: number, uuid: string): Promise<Wall> {
     try {

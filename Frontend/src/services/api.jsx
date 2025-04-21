@@ -60,6 +60,10 @@ export const getWallById = async (wallId) => {
   return api.get(`/walls/${wallId}`);
 };
 
+export const getPublicWallsById = async (wallId) => {
+  return api.get(`/walls/${wallId}/public`);
+};
+
 export const addWalls = async (data) => {
   return api.post("/walls", data, {
     headers: { "Content-Type": "multipart/form-data" },

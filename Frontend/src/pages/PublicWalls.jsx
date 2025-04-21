@@ -111,7 +111,7 @@ const PublicWalls = () => {
                     className="w-full h-24 sm:h-32 object-cover rounded-md mb-3"
                     onClick={() =>
                       navigate(
-                        `/walls/${wall.id}/link/71d0623b-013f-4bbb-8fe1-1f0168abd68a`
+                        `/walls/${wall.id}/public`
                       )
                     }
                   />
@@ -121,7 +121,7 @@ const PublicWalls = () => {
                   className="text-xl font-semibold mb-2"
                   onClick={() =>
                     navigate(
-                      `/walls/${wall.id}/link/71d0623b-013f-4bbb-8fe1-1f0168abd68a`
+                      `/walls/${wall.id}/public`
                     )
                   }
                 >
