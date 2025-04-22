@@ -154,7 +154,7 @@ const ShareWallModal = ({ wallId, isOpen, onClose }) => {
                 readOnly
                 placeholder="Generate code to embed this wall"
                 className="flex-grow text-black border border-gray-300 rounded-lg p-2 text-sm bg-gray-50 min-h-[48px] resize-none overflow-x-auto"
-                rows={3}
+                rows={4}
               />
               <button
                 onClick={
@@ -163,7 +163,7 @@ const ShareWallModal = ({ wallId, isOpen, onClose }) => {
                     : handleGenerateEmbedLink
                 }
                 disabled={loading.embed}
-                className={`px-3 py-2 rounded-lg text-white flex items-center justify-center transition-colors w-full sm:w-auto ${
+                className={`h-[42px] px-3 py-2 rounded-lg text-white flex items-center justify-center transition-colors w-full sm:w-auto ${
                   links.embed_link
                     ? copied.embed
                       ? "bg-[#334155]"
