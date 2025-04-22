@@ -1,14 +1,15 @@
 import React, { useEffect } from "react";
 import { Link as RouterLink } from "react-router-dom";
-import { Link } from "react-scroll";
 import { motion } from "framer-motion";
 import { FaTwitter, FaFacebookF, FaYoutube, FaInstagram } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Link as ScrollLink } from "react-scroll";
+import { useAuth } from "../context/AuthContext";
 
 const Home = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -21,6 +22,7 @@ const Home = () => {
       }
     }
   }, []);
+
   return (
     <div
       className="min-h-screen flex flex-col bg-cover bg-center relative"
@@ -92,22 +94,34 @@ const Home = () => {
           </div>
 
           {/* Sign In/Sign Up - Desktop */}
-          <div className="hidden sm:flex space-x-4">
-            <RouterLink
-              to="/signin"
-              className="relative px-6 py-2 text-white text-lg font-semibold rounded-lg overflow-hidden bg-[#334155] shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl"
-            >
-              Sign In
-              <span className="absolute inset-0 bg-blue-600 opacity-0 transition-opacity duration-300 hover:opacity-20"></span>
-            </RouterLink>
-            <RouterLink
-              to="/signup"
-              className="relative px-6 py-2 text-white text-lg font-semibold rounded-lg overflow-hidden bg-[#334155] shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl"
-            >
-              Sign Up
-              <span className="absolute inset-0 bg-green-600 opacity-0 transition-opacity duration-300 hover:opacity-20"></span>
-            </RouterLink>
-          </div>
+          {user ? (
+            <div className="hidden sm:flex space-x-4">
+              <RouterLink
+                to="/admin/dashboard"
+                className="relative px-6 py-2 text-white text-lg font-semibold rounded-lg overflow-hidden bg-[#334155] shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl"
+              >
+                Dashboard
+                <span className="absolute inset-0 bg-blue-600 opacity-0 transition-opacity duration-300 hover:opacity-20"></span>
+              </RouterLink>
+            </div>
+          ) : (
+            <div className="hidden sm:flex space-x-4">
+              <RouterLink
+                to="/signin"
+                className="relative px-6 py-2 text-white text-lg font-semibold rounded-lg overflow-hidden bg-[#334155] shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl"
+              >
+                Sign In
+                <span className="absolute inset-0 bg-blue-600 opacity-0 transition-opacity duration-300 hover:opacity-20"></span>
+              </RouterLink>
+              <RouterLink
+                to="/signup"
+                className="relative px-6 py-2 text-white text-lg font-semibold rounded-lg overflow-hidden bg-[#334155] shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl"
+              >
+                Sign Up
+                <span className="absolute inset-0 bg-green-600 opacity-0 transition-opacity duration-300 hover:opacity-20"></span>
+              </RouterLink>
+            </div>
+          )}
         </div>
 
         {/* Mobile Menu */}
