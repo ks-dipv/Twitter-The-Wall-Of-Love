@@ -141,6 +141,25 @@ const Sidebar = () => {
           )}
         </div>
 
+        {/* Add home page & Public walls page */}
+        <div className="space-y-4 p-4">
+          {isOpen && (
+            <div className="font-bold text-gray-400 text-sm uppercase">
+              Navigation
+            </div>
+          )}
+          <Link
+            to="/"
+            className={`flex items-center gap-2 p-2 rounded ${
+              isActive("/") ? "bg-gray-400" : "hover:bg-gray-700"
+            }`}
+            onClick={() => isMobile && setIsOpen(false)}
+          >
+            <LayoutDashboard className="w-5 h-5 flex-shrink-0" />
+            {isOpen && <span className="truncate">Home</span>}
+          </Link>
+        </div>
+
         {/* Main Navigation */}
         <div className="flex-grow overflow-y-auto">
           <ul className="space-y-4 p-4">

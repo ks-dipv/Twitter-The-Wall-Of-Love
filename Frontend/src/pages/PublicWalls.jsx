@@ -6,7 +6,9 @@ import { FaTwitter, FaFacebookF, FaYoutube, FaInstagram } from "react-icons/fa";
 
 const PublicWalls = () => {
   const [walls, setWalls] = useState([]);
+  const [searchQuery, setSearchQuery] = useState(""); 
   const navigate = useNavigate();
+  
 
   useEffect(() => {
     const fetchWalls = async () => {
@@ -24,6 +26,19 @@ const PublicWalls = () => {
   const navigateToHomeSection = (sectionId) => {
     navigate(`/#${sectionId}`);
   };
+
+   // Filter walls by title and description 
+   const filteredWalls = walls
+   .filter((wall) =>
+     wall.title.toLowerCase().includes(searchQuery.toLowerCase())
+   )
+   .concat(
+     walls.filter(
+       (wall) =>
+         wall.description.toLowerCase().includes(searchQuery.toLowerCase()) &&
+         !wall.title.toLowerCase().includes(searchQuery.toLowerCase())
+     )
+   );
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -94,11 +109,21 @@ const PublicWalls = () => {
 
       {/* Public Walls Content */}
       <div className="max-w-7xl mx-auto px-4 py-32">
-        {walls.length === 0 ? (
+         {/* Search Box */}
+         <div className="mb-8 flex justify-center">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by title or description..."
+            className="w-96 p-2 border rounded-lg shadow-sm focus:ring-blue-400 focus:border-blue-400"
+          />
+        </div>
+        {filteredWalls.length === 0 ? (
           <p className="text-center text-gray-500">No walls found.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-            {walls.map((wall) => (
+            {filteredWalls.map((wall) => (
               <div
                 key={wall.id}
                 className="bg-white p-4 rounded-xl shadow-lg border hover:scale-105 transition-all duration-300 flex flex-col items-center text-center"
@@ -138,14 +163,24 @@ const PublicWalls = () => {
                 ></p>
                 {/* User Info */}
                 {wall.user && (
-                  <div className="flex items-center space-x-2 mt-auto gap-14 ">
-                    <img
-                      src={wall.user.profile_pic}
-                      alt={wall.user.name}
-                      className="w-10 h-10  rounded-full object-cover border"
-                    />
-                    <span className="text-gray-500 font-medium">
-                      ~{wall.user.name}
+                  <div className="flex flex-col items-center mt-auto gap-2">
+                    <div className="flex items-center space-x-2 gap-12">
+                      <img
+                        src={wall.user.profile_pic}
+                        alt={wall.user.name}
+                        className="w-10 h-10 rounded-full object-cover border"
+                      />
+                      <span className="text-gray-500 font-medium">
+                        ~{wall.user.name}
+                      </span>
+                    </div>
+                    {/* Show created_at date below user */}
+                    <span className="text-gray-400 text-sm">
+                      {new Date(wall.created_at).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
                     </span>
                   </div>
                 )}

@@ -6,6 +6,7 @@ import {
   UploadedFile,
   UseInterceptors,
   Response,
+  Get,
 } from '@nestjs/common';
 import { AuthService } from './services/auth.service';
 import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
@@ -71,6 +72,18 @@ export class AuthController {
   @Auth(AuthType.None)
   async verifyEmail(@Param('token') token: string) {
     return this.authService.verifyEmail(token);
+  }
+
+  @Get('auth/check-verification/:token')
+  @CommonApiDecorators({
+    summary: 'Check if verification token is valid',
+    successDescription: 'Token is valid',
+    errorDescription: 'Invalid or expired token',
+  })
+  @Auth(AuthType.None)
+  async checkVerification(@Param('token') token: string) {
+    await this.authService.checkVerificationToken(token);
+    return new SuccessDto('Token is valid');
   }
 
   @Post('auth/signin')
@@ -144,5 +157,21 @@ export class AuthController {
     const { password } = updatePassword;
     this.authService.resetPassword(token, password);
     return new SuccessDto('Password Reset Successfully');
+  }
+
+  @Get('auth/verify-reset-token/:token')
+  @CommonApiDecorators({
+    summary: 'Verify reset password token',
+    successDescription: 'Token is valid',
+  })
+  @ApiParam({
+    name: 'token',
+    description: 'Password reset token',
+    type: 'string',
+  })
+  @Auth(AuthType.None)
+  public async verifyResetToken(@Param('token') token: string) {
+    await this.authService.verifyResetToken(token);
+    return new SuccessDto('Token is valid');
   }
 }
