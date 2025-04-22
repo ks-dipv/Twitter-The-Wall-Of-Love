@@ -51,6 +51,10 @@ export const requestPasswordReset = async (email) => {
   return api.post("/auth/reset-password/request", { email });
 };
 
+export const verifyResetToken = async (token) => {
+  return await api.get(`/auth/verify-reset-token/${token}`);
+};
+
 export const getAllWalls = async () => {
   return api.get("/walls");
 };
@@ -101,6 +105,10 @@ export const reorderTweets = async (wallId, orderedTweetIds) => {
 
 export const userVerify = async (token) => {
   return api.post(`/auth/verify-email/${token}`, { token });
+};
+
+export const checkVerificationToken = async (token) => {
+  return await api.get(`/auth/check-verification/${token}`);
 };
 
 export const totalData = async () => {
