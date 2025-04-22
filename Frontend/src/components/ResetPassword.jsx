@@ -11,6 +11,7 @@ const ResetPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isTokenValid, setIsTokenValid] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [passwordErrors, setPasswordErrors] = useState([]);
 
   useEffect(() => {
     // Verify token validity when component mounts
@@ -22,11 +23,12 @@ const ResetPassword = () => {
       }
 
       try {
-        // You'll need to implement this endpoint
         await verifyResetToken(token);
         setIsTokenValid(true);
       } catch (err) {
-        toast.error(err.response?.data?.message || "Invalid or expired reset link.");
+        toast.error(
+          err.response?.data?.message || "Invalid or expired reset link."
+        );
         setIsTokenValid(false);
       } finally {
         setIsLoading(false);
@@ -36,11 +38,40 @@ const ResetPassword = () => {
     checkToken();
   }, [token]);
 
+  const validatePassword = (password) => {
+    const errors = [];
+
+    if (password.length < 8) {
+      errors.push("Password must be at least 8 characters long");
+    }
+
+    if (!/[A-Za-z]/.test(password)) {
+      errors.push("Password must include at least one letter");
+    }
+
+    if (!/\d/.test(password)) {
+      errors.push("Password must include at least one number");
+    }
+
+    if (!/[@$!%*#?&]/.test(password)) {
+      errors.push("Password must include at least one special character");
+    }
+
+    return errors;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!isTokenValid) {
       toast.error("Cannot reset password with an invalid or expired link.");
+      return;
+    }
+
+    const passwordValidationErrors = validatePassword(newPassword);
+    if (passwordValidationErrors.length > 0) {
+      setPasswordErrors(passwordValidationErrors);
+      passwordValidationErrors.forEach((err) => toast.error(err));
       return;
     }
 
@@ -54,11 +85,15 @@ const ResetPassword = () => {
       toast.success(response.data.message || "Password successfully reset.");
       setTimeout(() => navigate("/signin"), 2000);
     } catch (err) {
-      const errorMessage = err.response?.data?.message || "Failed to reset password.";
+      const errorMessage =
+        err.response?.data?.message || "Failed to reset password.";
       toast.error(errorMessage);
-      
-      // If token is invalid/expired, update state to hide form
-      if (errorMessage.includes("invalid") || errorMessage.includes("expired") || errorMessage.includes("already been used")) {
+
+      if (
+        errorMessage.includes("invalid") ||
+        errorMessage.includes("expired") ||
+        errorMessage.includes("already been used")
+      ) {
         setIsTokenValid(false);
       }
     }
@@ -98,11 +133,24 @@ const ResetPassword = () => {
                 type="password"
                 name="newPassword"
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setNewPassword(val);
+                  setPasswordErrors(validatePassword(val));
+                }}
                 required
                 className="w-full p-3 border rounded focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                 placeholder="Enter new password"
               />
+              {passwordErrors.length > 0 && (
+                <div className="mt-2 text-red-500 text-sm">
+                  <ul className="list-disc list-inside">
+                    {passwordErrors.map((error, index) => (
+                      <li key={index}>{error}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
             <div className="mb-4">
               <label className="block text-gray-700 dark:text-gray-300 mb-2">
