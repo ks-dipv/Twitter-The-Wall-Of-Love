@@ -5,7 +5,9 @@ import { FiTrash2, FiEdit, FiPlus } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { toast, ToastContainer } from "react-toastify";
 import ConfirmationDialog from "../components/ConfirmationDialog";
+import { FaShareAlt } from "react-icons/fa";
 
+import ShareWallModal from "../components/ShareWallModal";
 const ListWalls = () => {
   const [walls, setWalls] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,6 +15,9 @@ const ListWalls = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [wallToDelete, setWallToDelete] = useState(null);
   const [searchQuery, setSearchQuery] = useState(""); // state to store search query
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [wallToShare, setWallToShare] = useState(null);
+
   const navigate = useNavigate();
   useEffect(() => {
     const fetchWalls = async () => {
@@ -39,6 +44,16 @@ const ListWalls = () => {
     setShowDeleteDialog(false);
     setWallToDelete(null);
   };
+  const openShareModal = (wall) => {
+    setWallToShare(wall);
+    setShowShareModal(true);
+  };
+
+  const closeShareModal = () => {
+    setWallToShare(null);
+    setShowShareModal(false);
+  };
+
   const handleDelete = async () => {
     if (!wallToDelete) return;
     try {
@@ -112,11 +127,23 @@ const ListWalls = () => {
                   className="relative flex-1"
                   onClick={() => navigate(`/admin/walls/${wall.id}`)}
                 >
-                  <h2 className="text-lg sm:text-xl font-semibold">
-                    {wall.title}
-                  </h2>
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <h2 className="text-lg sm:text-xl font-semibold truncate">
+                      {wall.title}
+                    </h2>
+                    <span
+                      className={`text-[11px] sm:text-sm font-medium px-3 py-1 rounded-full ${
+                        wall.visibility === "public"
+                          ? "bg-[#D1D5DB] text-black-800"
+                          : "bg-[#D1D5DB] text-black-800"
+                      }`}
+                    >
+                      {wall.visibility === "public" ? "Public" : "Private"}
+                    </span>
+                  </div>
+
                   <p
-                    className="text-gray-600 absolute top-10 left-0 right-0 h-[80px] sm:h-[100px] overflow-hidden text-ellipsis p-2"
+                    className="text-gray-600 mt-2 h-[80px] sm:h-[100px] overflow-hidden text-ellipsis p-2"
                     dangerouslySetInnerHTML={{
                       __html:
                         wall.description.length > 160
@@ -141,9 +168,21 @@ const ListWalls = () => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
+                      openShareModal(wall);
+                    }}
+                    className="flex items-center justify-center gap-1 sm:gap-2 bg-[#94A3B8]  hover:bg-[#D1D5DB] px-2 py-1 sm:px-3 sm:py-2 rounded-md bg-white border border-[#94A3B8] hover:bg-[#D1D5DB] transition text-sm sm:text-base w-full sm:w-auto"
+                    title="Share this wall"
+                  >
+                    <FaShareAlt className="shrink-0" />
+                    <span className="hidden xs:inline">Share</span>
+                  </button>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
                       navigate(`/admin/walls/${wall.id}/update`);
                     }}
-                    className="flex items-center justify-center gap-1 sm:gap-2 text-blue-600 hover:text-blue-700 px-2 py-1 sm:px-3 sm:py-2 rounded-md bg-white border border-blue-200 hover:bg-blue-50 transition text-sm sm:text-base w-full sm:w-auto"
+                    className="flex items-center justify-center gap-1 sm:gap-2 bg-[#94A3B8] hover:bg-[#D1D5DB] px-2 py-1 sm:px-3 sm:py-2 rounded-md bg-white border border-[#94A3B8] hover:bg-[#94A3B8] transition text-sm sm:text-base w-full sm:w-auto"
                     title="Update this wall"
                   >
                     <FiEdit className="shrink-0" />
@@ -167,6 +206,12 @@ const ListWalls = () => {
           </div>
         )}
       </div>
+      <ShareWallModal
+        wallId={wallToShare?.id}
+        isOpen={showShareModal}
+        onClose={closeShareModal}
+      />
+
       {/* Delete Confirmation Dialog */}
       <ConfirmationDialog
         isOpen={showDeleteDialog}
