@@ -14,12 +14,15 @@ const PublicWalls = () => {
     const fetchWalls = async () => {
       try {
         const response = await getPublicWalls();
-        setWalls(response.data);
+        const sortedWalls = response.data.sort(
+          (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        );
+        setWalls(sortedWalls);
       } catch (error) {
         console.error("Failed to fetch walls:", error);
       }
     };
-
+    
     fetchWalls();
   }, []);
 
