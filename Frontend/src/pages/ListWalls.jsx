@@ -112,9 +112,21 @@ const ListWalls = () => {
                   className="relative flex-1"
                   onClick={() => navigate(`/admin/walls/${wall.id}`)}
                 >
-                  <h2 className="text-lg sm:text-xl font-semibold">
-                    {wall.title}
-                  </h2>
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <h2 className="text-lg sm:text-xl font-semibold truncate">
+                      {wall.title}
+                    </h2>
+                    <span
+                      className={`text-[11px] sm:text-sm font-medium px-3 py-1 rounded-full ${
+                        wall.visibility === "public"
+                          ? "bg-[#D1D5DB] text-black-800"
+                          : "bg-[#D1D5DB] text-black-800"
+                      }`}
+                    >
+                      {wall.visibility === "public" ? "Public" : "Private"}
+                    </span>
+                  </div>
+
                   <p
                     className="text-gray-600 mt-2 h-[80px] sm:h-[100px] overflow-hidden text-ellipsis p-2"
                     dangerouslySetInnerHTML={{
@@ -124,17 +136,6 @@ const ListWalls = () => {
                           : wall.description,
                     }}
                   ></p>
-                  <div className="flex justify-center mt-3">
-                    <span
-                      className={`text-[11px] sm:text-sm font-medium px-3 py-1 rounded-full whitespace-nowrap ${
-                        wall.visibility === "public"
-                          ? "bg-[#D1D5DB] text-black-800"
-                          : "bg-[#D1D5DB] text-black-800"
-                      }`}
-                    >
-                      {wall.visibility === "public" ? "Public" : "Private"}
-                    </span>
-                  </div>
                 </div>
                 {/* Action Buttons */}
                 <div className="absolute bottom-4 left-4 right-4 flex flex-col sm:flex-row justify-between gap-2 sm:gap-0">
