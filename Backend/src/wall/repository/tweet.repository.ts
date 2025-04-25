@@ -14,6 +14,19 @@ export class TweetRepository extends Repository<Tweets> {
       order: { order_index: 'ASC' },
     });
   }
+  
+  async getTweetsByWallWithPagination(
+    wallId: number,
+    skip: number,
+    limit: number,
+  ): Promise<[Tweets[], number]> {
+    return await this.findAndCount({
+      where: { wall: { id: wallId } },
+      order: { order_index: 'ASC' },
+      skip: skip,
+      take: limit,
+    });
+  }
 
   async getTweetByIdAndWall(tweetId: number, wallId: number): Promise<Tweets> {
     return await this.findOne({

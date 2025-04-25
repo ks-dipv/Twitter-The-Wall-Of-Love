@@ -55,7 +55,12 @@ export class TweetController {
     errorDescription: 'Wall not found',
   })
   @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
-  async getAllTweetsByWall(@Param('wallId') wallId: number, @User() user) {
+  async getAllTweetsByWall(
+    @Param('wallId') wallId: number,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 9,
+    @User() user,
+  ) {
     return await this.tweetService.getAllTweetsByWall(wallId, user);
   }
 
