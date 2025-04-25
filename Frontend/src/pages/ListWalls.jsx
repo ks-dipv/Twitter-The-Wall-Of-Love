@@ -14,27 +14,36 @@ const ListWalls = () => {
   const [error, setError] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [wallToDelete, setWallToDelete] = useState(null);
-  const [searchQuery, setSearchQuery] = useState(""); // state to store search query
+  const [searchQuery, setSearchQuery] = useState("");
   const [showShareModal, setShowShareModal] = useState(false);
   const [wallToShare, setWallToShare] = useState(null);
+
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 8; // Items per page
 
   const navigate = useNavigate();
   useEffect(() => {
     const fetchWalls = async () => {
+      setLoading(true);
       try {
-        const response = await getAllWalls();
-        if (!response || !response.data)
-          throw new Error("Invalid API response");
-        setWalls(response.data);
+        // Pass page and limit to API
+        const response = await getAllWalls(page, limit);
+        if (!response || !response.data) throw new Error("Invalid API response");
+        setWalls(response.data.data || []);
+        const totalItems = response.data.total || 0;
+        setTotalPages(Math.ceil(totalItems / limit));
       } catch (err) {
         console.error("API Error:", err);
         setWalls([]);
+        setError(err.message || "Failed to fetch walls");
       } finally {
         setLoading(false);
       }
     };
     fetchWalls();
-  }, []);
+  }, [page]);
 
   const openDeleteDialog = (id, title) => {
     setWallToDelete({ id, title });
@@ -70,7 +79,7 @@ const ListWalls = () => {
     }
   };
 
-  // First, filter for title matches, then for description matches
+  // Filter walls by title or description
   const filteredWalls = walls
     .filter((wall) =>
       wall.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -106,7 +115,7 @@ const ListWalls = () => {
           />
         </div>
 
-        {Array.isArray(filteredWalls) && filteredWalls.length > 0 ? (
+        {filteredWalls.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {filteredWalls.map((wall) => (
               <motion.div
@@ -205,6 +214,27 @@ const ListWalls = () => {
             </motion.button>
           </div>
         )}
+
+        {/* Pagination Controls */}
+        <div className="flex justify-center mt-6 gap-4">
+          <button
+            disabled={page <= 1}
+            onClick={() => setPage(page - 1)}
+            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+          >
+            Prev
+          </button>
+          <span className="px-4 py-2">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            disabled={page >= totalPages}
+            onClick={() => setPage(page + 1)}
+            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
       </div>
       <ShareWallModal
         wallId={wallToShare?.id}
