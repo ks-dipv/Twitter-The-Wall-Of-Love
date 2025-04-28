@@ -6,9 +6,8 @@ import { FaTwitter, FaFacebookF, FaYoutube, FaInstagram } from "react-icons/fa";
 
 const PublicWalls = () => {
   const [walls, setWalls] = useState([]);
-  const [searchQuery, setSearchQuery] = useState(""); 
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
-  
 
   useEffect(() => {
     const fetchWalls = async () => {
@@ -22,7 +21,7 @@ const PublicWalls = () => {
         console.error("Failed to fetch walls:", error);
       }
     };
-    
+
     fetchWalls();
   }, []);
 
@@ -30,18 +29,18 @@ const PublicWalls = () => {
     navigate(`/#${sectionId}`);
   };
 
-   // Filter walls by title and description 
-   const filteredWalls = walls
-   .filter((wall) =>
-     wall.title.toLowerCase().includes(searchQuery.toLowerCase())
-   )
-   .concat(
-     walls.filter(
-       (wall) =>
-         wall.description.toLowerCase().includes(searchQuery.toLowerCase()) &&
-         !wall.title.toLowerCase().includes(searchQuery.toLowerCase())
-     )
-   );
+  // Filter walls by title and description
+  const filteredWalls = walls
+    .filter((wall) =>
+      wall.title.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .concat(
+      walls.filter(
+        (wall) =>
+          wall.description.toLowerCase().includes(searchQuery.toLowerCase()) &&
+          !wall.title.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    );
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -112,8 +111,8 @@ const PublicWalls = () => {
 
       {/* Public Walls Content */}
       <div className="max-w-7xl mx-auto px-4 py-32">
-         {/* Search Box */}
-         <div className="mb-8 flex justify-center">
+        {/* Search Box */}
+        <div className="mb-8 flex justify-center">
           <input
             type="text"
             value={searchQuery}
@@ -137,8 +136,8 @@ const PublicWalls = () => {
                     src={wall.logo}
                     alt={wall.title}
                     className="w-full h-24 sm:h-32 object-cover rounded-md mb-3"
-                    onClick={() =>
-                      navigate(
+                    onClick={() => 
+                      navigate( 
                         `/walls/${wall.id}/public`
                       )
                     }
@@ -147,7 +146,7 @@ const PublicWalls = () => {
 
                 <h2
                   className="text-xl font-semibold mb-2"
-                  onClick={() =>
+                  onClick={() => 
                     navigate(
                       `/walls/${wall.id}/public`
                     )
@@ -167,7 +166,7 @@ const PublicWalls = () => {
                 {/* User Info */}
                 {wall.user && (
                   <div className="flex flex-col items-center mt-auto gap-2">
-                    <div className="flex items-center space-x-2 gap-12">
+                    <div className="flex items-center space-x-2 ">
                       <img
                         src={wall.user.profile_pic}
                         alt={wall.user.name}
@@ -178,15 +177,46 @@ const PublicWalls = () => {
                       </span>
                     </div>
                     {/* Show created_at date below user */}
-                    <span className="text-gray-400 text-sm">
-                      {new Date(wall.created_at).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </span>
                   </div>
                 )}
+                {/**views for walls  */}
+                <div className="flex items-center justify-between w-full text-gray-400 text-sm mt-3">
+                  {/* Date on left */}
+                  <span>
+                    {new Date(wall.created_at).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </span>
+
+                  {/* Views on right */}
+                  <p className="flex items-center space-x-1 text-gray-600 text-sm font-medium">
+                    <span className="text-black-400">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        />
+                      </svg>
+                    </span>
+                    <span>{wall.views || 0}</span>
+                  </p>
+                </div>
+                
               </div>
             ))}
           </div>
