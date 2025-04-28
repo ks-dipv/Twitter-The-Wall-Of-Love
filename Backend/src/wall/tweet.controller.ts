@@ -8,6 +8,7 @@ import {
   Delete,
   Request,
   Query,
+  Req
 } from '@nestjs/common';
 import { TweetService } from './service/tweet.service';
 import { ApiTags, ApiParam, ApiBody, ApiQuery } from '@nestjs/swagger';
@@ -100,19 +101,18 @@ export class TweetController {
       },
     },
   })
-  async reorderTweets(
-    @Param('wallId') wallId: number,
-    @User() user,
-    @Body('orderedTweetIds') orderedTweetIds?: number[],
-    @Body('randomize') randomize?: boolean,
-  ) {
-    return this.tweetService.reorderTweets(
-      wallId,
-      user,
-      orderedTweetIds,
-      randomize,
-    );
-  }
+  @Post('reorder')
+async reorderTweets(
+  @Body() body: { wallId: number; orderedTweetIds: number[] },
+  @Req() req,
+) {
+  return this.tweetService.reorderTweets(
+    body.wallId,
+    req.user,
+    body.orderedTweetIds,
+  );
+}
+
 
   @Get(':wallId/tweet')
   @CommonApiDecorators({
