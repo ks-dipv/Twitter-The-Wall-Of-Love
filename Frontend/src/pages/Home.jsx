@@ -1,11 +1,10 @@
 import React, { useEffect } from "react";
 import { Link as RouterLink } from "react-router-dom";
-import { Link } from "react-scroll";
+import { Link as ScrollLink } from "react-scroll";
 import { motion } from "framer-motion";
 import { FaTwitter, FaFacebookF, FaYoutube, FaInstagram } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Link as ScrollLink } from "react-scroll";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -21,6 +20,7 @@ const Home = () => {
       }
     }
   }, []);
+
   return (
     <div
       className="min-h-screen flex flex-col bg-cover bg-center relative"
@@ -244,15 +244,41 @@ const Home = () => {
             Showcase the best tweets about your brand, product, or service!
           </motion.p>
 
-          {/* CTA Button */}
-          <motion.button
-            onClick={() => navigate("/signin")}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-6 py-3  bg-[#334155] font-semibold rounded-full  text-white hover:bg-[#94A3B8] hover:text-white transition-all duration-300 shadow-lg shadow-[#94A3B8]"
+          {/* CTA Buttons */}
+          <motion.div
+            className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4"
           >
-            Get Started
-          </motion.button>
+            <motion.button
+  onClick={() => navigate("/signin")}
+  whileHover={{ scale: 1.1, rotate: 5 }}
+  whileTap={{ scale: 0.95 }}
+  className="relative px-6 py-3 bg-transparent font-semibold rounded-full text-white border-2 border-white hover:border-white transition-all duration-300 flex items-center gap-2 overflow-hidden group"
+>
+  <span className="relative z-10 flex items-center gap-2">
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z" />
+    </svg>
+    Get Started
+  </span>
+  <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></span>
+</motion.button>
+
+<motion.button
+  onClick={() => navigate("/public-walls")}
+  whileHover={{ scale: 1.1, rotate: -5 }}
+  whileTap={{ scale: 0.95 }}
+  className="relative px-6 py-3 bg-transparent font-semibold rounded-full text-white border-2 border-white hover:border-white transition-all duration-300 flex items-center gap-2 overflow-hidden group"
+>
+  <span className="relative z-10 flex items-center gap-2">
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.243l-4.243-4.243m0 0l-4.243-4.243m4.243 4.243l4.243-4.243m-4.243 4.243l-4.243 4.243" />
+    </svg>
+    Explore Walls
+  </span>
+  <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></span>
+</motion.button>
+
+          </motion.div>
         </div>
       </motion.div>
 
@@ -325,7 +351,7 @@ const Home = () => {
         </div>
       </motion.section>
 
-      {/*feature section*/}
+      {/* Feature Section */}
       <motion.section
         id="features"
         name="features"
@@ -378,7 +404,7 @@ const Home = () => {
                   boxShadow: "0px 10px 30px rgba(0, 0, 0, 0.1)",
                 }}
                 whileTap={{ scale: 0.95 }}
-                className="p-8 rounded-xl shadow-lg text-center  border border-gray-300 dark:border-gray-700 backdrop-blur-lg transition-all duration-300 cursor-pointer"
+                className="p-8 rounded-xl shadow-lg text-center border border-gray-300 dark:border-gray-700 backdrop-blur-lg transition-all duration-300 cursor-pointer"
               >
                 <h3 className="text-3xl font-bold mb-3 text-gray-800 dark:text-white">
                   {feature.icon} {feature.title}
@@ -393,7 +419,7 @@ const Home = () => {
           {/* Image Right Side */}
           <div className="flex justify-center">
             <img
-              src="https://cdn.prod.website-files.com/5f1175d8eef44a6c5d6661fb/64d0a53700efdc84fa2cbda3_user%20generated%20content%20x-twitter.png" // Replace with your image path
+              src="https://cdn.prod.website-files.com/5f1175d8eef44a6c5d6661fb/64d0a53700efdc84fa2cbda3_user%20generated%20content%20x-twitter.png"
               alt="Features Illustration"
               className="max-w-full h-auto rounded-xl shadow-xl"
             />
@@ -407,7 +433,7 @@ const Home = () => {
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="relative z-10  p-12 mx-auto w-3/4 mt-20 shadow-2xl border border-gray-300 dark:border-gray-700"
+        className="relative z-10 p-12 mx-auto w-3/4 mt-20 shadow-2xl border border-gray-300 dark:border-gray-700"
       >
         <h2 className="text-5xl font-extrabold text-center text-gray-900 dark:text-white tracking-wide font-serif">
           📩 Let's Connect!
@@ -484,7 +510,7 @@ const Home = () => {
             </a>
           </div>
           <p className="text-gray-400 mt-4">
-            &copy; 2025 Wall of Love. All rights reserved.
+            © 2025 Wall of Love. All rights reserved.
           </p>
         </div>
       </footer>
