@@ -54,8 +54,8 @@ export class TweetService {
   async getAllTweetsByWall(
     wallId: number,
     user,
-    page: number = 1, // Default to page 1
-    limit: number = 9, // Default to 9 tweets per page
+    page: number = 1,
+    limit: number = 9,
   ): Promise<{ tweets: Tweets[]; total: number; page: number; totalPages: number }> {
     try {
       const existingUser = await this.userRepository.getByEmail(user.email);
@@ -72,10 +72,10 @@ export class TweetService {
 
       // Fetch tweets with pagination
       const [tweets, total] = await this.tweetRepository.getTweetsByWallWithPagination(
-        wallId,
-        skip,
-        limit,
-      );
+          wallId,
+          skip,
+          limit,
+        );
 
       // Calculate total pages
       const totalPages = Math.ceil(total / limit);
@@ -124,34 +124,34 @@ export class TweetService {
   }
 
   async reorderTweets(
-    wallId: number,
-    user,
+    wallId: number, 
+    user, 
     orderedTweetIds: number[],
   ) {
     try {
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) throw new BadRequestException("User doesn't exist");
-  
+
       const wall = await this.wallRepository.getWallByIdAndUser(wallId, existingUser.id);
       if (!wall) throw new NotFoundException('Wall not found or access denied');
-  
+
       const tweets = await this.tweetRepository.find({
         where: {
           id: In(orderedTweetIds),
-          wall: { id: wall.id }, // ✅ Correct for relation
+          wall: { id: wall.id },
         },
       });
-  
+
       if (tweets.length !== orderedTweetIds.length) {
         throw new BadRequestException('Some tweets not found for reorder');
       }
-  
+
       const updatePromises = orderedTweetIds.map((tweetId, index) => {
         return this.tweetRepository.update(tweetId, { order_index: index });
       });
-  
+
       await Promise.all(updatePromises);
-  
+
       return { message: 'Tweets reordered successfully' };
     } catch (error) {
       if (
@@ -164,7 +164,7 @@ export class TweetService {
       throw new InternalServerErrorException('Failed to reorder tweets');
     }
   }
-  
+
 
   @Cron('0 0 * * *')
   async updateTweetStatsDaily() {

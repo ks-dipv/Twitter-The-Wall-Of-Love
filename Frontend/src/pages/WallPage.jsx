@@ -18,7 +18,7 @@ import { faShuffle } from "@fortawesome/free-solid-svg-icons";
 const WallPage = () => {
   const { id } = useParams();
   const [wall, setWall] = useState(null);
-  const [tweets, setTweets] = useState([]); 
+  const [tweets, setTweets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -37,7 +37,7 @@ const WallPage = () => {
         setWall(wallResponse.data);
 
         const tweetsResponse = await getTweetsByWall(id, page, limit);
-        const tweetsData = tweetsResponse.data?.tweets || []; 
+        const tweetsData = tweetsResponse.data?.tweets || [];
         setTweets(Array.isArray(tweetsData) ? tweetsData : []);
         setTotal(tweetsResponse.data?.total || 0);
         setTotalPages(tweetsResponse.data?.totalPages || 1);
@@ -59,7 +59,9 @@ const WallPage = () => {
     try {
       await deleteTweet(wall.id, tweetId);
       setTweets((prevTweets) =>
-        Array.isArray(prevTweets) ? prevTweets.filter((tweet) => tweet.id !== tweetId) : []
+        Array.isArray(prevTweets)
+          ? prevTweets.filter((tweet) => tweet.id !== tweetId)
+          : []
       );
       setTotal((prevTotal) => prevTotal - 1);
       toast.success("Deleted Tweet successfully!");
@@ -317,6 +319,26 @@ const WallPage = () => {
             totalPages={totalPages}
             onPageChange={handlePageChange}
           />
+          {/*  Pagination added here */}
+          <div className="flex justify-center mt-6 gap-4">
+            <button
+              disabled={page <= 1}
+              onClick={() => setPage(page - 1)}
+              className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+            >
+              Prev
+            </button>
+            <span className="px-4 py-2">
+              Page {page} of {totalPages}
+            </span>
+            <button
+              disabled={page >= totalPages}
+              onClick={() => setPage(page + 1)}
+              className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </main>
       <Footer socialLinks={wall.social_links} />
