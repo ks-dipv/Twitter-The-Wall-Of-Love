@@ -69,7 +69,7 @@ export class WallService {
         wall.visibility === WallVisibility.PRIVATE
           ? wall.private_uuid
           : wall.public_uuid;
-      const shareable_link = `${baseUrl}/walls/${wallId}/link/${uuid}`;
+      const shareable_link = `${baseUrl}/walls/${wallId}/link/${uuid}?embed=true`;
       const embed_link = `<iframe src="${shareable_link}" width="600" height="400"></iframe>`;
 
       return {

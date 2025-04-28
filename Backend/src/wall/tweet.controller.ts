@@ -16,7 +16,7 @@ import { User } from '../common/decorator/user.decorater';
 import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
 import { Auth } from 'src/common/decorator/auth.decorator';
 import { AuthType } from 'src/common/enum/auth-type.enum';
-import { DefaultValuePipe, ParseIntPipe} from '@nestjs/common';
+import { DefaultValuePipe, ParseIntPipe } from '@nestjs/common';
 @ApiTags('Tweets')
 @Controller('api/walls')
 export class TweetController {
@@ -94,9 +94,9 @@ export class TweetController {
   async deleteTweetByWall(
     @Param('tweetId') tweetId: number,
     @Param('wallId') wallId: number,
-    @Request() req: Request,
+    @User() user,
   ) {
-    return await this.tweetService.deleteTweetByWall(tweetId, wallId, req);
+    return await this.tweetService.deleteTweetByWall(tweetId, wallId, user);
   }
 
   @Put(':wallId/tweets/reorder')
@@ -114,20 +114,15 @@ export class TweetController {
           items: { type: 'number' },
           example: [3, 1, 2],
         },
-        randomize: { type: 'boolean', example: true },
       },
     },
   })
-  @Post('reorder')
   async reorderTweets(
-    @Body() body: { wallId: number; orderedTweetIds: number[] },
-    @Req() req,
+    @Param('wallId', ParseIntPipe) wallId: number,
+    @Body() body: { orderedTweetIds: number[] },
+    @User() user,
   ) {
-    return this.tweetService.reorderTweets(
-      body.wallId,
-      req.user,
-      body.orderedTweetIds,
-    );
+    return this.tweetService.reorderTweets(wallId, user, body.orderedTweetIds);
   }
 
   @Get(':wallId/tweet')
