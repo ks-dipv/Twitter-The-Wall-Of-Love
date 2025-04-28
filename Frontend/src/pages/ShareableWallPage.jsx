@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useParams, useLocation } from "react-router-dom";
 import { getSharableLink, getFilteredTweetsByWall } from "../services/api";
 import TweetList from "../components/TweetList";
 import Footer from "../components/Footer";
@@ -8,11 +8,15 @@ import { motion } from "framer-motion";
 
 const ShareableWallPage = () => {
   const { wallId, uniqueId } = useParams();
+  const location = useLocation();
   const [wall, setWall] = useState(null);
   const [tweets, setTweets] = useState([]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const tweetsSectionRef = useRef(null);
+
+  const isEmbed = new URLSearchParams(location.search).get("embed") === "true";
 
   const handleWall = async () => {
     try {
@@ -28,6 +32,35 @@ const ShareableWallPage = () => {
     handleWall();
   }, [wallId]);
 
+  useEffect(() => {
+    if (!isEmbed) return; 
+  
+    let scrollStep = 2;  
+    let animationFrameId;
+  
+    const scrollWindow = () => {
+      // Scroll down by scrollStep pixels
+      window.scrollBy(0, scrollStep);
+  
+      // If we reach the bottom, scroll back to top smoothly
+      if (
+        window.innerHeight + window.pageYOffset >=
+        document.body.offsetHeight
+      ) {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+  
+      animationFrameId = requestAnimationFrame(scrollWindow);
+    };
+  
+    animationFrameId = requestAnimationFrame(scrollWindow);
+  
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [isEmbed]);
+  
+  
   const handleFilter = async () => {
     if (!startDate || !endDate) {
       toast.error("Please select both start and end dates.");
@@ -106,7 +139,7 @@ const ShareableWallPage = () => {
         </div>
 
         {/* Tweets Section */}
-        <div className="w-full mt-6">
+        <div className="w-full mt-6" ref={tweetsSectionRef}>
           {filteredTweets.length > 0 ? (
             <TweetList tweets={filteredTweets} />
           ) : (
