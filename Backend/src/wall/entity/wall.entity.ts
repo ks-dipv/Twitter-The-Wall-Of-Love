@@ -24,7 +24,7 @@ export class Wall {
   @Column({ type: 'varchar', nullable: true })
   logo?: string;
   
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: 'int' })
   views: number;
 
   @Column({ type: 'varchar', length: 250, nullable: true })
