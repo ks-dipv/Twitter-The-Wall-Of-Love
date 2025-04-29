@@ -28,6 +28,7 @@ const WallPage = () => {
   const [limit, setLimit] = useState(9);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [layout, setLayout] = useState("default"); // Default to grid layout
 
   useEffect(() => {
     const fetchWallData = async () => {
@@ -44,7 +45,7 @@ const WallPage = () => {
       } catch (error) {
         console.error("Error fetching wall:", error);
         toast.error("Failed to fetch wall data.");
-        setTweets([]); // Reset to empty array on error
+        setTweets([]);
       } finally {
         setLoading(false);
       }
@@ -80,8 +81,8 @@ const WallPage = () => {
     setIsSaving(true);
     try {
       // Fetch all tweets for the wall
-      const allTweetsResponse = await getTweetsByWall(id, 1, limit, true); // Use all=true to fetch all
-      const allTweets = allTweetsResponse.data?.tweets || [];
+      const allTweetsResponse = await getTweetsByWall(id, 1, limit, true); // Use all=true to fetch all 
+      const allTweets = allTweetsResponse.data?.tweets || [];     
       if (!Array.isArray(allTweets) || allTweets.length === 0) {
         throw new Error("No tweets found for this wall");
       }
@@ -102,17 +103,8 @@ const WallPage = () => {
         return aIndex - bIndex;
       });
 
-      // Generate orderedTweetIds with all tweet IDs in the new order
+       // Generate orderedTweetIds with all tweet IDs in the new order
       const orderedTweetIds = orderedTweets.map((tweet) => tweet.id);
-
-      console.log(
-        "wallId:",
-        wall.id,
-        "allTweets.length:",
-        allTweets.length,
-        "orderedTweetIds:",
-        orderedTweetIds
-      );
 
       if (orderedTweetIds.length !== allTweets.length) {
         throw new Error("Invalid tweet order data: length mismatch");
@@ -120,7 +112,6 @@ const WallPage = () => {
 
       const response = await reorderTweets(wall.id, orderedTweetIds);
       console.log("Reorder response:", response.data);
-      toast.success("Tweets reordered successfully!");
     } catch (error) {
       console.error("Error reordering tweets:", error);
       if (error.response) {
@@ -150,7 +141,7 @@ const WallPage = () => {
 
     setIsSaving(true);
     try {
-      const allTweetsResponse = await getTweetsByWall(id, 1, limit, true); // Fetch all tweets
+      const allTweetsResponse = await getTweetsByWall(id, 1, limit, true);
       const allTweets = allTweetsResponse.data?.tweets || [];
       if (!Array.isArray(allTweets) || allTweets.length === 0) {
         throw new Error("No tweets found for this wall");
@@ -174,22 +165,12 @@ const WallPage = () => {
 
       const orderedTweetIds = orderedTweets.map((tweet) => tweet.id);
 
-      console.log(
-        "wallId:",
-        wall.id,
-        "allTweets.length:",
-        allTweets.length,
-        "orderedTweetIds:",
-        orderedTweetIds
-      );
-
       if (orderedTweetIds.length !== allTweets.length) {
         throw new Error("Invalid tweet order data: incomplete list");
       }
 
       const response = await reorderTweets(wall.id, orderedTweetIds);
       console.log("Shuffle response:", response.data);
-      toast.success("Tweets shuffled successfully!");
     } catch (error) {
       console.error("Error updating shuffled tweets:", error);
       if (error.response) {
@@ -215,11 +196,11 @@ const WallPage = () => {
       const response = await getFilteredTweetsByWall(id, startDate, endDate);
       const filteredData = response.data || [];
       setTweets(Array.isArray(filteredData) ? filteredData : []);
-      setPage(1); // Reset to first page after filtering
+      setPage(1);
     } catch (error) {
       console.error("Error filtering tweets:", error);
       toast.error("Failed to fetch filtered tweets.");
-      setTweets([]); // Reset to empty array on error
+      setTweets([]);
     } finally {
       setLoading(false);
     }
@@ -299,13 +280,24 @@ const WallPage = () => {
               🔍
             </button>
           </div>
-          <button
-            onClick={handleShuffle}
-            disabled={isSaving}
-            className="px-5 py-2 bg-[#334155] text-white font-medium rounded transition-all duration-300 hover:bg-[#94A3B8] flex items-center gap-2"
-          >
-            <FontAwesomeIcon icon={faShuffle} /> Shuffle Tweets
-          </button>
+          <div className="flex items-center gap-4">
+            <select
+              value={layout}
+              onChange={(e) => setLayout(e.target.value)}
+              className="px-4 py-2 border rounded-lg shadow-sm focus:ring-blue-400 focus:border-blue-400"
+            >
+              <option value="default">Default</option>
+              <option value="horizontal">Horizontal</option>
+              <option value="vertical">Vertical</option>
+            </select>
+            <button
+              onClick={handleShuffle}
+              disabled={isSaving}
+              className="px-5 py-2 bg-[#334155] text-white font-medium rounded transition-all duration-300 hover:bg-[#94A3B8] flex items-center gap-2"
+            >
+              <FontAwesomeIcon icon={faShuffle} /> Shuffle Tweets
+            </button>
+          </div>
         </div>
 
         <div className="w-full">
@@ -318,8 +310,9 @@ const WallPage = () => {
             total={total}
             totalPages={totalPages}
             onPageChange={handlePageChange}
+            layout={layout}
           />
-          {/*  Pagination added here */}
+           {/*  Pagination added here */}
           <div className="flex justify-center mt-6 gap-4">
             <button
               disabled={page <= 1}

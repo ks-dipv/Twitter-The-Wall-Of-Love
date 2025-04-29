@@ -12,11 +12,12 @@ import {
   sortableKeyboardCoordinates,
   useSortable,
   rectSortingStrategy,
+  horizontalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { toast, ToastContainer } from "react-toastify";
 import ConfirmationDialog from "../components/ConfirmationDialog";
 
-const SortableTweet = ({ tweet, onDelete }) => {
+const SortableTweet = ({ tweet, onDelete, layout }) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -42,13 +43,19 @@ const SortableTweet = ({ tweet, onDelete }) => {
     setShowDeleteDialog(false);
   };
 
+  // Apply fixed width only for horizontal layout
+  const tweetClasses =
+    layout === "horizontal"
+      ? "bg-white shadow-md rounded-lg p-4 flex flex-col h-full relative cursor-pointer min-w-[300px] w-[300px]"
+      : "bg-white shadow-md rounded-lg p-4 flex flex-col h-full relative cursor-pointer";
+
   return (
     <div
       ref={setNodeRef}
       style={style}
       {...attributes}
       {...listeners}
-      className="bg-white shadow-md rounded-lg p-4 flex flex-col h-full relative cursor-pointer"
+      className={tweetClasses}
     >
       {onDelete && tweet.id && (
         <button
@@ -104,7 +111,7 @@ const SortableTweet = ({ tweet, onDelete }) => {
   );
 };
 
-const TweetList = ({ tweets, onDelete, onReorder }) => {
+const TweetList = ({ tweets, onDelete, onReorder, layout }) => {
   const isShare = !location.pathname.includes("/link");
 
   const sensors = useSensors(
@@ -132,6 +139,26 @@ const TweetList = ({ tweets, onDelete, onReorder }) => {
     }
   };
 
+  // Determine container classes and sorting strategy based on layout
+  let containerClasses, sortingStrategy;
+  switch (layout) {
+    case "default":
+      containerClasses = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4";
+      sortingStrategy = rectSortingStrategy;
+      break;
+    case "horizontal":
+      containerClasses = "flex flex-row gap-6 p-4 overflow-x-auto";
+      sortingStrategy = horizontalListSortingStrategy;
+      break;
+    case "vertical":
+      containerClasses = "grid grid-cols-1 gap-6 p-4 max-w-2xl mx-auto";
+      sortingStrategy = rectSortingStrategy;
+      break;
+    default:
+      containerClasses = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4";
+      sortingStrategy = rectSortingStrategy;
+  }
+
   return (
     <div>
       <ToastContainer autoClose={1000} hideProgressBar />
@@ -144,19 +171,24 @@ const TweetList = ({ tweets, onDelete, onReorder }) => {
         >
           <SortableContext
             items={tweets.map((tweet) => tweet.id.toString())}
-            strategy={rectSortingStrategy}
+            strategy={sortingStrategy}
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4">
+            <div className={containerClasses}>
               {tweets.length > 0 ? (
                 tweets.map((tweet) => (
                   <SortableTweet
                     key={tweet.id}
                     tweet={tweet}
                     onDelete={onDelete}
+                    layout={layout}
                   />
                 ))
               ) : (
-                <p className="text-center text-gray-500 col-span-3">
+                <p
+                  className={`text-center text-gray-500 ${
+                    layout === "horizontal" ? "w-full" : "col-span-full"
+                  }`}
+                >
                   No tweets available
                 </p>
               )}
@@ -164,13 +196,21 @@ const TweetList = ({ tweets, onDelete, onReorder }) => {
           </SortableContext>
         </DndContext>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4">
+        <div className={containerClasses}>
           {tweets.length > 0 ? (
             tweets.map((tweet) => (
-              <SortableTweet key={tweet.id} tweet={tweet} />
+              <SortableTweet
+                key={tweet.id}
+                tweet={tweet}
+                layout={layout}
+              />
             ))
           ) : (
-            <p className="text-center text-gray-500 col-span-3">
+            <p
+              className={`text-center text-gray-500 ${
+                layout === "horizontal" ? "w-full" : "col-span-full"
+              }`}
+            >
               No tweets available
             </p>
           )}
