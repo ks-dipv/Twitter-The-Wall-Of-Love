@@ -82,7 +82,7 @@ const WallPage = () => {
     try {
       // Fetch all tweets for the wall
       const allTweetsResponse = await getTweetsByWall(id, 1, limit, true); // Use all=true to fetch all 
-      const allTweets = allTweetsResponse.data?.tweets || [];     
+      const allTweets = allTweetsResponse.data?.tweets || [];
       if (!Array.isArray(allTweets) || allTweets.length === 0) {
         throw new Error("No tweets found for this wall");
       }
@@ -92,7 +92,7 @@ const WallPage = () => {
         reorderedTweets.map((tweet, index) => [tweet.id, index])
       );
 
-      // Sort all tweets based on the reordered indices
+       // Sort all tweets based on the reordered indices
       const orderedTweets = [...allTweets].sort((a, b) => {
         const aIndex = reorderedIdsMap.has(a.id)
           ? reorderedIdsMap.get(a.id)
@@ -103,7 +103,7 @@ const WallPage = () => {
         return aIndex - bIndex;
       });
 
-       // Generate orderedTweetIds with all tweet IDs in the new order
+      // Generate orderedTweetIds with all tweet IDs in the new order
       const orderedTweetIds = orderedTweets.map((tweet) => tweet.id);
 
       if (orderedTweetIds.length !== allTweets.length) {
@@ -284,11 +284,13 @@ const WallPage = () => {
             <select
               value={layout}
               onChange={(e) => setLayout(e.target.value)}
-              className="px-4 py-2 border rounded-lg shadow-sm focus:ring-blue-400 focus:border-blue-400"
+              className="px-4 py-2 border rounded-lg shadow-sm focus:ring-gray-400 focus:border-gray-400"
+              aria-label="Select tweet layout"
             >
               <option value="default">Default</option>
               <option value="horizontal">Horizontal</option>
               <option value="vertical">Vertical</option>
+              <option value="odd-even">Odd-Even</option>
             </select>
             <button
               onClick={handleShuffle}
@@ -312,7 +314,7 @@ const WallPage = () => {
             onPageChange={handlePageChange}
             layout={layout}
           />
-           {/*  Pagination added here */}
+          {/*  Pagination added here */}
           <div className="flex justify-center mt-6 gap-4">
             <button
               disabled={page <= 1}

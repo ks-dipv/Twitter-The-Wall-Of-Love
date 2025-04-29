@@ -17,7 +17,7 @@ import {
 import { toast, ToastContainer } from "react-toastify";
 import ConfirmationDialog from "../components/ConfirmationDialog";
 
-const SortableTweet = ({ tweet, onDelete, layout }) => {
+const SortableTweet = ({ tweet, onDelete, layout, index }) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -43,11 +43,15 @@ const SortableTweet = ({ tweet, onDelete, layout }) => {
     setShowDeleteDialog(false);
   };
 
-  // Apply fixed width only for horizontal layout
+  // Apply styles based on layout and index (for odd-even)
   const tweetClasses =
     layout === "horizontal"
-      ? "bg-white shadow-md rounded-lg p-4 flex flex-col h-full relative cursor-pointer min-w-[300px] w-[300px]"
-      : "bg-white shadow-md rounded-lg p-4 flex flex-col h-full relative cursor-pointer";
+      ? "shadow-md rounded-lg p-4 flex flex-col h-full relative cursor-pointer min-w-[300px] w-[300px] bg-white text-gray-800"
+      : layout === "odd-even"
+      ? `shadow-md rounded-lg p-4 flex flex-col h-full relative cursor-pointer ${
+          index % 2 === 0 ? "bg-gray-300" : "bg-white"
+        } text-gray-800`
+      : "shadow-md rounded-lg p-4 flex flex-col h-full relative cursor-pointer bg-white text-gray-800";
 
   return (
     <div
@@ -87,13 +91,13 @@ const SortableTweet = ({ tweet, onDelete, layout }) => {
       </div>
 
       <p
-        className="text-gray-800 flex-grow"
+        className="flex-grow"
         onClick={() => window.open(tweet.tweet_url, "_blank")}
       >
         {tweet.content}
       </p>
 
-      <div className="flex justify-between text-gray-500 text-sm mt-4 pt-2">
+      <div className="flex justify-between text-sm mt-4 pt-2 text-inherit">
         <span>❤️ {tweet.likes}</span>
         <span>💬 {tweet.comments}</span>
       </div>
@@ -143,6 +147,7 @@ const TweetList = ({ tweets, onDelete, onReorder, layout }) => {
   let containerClasses, sortingStrategy;
   switch (layout) {
     case "default":
+    case "odd-even":
       containerClasses = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4";
       sortingStrategy = rectSortingStrategy;
       break;
@@ -175,12 +180,13 @@ const TweetList = ({ tweets, onDelete, onReorder, layout }) => {
           >
             <div className={containerClasses}>
               {tweets.length > 0 ? (
-                tweets.map((tweet) => (
+                tweets.map((tweet, index) => (
                   <SortableTweet
                     key={tweet.id}
                     tweet={tweet}
                     onDelete={onDelete}
                     layout={layout}
+                    index={index}
                   />
                 ))
               ) : (
@@ -198,11 +204,12 @@ const TweetList = ({ tweets, onDelete, onReorder, layout }) => {
       ) : (
         <div className={containerClasses}>
           {tweets.length > 0 ? (
-            tweets.map((tweet) => (
+            tweets.map((tweet, index) => (
               <SortableTweet
                 key={tweet.id}
                 tweet={tweet}
                 layout={layout}
+                index={index}
               />
             ))
           ) : (
