@@ -14,6 +14,7 @@ import Navbar from "../components/Navbar";
 import { toast } from "react-toastify";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShuffle } from "@fortawesome/free-solid-svg-icons";
+import { RefreshCcw, Search } from "lucide-react";
 
 const WallPage = () => {
   const { id } = useParams();
@@ -81,7 +82,7 @@ const WallPage = () => {
     setIsSaving(true);
     try {
       // Fetch all tweets for the wall
-      const allTweetsResponse = await getTweetsByWall(id, 1, limit, true); // Use all=true to fetch all 
+      const allTweetsResponse = await getTweetsByWall(id, 1, limit, true); // Use all=true to fetch all
       const allTweets = allTweetsResponse.data?.tweets || [];
       if (!Array.isArray(allTweets) || allTweets.length === 0) {
         throw new Error("No tweets found for this wall");
@@ -92,7 +93,7 @@ const WallPage = () => {
         reorderedTweets.map((tweet, index) => [tweet.id, index])
       );
 
-       // Sort all tweets based on the reordered indices
+      // Sort all tweets based on the reordered indices
       const orderedTweets = [...allTweets].sort((a, b) => {
         const aIndex = reorderedIdsMap.has(a.id)
           ? reorderedIdsMap.get(a.id)
@@ -277,7 +278,13 @@ const WallPage = () => {
               onClick={handleFilter}
               className="p-2 bg-[#334155] text-white rounded transition-all duration-300 hover:bg-[#94A3B8]"
             >
-              🔍
+              <Search size={20} />
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              className="p-2 bg-[#334155] rounded hover:bg-[#94A3B8] text-white"
+            >
+              <RefreshCcw size={20} />
             </button>
           </div>
           <div className="flex items-center gap-4">
