@@ -52,7 +52,7 @@ const ShareWallModal = ({ wallId, isOpen, onClose }) => {
       alert("Error generating shareable link. Please try again.");
     } finally {
       setLoading({ ...loading, shareable: false });
-    }
+        }
   };
 
   const handleGenerateEmbedLink = async () => {
@@ -140,6 +140,17 @@ const ShareWallModal = ({ wallId, isOpen, onClose }) => {
                   : "Generate"}
               </button>
             </div>
+            {links.shareable_link && (
+              <div className="text-right">
+                <button
+                  onClick={handleGenerateShareableLink}
+                  disabled={loading.shareable}
+                  className="mt-2 px-3 py-1.5 bg-[#334155] text-white rounded-md text-sm hover:bg-[#94A3B8] transition-colors disabled:opacity-50"
+                >
+                  {loading.shareable ? "Regenerating..." : "Regenerate"}
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Embed Link Section */}
@@ -181,6 +192,17 @@ const ShareWallModal = ({ wallId, isOpen, onClose }) => {
                   : "Generate"}
               </button>
             </div>
+            {links.embed_link && (
+              <div className="text-right">
+                <button
+                  onClick={handleGenerateEmbedLink}
+                  disabled={loading.embed}
+                  className="mt-2 px-3 py-1.5 bg-[#334155] text-white rounded-md text-sm hover:bg-[#94A3B8] transition-colors disabled:opacity-50"
+                >
+                  {loading.embed ? "Regenerating..." : "Regenerate"}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
