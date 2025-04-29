@@ -5,31 +5,46 @@ import { FiTrash2, FiEdit, FiPlus } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { toast, ToastContainer } from "react-toastify";
 import ConfirmationDialog from "../components/ConfirmationDialog";
+import { FaShareAlt } from "react-icons/fa";
 
+import ShareWallModal from "../components/ShareWallModal";
 const ListWalls = () => {
   const [walls, setWalls] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [wallToDelete, setWallToDelete] = useState(null);
-  const [searchQuery, setSearchQuery] = useState(""); // state to store search query
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [wallToShare, setWallToShare] = useState(null);
+
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 8; // Items per page
+
   const navigate = useNavigate();
   useEffect(() => {
     const fetchWalls = async () => {
+      setLoading(true);
       try {
-        const response = await getAllWalls();
+        // Pass page and limit to API
+        const response = await getAllWalls(page, limit);
         if (!response || !response.data)
           throw new Error("Invalid API response");
-        setWalls(response.data);
+        setWalls(response.data.data || []);
+        const totalItems = response.data.total || 0;
+        setTotalPages(Math.ceil(totalItems / limit));
       } catch (err) {
         console.error("API Error:", err);
         setWalls([]);
+        setError(err.message || "Failed to fetch walls");
       } finally {
         setLoading(false);
       }
     };
     fetchWalls();
-  }, []);
+  }, [page]);
 
   const openDeleteDialog = (id, title) => {
     setWallToDelete({ id, title });
@@ -39,6 +54,16 @@ const ListWalls = () => {
     setShowDeleteDialog(false);
     setWallToDelete(null);
   };
+  const openShareModal = (wall) => {
+    setWallToShare(wall);
+    setShowShareModal(true);
+  };
+
+  const closeShareModal = () => {
+    setWallToShare(null);
+    setShowShareModal(false);
+  };
+
   const handleDelete = async () => {
     if (!wallToDelete) return;
     try {
@@ -55,7 +80,7 @@ const ListWalls = () => {
     }
   };
 
-  // First, filter for title matches, then for description matches
+  // Filter walls by title or description
   const filteredWalls = walls
     .filter((wall) =>
       wall.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -91,7 +116,7 @@ const ListWalls = () => {
           />
         </div>
 
-        {Array.isArray(filteredWalls) && filteredWalls.length > 0 ? (
+        {filteredWalls.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {filteredWalls.map((wall) => (
               <motion.div
@@ -112,11 +137,23 @@ const ListWalls = () => {
                   className="relative flex-1"
                   onClick={() => navigate(`/admin/walls/${wall.id}`)}
                 >
-                  <h2 className="text-lg sm:text-xl font-semibold">
-                    {wall.title}
-                  </h2>
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <h2 className="text-lg sm:text-xl font-semibold truncate">
+                      {wall.title}
+                    </h2>
+                    <span
+                      className={`text-[11px] sm:text-sm font-medium px-3 py-1 rounded-full ${
+                        wall.visibility === "public"
+                          ? "bg-[#D1D5DB] text-black-800"
+                          : "bg-[#D1D5DB] text-black-800"
+                      }`}
+                    >
+                      {wall.visibility === "public" ? "Public" : "Private"}
+                    </span>
+                  </div>
+
                   <p
-                    className="text-gray-600 absolute top-10 left-0 right-0 h-[80px] sm:h-[100px] overflow-hidden text-ellipsis p-2"
+                    className="text-gray-600 mt-2 h-[80px] sm:h-[100px] overflow-hidden text-ellipsis p-2"
                     dangerouslySetInnerHTML={{
                       __html:
                         wall.description.length > 160
@@ -126,7 +163,7 @@ const ListWalls = () => {
                   ></p>
                 </div>
                 {/* Action Buttons */}
-                <div className="absolute bottom-4 left-4 right-4 flex flex-col sm:flex-row justify-between gap-2 sm:gap-0">
+                <div className="absolute bottom-4 left-4 right-4 flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 ">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -141,14 +178,50 @@ const ListWalls = () => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
+                      openShareModal(wall);
+                    }}
+                    className="flex items-center justify-center gap-1 sm:gap-2 bg-[#94A3B8]  hover:bg-[#D1D5DB] px-2 py-1 sm:px-3 sm:py-2 rounded-md bg-white border border-[#94A3B8] hover:bg-[#D1D5DB] transition text-sm sm:text-base w-full sm:w-auto"
+                    title="Share this wall"
+                  >
+                    <FaShareAlt className="shrink-0" />
+                    <span className="hidden xs:inline">Share</span>
+                  </button>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
                       navigate(`/admin/walls/${wall.id}/update`);
                     }}
-                    className="flex items-center justify-center gap-1 sm:gap-2 text-blue-600 hover:text-blue-700 px-2 py-1 sm:px-3 sm:py-2 rounded-md bg-white border border-blue-200 hover:bg-blue-50 transition text-sm sm:text-base w-full sm:w-auto"
+                    className="flex items-center justify-center gap-1 sm:gap-2 bg-[#94A3B8] hover:bg-[#D1D5DB] px-2 py-1 sm:px-3 sm:py-2 rounded-md bg-white border border-[#94A3B8] hover:bg-[#94A3B8] transition text-sm sm:text-base w-full sm:w-auto"
                     title="Update this wall"
                   >
                     <FiEdit className="shrink-0" />
                     <span className="hidden xs:inline">Update</span>
                   </button>
+
+                  {/* Views below buttons */}
+                  <div className="mt-6 flex justify-center items-center text-gray-600 text-sm font-medium space-x-1">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-gray-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      />
+                    </svg>
+                    <span>{wall.views || 0} </span>
+                  </div>
                 </div>
               </motion.div>
             ))}
@@ -166,7 +239,34 @@ const ListWalls = () => {
             </motion.button>
           </div>
         )}
+
+        {/* Pagination Controls */}
+        <div className="flex justify-center mt-6 gap-4">
+          <button
+            disabled={page <= 1}
+            onClick={() => setPage(page - 1)}
+            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+          >
+            Prev
+          </button>
+          <span className="px-4 py-2">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            disabled={page >= totalPages}
+            onClick={() => setPage(page + 1)}
+            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
       </div>
+      <ShareWallModal
+        wallId={wallToShare?.id}
+        isOpen={showShareModal}
+        onClose={closeShareModal}
+      />
+
       {/* Delete Confirmation Dialog */}
       <ConfirmationDialog
         isOpen={showDeleteDialog}

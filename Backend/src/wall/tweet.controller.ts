@@ -8,6 +8,7 @@ import {
   Delete,
   Request,
   Query,
+  Req,
 } from '@nestjs/common';
 import { TweetService } from './service/tweet.service';
 import { ApiTags, ApiParam, ApiBody, ApiQuery } from '@nestjs/swagger';
@@ -15,7 +16,7 @@ import { User } from '../common/decorator/user.decorater';
 import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
 import { Auth } from 'src/common/decorator/auth.decorator';
 import { AuthType } from 'src/common/enum/auth-type.enum';
-
+import { DefaultValuePipe, ParseIntPipe } from '@nestjs/common';
 @ApiTags('Tweets')
 @Controller('api/walls')
 export class TweetController {
@@ -55,8 +56,30 @@ export class TweetController {
     errorDescription: 'Wall not found',
   })
   @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
-  async getAllTweetsByWall(@Param('wallId') wallId: number, @User() user) {
-    return await this.tweetService.getAllTweetsByWall(wallId, user);
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number for pagination (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Number of tweets per page (default: 9)',
+  })
+  async getAllTweetsByWall(
+    @Param('wallId') wallId: number,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
+    @Query('limit', new DefaultValuePipe(9), ParseIntPipe) limit: number = 9,
+    @User() user,
+  ) {
+    return await this.tweetService.getAllTweetsByWall(
+      wallId,
+      user,
+      page,
+      limit,
+    );
   }
 
   @Delete(':wallId/tweets/:tweetId')
@@ -71,9 +94,9 @@ export class TweetController {
   async deleteTweetByWall(
     @Param('tweetId') tweetId: number,
     @Param('wallId') wallId: number,
-    @Request() req: Request,
+    @User() user,
   ) {
-    return await this.tweetService.deleteTweetByWall(tweetId, wallId, req);
+    return await this.tweetService.deleteTweetByWall(tweetId, wallId, user);
   }
 
   @Put(':wallId/tweets/reorder')
@@ -91,22 +114,15 @@ export class TweetController {
           items: { type: 'number' },
           example: [3, 1, 2],
         },
-        randomize: { type: 'boolean', example: true },
       },
     },
   })
   async reorderTweets(
-    @Param('wallId') wallId: number,
+    @Param('wallId', ParseIntPipe) wallId: number,
+    @Body() body: { orderedTweetIds: number[] },
     @User() user,
-    @Body('orderedTweetIds') orderedTweetIds?: number[],
-    @Body('randomize') randomize?: boolean,
   ) {
-    return this.tweetService.reorderTweets(
-      wallId,
-      user,
-      orderedTweetIds,
-      randomize,
-    );
+    return this.tweetService.reorderTweets(wallId, user, body.orderedTweetIds);
   }
 
   @Get(':wallId/tweet')

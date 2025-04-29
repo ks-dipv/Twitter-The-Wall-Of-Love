@@ -11,6 +11,7 @@ import { TwitterService } from './twitter.service';
 import { Tweets } from '../entity/tweets.entity';
 import { UserRepository } from '../../user/repositories/user.repository';
 import { Cron } from '@nestjs/schedule';
+import { In } from 'typeorm';
 
 @Injectable()
 export class TweetService {
@@ -50,7 +51,17 @@ export class TweetService {
     }
   }
 
-  async getAllTweetsByWall(wallId: number, user): Promise<Tweets[]> {
+  async getAllTweetsByWall(
+    wallId: number,
+    user,
+    page: number = 1,
+    limit: number = 9,
+  ): Promise<{
+    tweets: Tweets[];
+    total: number;
+    page: number;
+    totalPages: number;
+  }> {
     try {
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) throw new BadRequestException("User doesn't exist");
@@ -61,7 +72,26 @@ export class TweetService {
       );
       if (!wall) throw new NotFoundException('Wall not found or access denied');
 
-      return await this.tweetRepository.getTweetsByWall(wallId);
+      // Calculate the offset (skip) for pagination
+      const skip = (page - 1) * limit;
+
+      // Fetch tweets with pagination
+      const [tweets, total] =
+        await this.tweetRepository.getTweetsByWallWithPagination(
+          wallId,
+          skip,
+          limit,
+        );
+
+      // Calculate total pages
+      const totalPages = Math.ceil(total / limit);
+
+      return {
+        tweets,
+        total,
+        page,
+        totalPages,
+      };
     } catch (error) {
       if (
         error instanceof UnauthorizedException ||
@@ -99,12 +129,7 @@ export class TweetService {
     }
   }
 
-  async reorderTweets(
-    wallId: number,
-    user,
-    orderedTweetIds?: number[],
-    randomize?: boolean,
-  ) {
+  async reorderTweets(wallId: number, user, orderedTweetIds: number[]) {
     try {
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) throw new BadRequestException("User doesn't exist");
@@ -115,40 +140,44 @@ export class TweetService {
       );
       if (!wall) throw new NotFoundException('Wall not found or access denied');
 
-      const tweets = await this.tweetRepository.getTweetsByWall(wallId);
-      if (!tweets.length)
-        throw new BadRequestException('No tweets found for this wall');
+      // Fetch all tweets for the wall
+      const allTweets = await this.tweetRepository.find({
+        where: { wall: { id: wallId } },
+        select: ['id'],
+      });
+      const allTweetIds = allTweets.map((tweet) => tweet.id);
 
-      if (randomize) {
-        tweets.sort(() => Math.random() - 0.5);
-      } else if (orderedTweetIds) {
-        if (tweets.length !== orderedTweetIds.length) {
-          throw new BadRequestException('Invalid tweet order data.');
-        }
-
-        const tweetMap = new Map(tweets.map((tweet) => [tweet.id, tweet]));
-
-        for (const tweetId of orderedTweetIds) {
-          if (!tweetMap.has(tweetId)) {
-            throw new BadRequestException('Invalid tweet ID in reorder list.');
-          }
-        }
-
-        tweets.sort(
-          (a, b) =>
-            orderedTweetIds.indexOf(a.id) - orderedTweetIds.indexOf(b.id),
+      // Validate orderedTweetIds
+      const invalidTweetIds = orderedTweetIds.filter(
+        (id) => !allTweetIds.includes(id),
+      );
+      if (invalidTweetIds.length > 0) {
+        console.warn(
+          `Invalid tweet IDs for wall ${wallId}: ${invalidTweetIds.join(', ')}`,
         );
-      } else {
+        
+      }
+
+      // If no valid tweet IDs remain, throw an error
+      if (orderedTweetIds.length === 0) {
         throw new BadRequestException(
-          'Either provide an ordered list or set randomize to true.',
+          'No valid tweet IDs provided for reordering',
         );
       }
 
-      for (let i = 0; i < tweets.length; i++) {
-        await this.tweetRepository.update(tweets[i].id, { order_index: i });
-      }
+      // Update order_index for valid tweet IDs
+      const updatePromises = orderedTweetIds
+        .filter((id) => allTweetIds.includes(id))
+        .map((tweetId, index) => {
+          return this.tweetRepository.update(tweetId, { order_index: index });
+        });
 
-      return await this.tweetRepository.getTweetsByWall(wallId);
+      await Promise.all(updatePromises);
+
+      return {
+        message: 'Tweets reordered successfully',
+        reorderedTweetIds: orderedTweetIds,
+      };
     } catch (error) {
       if (
         error instanceof UnauthorizedException ||
@@ -160,6 +189,7 @@ export class TweetService {
       throw new InternalServerErrorException('Failed to reorder tweets');
     }
   }
+
 
   @Cron('0 0 * * *')
   async updateTweetStatsDaily() {
@@ -190,7 +220,7 @@ export class TweetService {
         throw new BadRequestException("User doesn't exist");
       }
 
-      // Validate the wall exists for the given user
+       // Validate the wall exists for the given user
       const wall = await this.wallRepository.getWallByIdAndUser(
         wallId,
         existingUser.id,

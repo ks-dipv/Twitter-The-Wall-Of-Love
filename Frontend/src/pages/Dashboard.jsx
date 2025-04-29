@@ -11,6 +11,7 @@ import {
   Cell,
 } from "recharts";
 import { getUser, totalData } from "../services/api";
+import { toast, ToastContainer } from "react-toastify"; 
 
 const COLORS = ["#6ea7be", "#7997a3", "#1c5d77"];
 
@@ -23,7 +24,8 @@ const Dashboard = () => {
   });
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [statsError, setStatsError] = useState(null); 
+  const [userError, setUserError] = useState(null); 
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -36,9 +38,7 @@ const Dashboard = () => {
           err.response && typeof err.response.data === "object"
             ? err.response.data.message || JSON.stringify(err.response.data)
             : err.message;
-        setError(errMsg);
-      } finally {
-        setLoading(false);
+        setStatsError(errMsg);
       }
     };
 
@@ -47,12 +47,22 @@ const Dashboard = () => {
         const response = await getUser();
         setUser(response.data);
       } catch (err) {
-        console.error("Error fetching user data", err);
+        const errMsg = "User not found. Please log in to continue.";
+        setUserError(errMsg);
+        toast.error(errMsg, {
+          position: "top-right",
+          autoClose: 5000,
+        });
       }
     };
 
-    fetchStats();
-    fetchUser();
+    const fetchData = async () => {
+      setLoading(true);
+      await Promise.all([fetchStats(), fetchUser()]);
+      setLoading(false);
+    };
+
+    fetchData();
 
     // Update time every second
     const timeInterval = setInterval(() => {
@@ -64,7 +74,16 @@ const Dashboard = () => {
   }, []);
 
   if (loading) return <Skeleton className="h-96 w-full" />;
-  if (error) return <p className="text-red-500">Error: {error}</p>;
+  if (userError || statsError) {
+    return (
+      <div className="p-6 space-y-6">
+        <p className="text-red-500 text-center text-lg">
+          {userError || statsError}
+        </p>
+        <ToastContainer />
+      </div>
+    );
+  }
 
   const publicPercentage = stats.totalWalls
     ? ((stats.publicWalls / stats.totalWalls) * 100).toFixed(1)
