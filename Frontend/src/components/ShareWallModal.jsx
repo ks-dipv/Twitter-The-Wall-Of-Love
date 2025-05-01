@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { generateSharableLink } from "../services/api";
-import { FaCopy, FaLink, FaCode } from "react-icons/fa";
+import { generateSharableLink, reGenerateSharableLink } from "../services/api";
+import { FaCopy, FaLink, FaCode, FaRedo } from "react-icons/fa";
 
 const ShareWallModal = ({ wallId, isOpen, onClose }) => {
   const [links, setLinks] = useState({
@@ -52,13 +52,39 @@ const ShareWallModal = ({ wallId, isOpen, onClose }) => {
       alert("Error generating shareable link. Please try again.");
     } finally {
       setLoading({ ...loading, shareable: false });
-        }
+    }
+  };
+
+  const handleReGenerateShareableLink = async () => {
+    setLoading({ ...loading, shareable: true });
+    try {
+      const response = await reGenerateSharableLink(wallId);
+      setLinks({ ...links, shareable_link: response.data.shareable_link });
+    } catch (error) {
+      console.error("Failed to generate shareable link:", error);
+      alert("Error generating shareable link. Please try again.");
+    } finally {
+      setLoading({ ...loading, shareable: false });
+    }
   };
 
   const handleGenerateEmbedLink = async () => {
     setLoading({ ...loading, embed: true });
     try {
       const response = await generateSharableLink(wallId);
+      setLinks({ ...links, embed_link: response.data.embed_link });
+    } catch (error) {
+      console.error("Failed to generate embed link:", error);
+      alert("Error generating embed link. Please try again.");
+    } finally {
+      setLoading({ ...loading, embed: false });
+    }
+  };
+
+  const handleReGenerateEmbedLink = async () => {
+    setLoading({ ...loading, embed: true });
+    try {
+      const response = await reGenerateSharableLink(wallId);
       setLinks({ ...links, embed_link: response.data.embed_link });
     } catch (error) {
       console.error("Failed to generate embed link:", error);
@@ -115,42 +141,44 @@ const ShareWallModal = ({ wallId, isOpen, onClose }) => {
                 placeholder="Generate link to share this wall"
                 className="flex-grow text-black border border-gray-300 rounded-lg p-2 text-sm bg-gray-50"
               />
-              <button
-                onClick={
-                  links.shareable_link
-                    ? () => handleCopy("shareable")
-                    : handleGenerateShareableLink
-                }
-                disabled={loading.shareable}
-                className={`px-3 py-2 rounded-lg text-white flex items-center justify-center transition-colors w-full sm:w-auto ${
-                  links.shareable_link
-                    ? copied.shareable
-                      ? "bg-[#334155]"
-                      : "bg-[#94A3B8]"
-                    : "bg-[#334155] hover:bg-[#94A3B8]"
-                }`}
-              >
-                {links.shareable_link ? <FaCopy className="mr-1" /> : null}
-                {loading.shareable
-                  ? "Generating..."
-                  : copied.shareable
-                  ? "Copied!"
-                  : links.shareable_link
-                  ? "Copy"
-                  : "Generate"}
-              </button>
-            </div>
-            {links.shareable_link && (
-              <div className="text-right">
+              <div className="flex gap-2">
                 <button
-                  onClick={handleGenerateShareableLink}
+                  onClick={
+                    links.shareable_link
+                      ? () => handleCopy("shareable")
+                      : handleGenerateShareableLink
+                  }
                   disabled={loading.shareable}
-                  className="mt-2 px-3 py-1.5 bg-[#334155] text-white rounded-md text-sm hover:bg-[#94A3B8] transition-colors disabled:opacity-50"
+                  className={`px-3 py-2 rounded-lg text-white flex items-center justify-center transition-colors ${
+                    links.shareable_link
+                      ? copied.shareable
+                        ? "bg-[#334155]"
+                        : "bg-[#94A3B8]"
+                      : "bg-[#334155] hover:bg-[#94A3B8]"
+                  }`}
                 >
-                  {loading.shareable ? "Regenerating..." : "Regenerate"}
+                  {links.shareable_link ? <FaCopy className="mr-1" /> : null}
+                  {loading.shareable && !links.shareable_link
+                    ? "Generating..."
+                    : copied.shareable
+                    ? "Copied!"
+                    : links.shareable_link
+                    ? "Copy"
+                    : "Generate"}
                 </button>
+
+                {links.shareable_link && (
+                  <button
+                    onClick={handleReGenerateShareableLink}
+                    disabled={loading.shareable}
+                    className="px-3 py-2 bg-[#334155] text-white rounded-lg flex items-center justify-center hover:bg-[#94A3B8] transition-colors disabled:opacity-50"
+                    title="Regenerate link"
+                  >
+                    {loading.shareable ? "..." : <FaRedo />}
+                  </button>
+                )}
               </div>
-            )}
+            </div>
           </div>
 
           {/* Embed Link Section */}
@@ -167,42 +195,44 @@ const ShareWallModal = ({ wallId, isOpen, onClose }) => {
                 className="flex-grow text-black border border-gray-300 rounded-lg p-2 text-sm bg-gray-50 min-h-[48px] resize-none overflow-x-auto"
                 rows={4}
               />
-              <button
-                onClick={
-                  links.embed_link
-                    ? () => handleCopy("embed")
-                    : handleGenerateEmbedLink
-                }
-                disabled={loading.embed}
-                className={`h-[42px] px-3 py-2 rounded-lg text-white flex items-center justify-center transition-colors w-full sm:w-auto ${
-                  links.embed_link
-                    ? copied.embed
-                      ? "bg-[#334155]"
-                      : "bg-[#94A3B8]"
-                    : "bg-[#334155] hover:bg-[#94A3B8]"
-                }`}
-              >
-                {links.embed_link ? <FaCopy className="mr-1" /> : null}
-                {loading.embed
-                  ? "Generating..."
-                  : copied.embed
-                  ? "Copied!"
-                  : links.embed_link
-                  ? "Copy"
-                  : "Generate"}
-              </button>
-            </div>
-            {links.embed_link && (
-              <div className="text-right">
+              <div className="flex gap-2 self-start">
                 <button
-                  onClick={handleGenerateEmbedLink}
+                  onClick={
+                    links.embed_link
+                      ? () => handleCopy("embed")
+                      : handleGenerateEmbedLink
+                  }
                   disabled={loading.embed}
-                  className="mt-2 px-3 py-1.5 bg-[#334155] text-white rounded-md text-sm hover:bg-[#94A3B8] transition-colors disabled:opacity-50"
+                  className={`h-10 px-3 py-2 rounded-lg text-white flex items-center justify-center transition-colors ${
+                    links.embed_link
+                      ? copied.embed
+                        ? "bg-[#334155]"
+                        : "bg-[#94A3B8]"
+                      : "bg-[#334155] hover:bg-[#94A3B8]"
+                  }`}
                 >
-                  {loading.embed ? "Regenerating..." : "Regenerate"}
+                  {links.embed_link ? <FaCopy className="mr-1" /> : null}
+                  {loading.embed && !links.embed_link
+                    ? "Generating..."
+                    : copied.embed
+                    ? "Copied!"
+                    : links.embed_link
+                    ? "Copy"
+                    : "Generate"}
                 </button>
+
+                {links.embed_link && (
+                  <button
+                    onClick={handleReGenerateEmbedLink}
+                    disabled={loading.embed}
+                    className="h-10 px-3 py-2 bg-[#334155] text-white rounded-lg flex items-center justify-center hover:bg-[#94A3B8] transition-colors disabled:opacity-50"
+                    title="Regenerate embed code"
+                  >
+                    {loading.embed ? "..." : <FaRedo />}
+                  </button>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
