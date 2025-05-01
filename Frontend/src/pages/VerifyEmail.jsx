@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { userVerify, checkVerificationToken } from "../services/api";
+import { userVerify } from "../services/api";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -11,36 +11,13 @@ const VerifyEmail = () => {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    // First check if the token exists
     if (!verificationToken) {
       setStatus("error");
       setMessage("Invalid verification link.");
-      toast.error("Invalid verification link.");
       return;
     }
 
-    // Check if the token is valid
-    const validateToken = async () => {
-      try {
-        await checkVerificationToken(verificationToken);
-        setStatus("valid"); // Token is valid and not yet used
-      } catch (error) {
-        setStatus("error");
-        const errorMessage =
-          error.response?.data?.message || "Invalid verification link.";
-
-        // Check if the email has already been verified
-        if (errorMessage.includes("already been verified")) {
-          setMessage("Your email has already been verified. Please sign in.");
-          toast.info("Your email has already been verified. Please sign in.");
-        } else {
-          setMessage(errorMessage);
-          toast.error(errorMessage);
-        }
-      }
-    };
-
-    validateToken();
+    handleVerify();
   }, [verificationToken]);
 
   const handleVerify = async () => {
@@ -58,10 +35,11 @@ const VerifyEmail = () => {
 
       if (errorMessage.includes("already been verified")) {
         toast.info("Your email has already been verified. Please sign in.");
-      } else if (errorMessage.includes("expired")) {
-        toast.error(
-          "Your verification link has expired. Please request a new one."
-        );
+      } else if (
+        errorMessage.includes("invalid") ||
+        errorMessage.includes("expired")
+      ) {
+        toast.error("Your verification link is invalid or has expired.");
       } else {
         toast.error(errorMessage);
       }
@@ -104,20 +82,26 @@ const VerifyEmail = () => {
         )}
 
         {status === "verified" && (
-          <>
-            <div className="text-center mb-6">
-              <p className="text-green-600 font-semibold">{message}</p>
-              <p className="text-gray-600 dark:text-gray-300 mt-2">
-                You will be redirected to the sign in page shortly.
-              </p>
-            </div>
-          </>
+          <div className="text-center mb-6">
+            <p className="text-green-600 font-semibold">{message}</p>
+            <p className="text-gray-600 dark:text-gray-300 mt-2">
+              You will be redirected to the sign in page shortly.
+            </p>
+          </div>
         )}
 
         {status === "error" && (
           <>
             <div className="text-center mb-6">
-              <p className="text-red-600 font-semibold">{message}</p>
+              <p
+                className={`font-semibold ${
+                  message.includes("already been verified")
+                    ? "text-green-600"
+                    : "text-red-600"
+                }`}
+              >
+                {message}
+              </p>
             </div>
             <button
               onClick={() => navigate("/signin")}
