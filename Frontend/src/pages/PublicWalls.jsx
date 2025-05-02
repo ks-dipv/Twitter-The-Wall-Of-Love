@@ -129,6 +129,7 @@ const PublicWalls = () => {
               <div
                 key={wall.id}
                 className="bg-white p-4 rounded-xl shadow-lg border hover:scale-105 transition-all duration-300 flex flex-col items-center text-center"
+                onClick={() => navigate(`/walls/${wall.id}/public`)}
               >
                 {/* Wall Logo */}
                 {wall.logo && (
@@ -136,32 +137,13 @@ const PublicWalls = () => {
                     src={wall.logo}
                     alt={wall.title}
                     className="w-full h-24 sm:h-32 object-cover rounded-md mb-3"
-                    onClick={() => 
-                      navigate( 
-                        `/walls/${wall.id}/public`
-                      )
-                    }
                   />
                 )}
 
-                <h2
-                  className="text-xl font-semibold mb-2"
-                  onClick={() => 
-                    navigate(
-                      `/walls/${wall.id}/public`
-                    )
-                  }
-                >
-                  {wall.title}
-                </h2>
+                <h2 className="text-xl font-semibold mb-2">{wall.title}</h2>
                 <p
                   className="text-gray-600 line-clamp-2"
                   dangerouslySetInnerHTML={{ __html: wall.description }}
-                  onClick={() =>
-                    navigate(
-                      `/walls/${wall.id}/link/71d0623b-013f-4bbb-8fe1-1f0168abd68a`
-                    )
-                  }
                 ></p>
                 {/* User Info */}
                 {wall.user && (
@@ -176,7 +158,6 @@ const PublicWalls = () => {
                         ~{wall.user.name}
                       </span>
                     </div>
-                    {/* Show created_at date below user */}
                   </div>
                 )}
                 {/**views for walls  */}
@@ -189,7 +170,7 @@ const PublicWalls = () => {
                       day: "numeric",
                     })}
                   </span>
-
+                    
                   {/* Views on right */}
                   <p className="flex items-center space-x-1 text-gray-600 text-sm font-medium">
                     <span className="text-black-400">
@@ -216,7 +197,6 @@ const PublicWalls = () => {
                     <span>{wall.views || 0}</span>
                   </p>
                 </div>
-                
               </div>
             ))}
           </div>

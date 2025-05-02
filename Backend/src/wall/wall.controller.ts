@@ -72,7 +72,7 @@ export class WallController {
   ) {
     return await this.wallService.getAllWalls(user, page, limit);
   }
-  
+
   @Get(':id')
   @CommonApiDecorators({
     summary: 'Get a specific Wall by ID',

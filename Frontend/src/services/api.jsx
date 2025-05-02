@@ -59,7 +59,6 @@ export const getAllWalls = (page = 1, limit = 8) => {
   return axios.get(`/api/walls?page=${page}&limit=${limit}`);
 };
 
-
 // Fetch Wall by ID
 export const getWallById = async (wallId) => {
   return api.get(`/walls/${wallId}`);
@@ -80,7 +79,12 @@ export const deleteWall = async (id) => {
 };
 
 // Fetch Tweets for a Wall
-export const getTweetsByWall = async (wallId, page = 1, limit = 9, all = false) => {
+export const getTweetsByWall = async (
+  wallId,
+  page = 1,
+  limit = 9,
+  all = false
+) => {
   return api.get(`/walls/${wallId}/tweets`, {
     params: { page, limit, all }, // Add all parameter
   });
