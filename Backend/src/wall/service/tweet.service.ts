@@ -271,4 +271,51 @@ export class TweetService {
       throw new InternalServerErrorException('Failed to filter tweets by date');
     }
   }
+  
+  async addTweetsByHashtagToWall(
+    hashtag: string,
+    wallId: number,
+    user,
+  ): Promise<Tweets[]> {
+    try {
+      const existingUser = await this.userRepository.getByEmail(user.email);
+      if (!existingUser) throw new BadRequestException("User doesn't exist");
+
+      const wall = await this.wallRepository.getWallByIdAndUser(
+        wallId,
+        existingUser.id,
+      );
+      if (!wall) throw new NotFoundException('Wall not found or access denied');
+
+      // Fetch tweets by hashtag
+      const tweetsData = await this.twitterService.fetchTweetsByHashtag(hashtag);
+
+      if (tweetsData.length === 0) {
+        throw new BadRequestException('No tweets found for the given hashtag');
+      }
+
+      // Add tweets to the wall
+      const createdTweets = await Promise.all(
+        tweetsData.map(async (tweetData) => {
+          const tweet = this.tweetRepository.create({
+            ...tweetData,
+            wall,
+          });
+          return await this.tweetRepository.save(tweet);
+        }),
+      );
+
+      return createdTweets.flat();
+
+    } catch (error) {
+      if (
+        error instanceof UnauthorizedException ||
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to add tweets by hashtag to wall');
+    }
+  }
 }

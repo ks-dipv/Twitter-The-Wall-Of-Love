@@ -169,4 +169,30 @@ export class TweetController {
       endDate,
     );
   }
+
+  @Post(':wallId/tweets/hashtag')
+  @CommonApiDecorators({
+    summary: 'Add tweets based on hashtag to a wall',
+    successStatus: 201,
+    successDescription: 'Tweets added successfully',
+  })
+  @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        hashtag: {
+          type: 'string',
+          example: 'NestJS',
+        },
+      },
+    },
+  })
+  async addTweetsByHashtag(
+    @Param('wallId') wallId: number,
+    @Body('hashtag') hashtag: string,
+    @User() user,
+  ) {
+    return await this.tweetService.addTweetsByHashtagToWall(hashtag, wallId, user);
+  }
 }
