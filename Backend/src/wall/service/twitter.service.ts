@@ -72,14 +72,19 @@ export class TwitterService {
       throw new InternalServerErrorException('Failed to fetch tweet details');
     }
   }
-  async fetchTweetsByHashtag(hashtag: string, maxResults: number = 10): Promise<any[]> {
+  async fetchTweetsByHashtag(
+    hashtag: string,
+    maxResults: number = 10,
+  ): Promise<any[]> {
     if (!hashtag || typeof hashtag !== 'string') {
       throw new BadRequestException('Invalid hashtag provided');
     }
 
     const token = this.config.get<string>('TWITTER_BEARER_TOKEN');
     if (!token) {
-      throw new InternalServerErrorException('Twitter API token is not configured');
+      throw new InternalServerErrorException(
+        'Twitter API token is not configured',
+      );
     }
 
     try {
@@ -103,7 +108,6 @@ export class TwitterService {
         throw new BadRequestException('No tweets found for the given hashtag');
       }
 
-      console.log(response.data)
       const tweets = response.data.data;
       const users = response.data.includes?.users || [];
 
@@ -127,7 +131,9 @@ export class TwitterService {
         );
       }
 
-      throw new InternalServerErrorException('Failed to fetch tweets by hashtag');
+      throw new InternalServerErrorException(
+        'Failed to fetch tweets by hashtag',
+      );
     }
   }
 }

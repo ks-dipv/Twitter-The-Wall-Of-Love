@@ -183,7 +183,7 @@ export class TweetController {
       properties: {
         hashtag: {
           type: 'string',
-          example: 'NestJS',
+          example: 'News',
         },
       },
     },

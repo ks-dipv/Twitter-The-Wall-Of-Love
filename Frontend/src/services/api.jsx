@@ -155,4 +155,8 @@ export const getPublicWalls = async () => {
   return await api.post("/walls/public");
 };
 
+// Add tweet based on hashtag
+export const addHashtagTweetsToWall = (wallId, hashtag) =>
+  axios.post(`/api/walls/${wallId}/tweets/hashtag`, { hashtag });
+
 export default api;
