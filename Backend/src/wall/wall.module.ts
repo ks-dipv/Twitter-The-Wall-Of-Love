@@ -13,6 +13,7 @@ import { TweetRepository } from './repository/tweet.repository';
 import { UserModule } from '../user/user.module';
 import { UserRepository } from '../user/repositories/user.repository';
 import { UploadService } from '../common/services/upload.service';
+import { XUserHandleService } from './service/x-user-handle.service';
 @Module({
   imports: [TypeOrmModule.forFeature([Wall, SocialLink, Tweets]), UserModule],
   controllers: [WallController, TweetController],
@@ -24,6 +25,7 @@ import { UploadService } from '../common/services/upload.service';
     TweetService,
     TwitterService,
     TweetRepository,
+    XUserHandleService,
   ],
   exports: [WallRepository, TweetRepository],
 })
