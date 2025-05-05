@@ -6,9 +6,7 @@ import {
   Param,
   Body,
   Delete,
-  Request,
   Query,
-  Req,
 } from '@nestjs/common';
 import { TweetService } from './service/tweet.service';
 import { ApiTags, ApiParam, ApiBody, ApiQuery } from '@nestjs/swagger';
@@ -46,6 +44,36 @@ export class TweetController {
     @User() user,
   ) {
     return await this.tweetService.addTweetToWall(tweetUrl, wallId, user);
+  }
+
+  @Post(':wallId/tweets/user')
+  @CommonApiDecorators({
+    summary: 'Add a tweet to a wall',
+    successStatus: 201,
+    successDescription: 'Tweet added successfully',
+  })
+  @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        tweetUrl: {
+          type: 'string',
+          example: 'https://x.com/SpiderVerse',
+        },
+      },
+    },
+  })
+  async addTweetByXHandle(
+    @Param('wallId') wallId: number,
+    @Body('xHandle') xHandle: string,
+    @User() user,
+  ) {
+    return await this.tweetService.addTweetToWallByXHandle(
+      xHandle,
+      wallId,
+      user,
+    );
   }
 
   @Get(':wallId/tweets')

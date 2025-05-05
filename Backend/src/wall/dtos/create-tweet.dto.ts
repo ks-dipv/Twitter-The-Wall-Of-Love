@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, Matches } from 'class-validator';
+import { IsString, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateTweetDto {
@@ -15,4 +15,12 @@ export class CreateTweetDto {
 
   @IsString()
   hashtag: string;
+
+  @ApiProperty({
+    description: 'The URL of the user',
+    example: 'https://twitter.com/username/narendramodi',
+  })
+  @IsString()
+  xHandle: string;
+
 }
