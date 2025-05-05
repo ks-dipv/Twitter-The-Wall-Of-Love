@@ -1,62 +1,41 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { addTweetToWall, addHashtagTweetsToWall } from "../services/api"; // new service
-import { Loader2, Hash } from "lucide-react"; // Import # icon
+import { addTweetToWall, addHashtagTweetsToWall, addHandleTweetsToWall } from "../services/api"; 
+import { Loader2, Hash, Link2 } from "lucide-react"; 
 import { toast, ToastContainer } from "react-toastify";
 
 const AddTweet = () => {
   const { wallId } = useParams();
   const navigate = useNavigate();
-  const [tweetUrl, setTweetUrl] = useState("");
-  const [hashtag, setHashtag] = useState("");
-  const [error, setError] = useState("");
+  const [selectedOption, setSelectedOption] = useState("url"); 
+  const [inputValue, setInputValue] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleTweetSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    if (!tweetUrl.trim()) {
-      toast.error("Tweet URL cannot be empty.");
-      setLoading(false);
+    if (!inputValue.trim()) {
+      toast.error("Input cannot be empty.");
       return;
     }
 
+    setLoading(true);
     try {
-      await addTweetToWall(wallId, tweetUrl);
-      toast.success("Tweet added successfully! 🚀");
+      if (selectedOption === "url") {
+        await addTweetToWall(wallId, inputValue);
+        toast.success("Tweet added successfully! 🚀");
+      } else if (selectedOption === "hashtag") {
+        await addHashtagTweetsToWall(wallId, inputValue);
+        toast.success("Tweets added from hashtag successfully! 🚀");
+      } else if (selectedOption === "handle") {
+        await addHandleTweetsToWall(wallId, inputValue);
+        toast.success("Tweets added from handle (profile URL) successfully! 🚀");
+      }
       setTimeout(() => {
         navigate(`/admin/walls/${wallId}`);
       }, 1000);
     } catch (err) {
-      console.error("API Error:",err.response?.data?.message || "Failed to add tweet.");
-      toast.error(err.response?.data?.message || "Failed to add tweet.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleHashtagSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    if (!hashtag.trim()) {
-      toast.error("Hashtag cannot be empty.");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      await addHashtagTweetsToWall(wallId, hashtag);
-      toast.success("Tweets added from hashtag successfully! 🚀");
-      setTimeout(() => {
-        navigate(`/admin/walls/${wallId}`);
-      }, 1000);
-    } catch (err) {
-      console.error("API Error:", err.response?.data?.message || "Failed to add hashtag tweets.");
-      toast.error(err.response?.data?.message || "Failed to add hashtag tweets.");
+      console.error("API Error:", err.response?.data?.message || "Failed to add tweets.");
+      toast.error(err.response?.data?.message || "Failed to add tweets.");
     } finally {
       setLoading(false);
     }
@@ -67,47 +46,54 @@ const AddTweet = () => {
       <ToastContainer hideProgressBar />
       <div className="w-full max-w-lg p-8 bg-white shadow-lg rounded-2xl space-y-8">
         <h2 className="text-2xl font-bold text-gray-900 text-center">
-           Add Tweet to Your Wall
+          Add Tweets to Your Wall
         </h2>
 
-        {error && <p className="text-red-500 text-center">{error}</p>}
-
-        {/* Add Tweet by URL */}
-        <form onSubmit={handleTweetSubmit} className="space-y-4">
-          <input
-            type="url"
-            placeholder="Enter Tweet URL..."
-            value={tweetUrl}
-            onChange={(e) => setTweetUrl(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
-          />
+        {/* Options */}
+        <div className="flex justify-center gap-4 mb-6">
           <button
-            type="submit"
-            disabled={loading}
-            className="w-full flex items-center justify-center bg-[#334155] text-white px-4 py-3 rounded-xl font-semibold hover:bg-[#94A3B8] transition"
+            onClick={() => { setSelectedOption("url"); setInputValue(""); }}
+            className={`px-4 py-2 rounded-full font-semibold ${
+              selectedOption === "url" ? "bg-[#334155] text-white" : "bg-gray-200 text-gray-700"
+            }`}
           >
-            {loading ? (
-              <Loader2 className="animate-spin w-5 h-5" />
-            ) : (
-              "+ Add Tweet by URL"
-            )}
+            By URL
           </button>
-        </form>
+          <button
+            onClick={() => { setSelectedOption("hashtag"); setInputValue(""); }}
+            className={`px-4 py-2 rounded-full font-semibold ${
+              selectedOption === "hashtag" ? "bg-[#334155] text-white" : "bg-gray-200 text-gray-700"
+            }`}
+          >
+            By Hashtag
+          </button>
+          <button
+            onClick={() => { setSelectedOption("handle"); setInputValue(""); }}
+            className={`px-4 py-2 rounded-full font-semibold ${
+              selectedOption === "handle" ? "bg-[#334155] text-white" : "bg-gray-200 text-gray-700"
+            }`}
+          >
+            By Handle
+          </button>
+        </div>
 
-        {/* Divider */}
-        <div className="text-center text-gray-400">OR</div>
-
-        {/* Add Tweets by Hashtag */}
-        <form onSubmit={handleHashtagSubmit} className="space-y-4 relative">
+        {/* Dynamic Form */}
+        <form onSubmit={handleSubmit} className="space-y-4 relative">
           <div className="relative">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-              <Hash size={20} />
+              {selectedOption === "hashtag" ? <Hash size={20} /> : <Link2 size={20} />}
             </span>
             <input
               type="text"
-              placeholder="Enter Hashtag..."
-              value={hashtag}
-              onChange={(e) => setHashtag(e.target.value)}
+              placeholder={
+                selectedOption === "url"
+                  ? "Enter Tweet URL..."
+                  : selectedOption === "hashtag"
+                  ? "Enter Hashtag..."
+                  : "Enter Twitter Profile URL..."
+              }
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
               className="w-full p-3 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
           </div>
@@ -119,7 +105,7 @@ const AddTweet = () => {
             {loading ? (
               <Loader2 className="animate-spin w-5 h-5" />
             ) : (
-              "+ Add Tweets by Hashtag"
+              `+ Add Tweet${selectedOption !== "url" ? "s" : ""} by ${selectedOption.charAt(0).toUpperCase() + selectedOption.slice(1)}`
             )}
           </button>
         </form>
