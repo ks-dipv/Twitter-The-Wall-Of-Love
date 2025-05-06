@@ -142,11 +142,11 @@ export const getApiToken = async () => {
 };
 
 export const searchTweets = async (wallId, query) => {
-  return await axios.get(`/api/walls/${wallId}/tweet?search=${query}`);
+  return api.get(`/walls/${wallId}/tweet?search=${query}`);
 };
 
 export const getFilteredTweetsByWall = async (wallId, startDate, endDate) => {
-  return await axios.get(`/api/walls/${wallId}/filter`, {
+  return api.get(`/walls/${wallId}/filter`, {
     params: { startDate, endDate },
   });
 };
@@ -157,11 +157,11 @@ export const getPublicWalls = async () => {
 
 // Add tweet based on hashtag
 export const addHashtagTweetsToWall = (wallId, hashtag) =>
-  axios.post(`/api/walls/${wallId}/tweets/hashtag`, { hashtag });
+  api.post(`/walls/${wallId}/tweets/hashtag`, { hashtag });
 
 
 export const addHandleTweetsToWall = (wallId, xHandle) => {
-  return axios.post(`/api/walls/${wallId}/tweets/user`, { xHandle });
+  return api.post(`/walls/${wallId}/tweets/user`, { xHandle });
 };
 
 export default api;

@@ -125,12 +125,6 @@ export class TwitterService {
         };
       });
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        throw new BadRequestException(
-          `Twitter API error: ${error.response?.data?.title || 'Unknown error'}`,
-        );
-      }
-
       throw new InternalServerErrorException(
         'Failed to fetch tweets by hashtag',
       );
