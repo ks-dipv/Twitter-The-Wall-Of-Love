@@ -12,6 +12,9 @@ import { Tweets } from '../entity/tweets.entity';
 import { UserRepository } from '../../user/repositories/user.repository';
 import { Cron } from '@nestjs/schedule';
 import { XUserHandleService } from './x-user-handle.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { TweetHandleQueue } from '../entity/tweet-handle-queue.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TweetService {
@@ -21,6 +24,9 @@ export class TweetService {
     private readonly twitterService: TwitterService,
     private readonly userRepository: UserRepository,
     private readonly xUserHandleService: XUserHandleService,
+
+    @InjectRepository(TweetHandleQueue)
+    private readonly tweetHandleQueueRepository: Repository<TweetHandleQueue>,
   ) {}
 
   async addTweetToWall(tweetUrl: string, wallId: number, user) {
@@ -97,6 +103,19 @@ export class TweetService {
         }
       }
 
+      const tweetUrls = await this.tweetHandleQueueRepository.findOne({
+        where: { url: xHandle },
+      });
+
+      if (!tweetUrls) {
+        const tweetHandleQueue = this.tweetHandleQueueRepository.create({
+          url: xHandle,
+          wall: wall,
+          processed: false,
+        });
+        await this.tweetHandleQueueRepository.save(tweetHandleQueue);
+      }
+
       return {
         tweets: createdTweets,
       };
@@ -106,9 +125,41 @@ export class TweetService {
         error instanceof BadRequestException ||
         error instanceof NotFoundException
       ) {
-        throw error; // Rethrow known exceptions
+        throw error;
       }
       throw new InternalServerErrorException('Failed to add tweet to wall');
+    }
+  }
+
+  @Cron('*/15 * * * *')
+  async processNextHandleUrl() {
+    const nextHandle = await this.tweetHandleQueueRepository.findOne({
+      where: { processed: false },
+      relations: ['wall'],
+      order: { id: 'ASC' },
+    });
+
+    if (!nextHandle) {
+      await this.tweetHandleQueueRepository.update({}, { processed: false });
+      console.log('All handles processed. Resetting for a new round.');
+      return;
+    }
+
+    try {
+      console.log(`Processing handle: ${nextHandle.url}`);
+
+      await this.addTweetToWallByXHandle(
+        nextHandle.url,
+        nextHandle.wall.id,
+        nextHandle.wall.user,
+      );
+
+      nextHandle.processed = true;
+      await this.tweetHandleQueueRepository.save(nextHandle);
+
+      console.log(`Handle processed successfully: ${nextHandle.url}`);
+    } catch (error) {
+      console.error(`Error processing handle: ${nextHandle.url}`, error);
     }
   }
 
