@@ -381,7 +381,7 @@ export class TweetService {
       throw new InternalServerErrorException('Failed to filter tweets by date');
     }
   }
-  
+
   async addTweetsByHashtagToWall(
     hashtag: string,
     wallId: number,
@@ -390,20 +390,21 @@ export class TweetService {
     try {
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) throw new BadRequestException("User doesn't exist");
-  
+
       const wall = await this.wallRepository.getWallByIdAndUser(
         wallId,
         existingUser.id,
       );
       if (!wall) throw new NotFoundException('Wall not found or access denied');
-  
+
       // Fetch tweets by hashtag
-      const tweetsData = await this.twitterService.fetchTweetsByHashtag(hashtag);
-  
+      const tweetsData =
+        await this.twitterService.fetchTweetsByHashtag(hashtag);
+
       if (tweetsData.length === 0) {
         throw new BadRequestException('No tweets found for the given hashtag');
       }
-  
+
       // Add tweets to the wall
       const createdTweets = await Promise.all(
         tweetsData.map(async (tweetData) => {
@@ -411,16 +412,16 @@ export class TweetService {
           const existingTweet = await this.tweetRepository.findOne({
             where: {
               tweet_url: tweetData.tweet_url,
-              wall,  // Make sure the tweet belongs to the specific wall
+              wall, // Make sure the tweet belongs to the specific wall
             },
           });
-  
+
           if (existingTweet) {
             // If the tweet already exists, skip adding it
             console.log(`Tweet already exists: ${tweetData.tweet_url}`);
-            return null;  // Return null to avoid adding this tweet
+            return null; // Return null to avoid adding this tweet
           }
-  
+
           // If the tweet does not exist, create and save it
           const tweet = this.tweetRepository.create({
             ...tweetData,
@@ -429,10 +430,9 @@ export class TweetService {
           return await this.tweetRepository.save(tweet);
         }),
       );
-  
+
       // Filter out any null values from already existing tweets
       return createdTweets.flat().filter((tweet) => tweet !== null);
-  
     } catch (error) {
       if (
         error instanceof UnauthorizedException ||
@@ -441,7 +441,9 @@ export class TweetService {
       ) {
         throw error;
       }
-      throw new InternalServerErrorException('Failed to add tweets by hashtag to wall');
+      throw new InternalServerErrorException(
+        'Failed to add tweets by hashtag to wall',
+      );
     }
   }
 }

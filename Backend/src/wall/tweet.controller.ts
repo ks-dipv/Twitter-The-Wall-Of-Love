@@ -221,6 +221,10 @@ export class TweetController {
     @Body('hashtag') hashtag: string,
     @User() user,
   ) {
-    return await this.tweetService.addTweetsByHashtagToWall(hashtag, wallId, user);
+    return await this.tweetService.addTweetsByHashtagToWall(
+      hashtag,
+      wallId,
+      user,
+    );
   }
 }
