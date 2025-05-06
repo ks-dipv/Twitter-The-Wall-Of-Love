@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import {
   getWallById,
   getTweetsByWall,
@@ -25,11 +25,18 @@ const WallPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(1); 
   const [limit, setLimit] = useState(9);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [layout, setLayout] = useState("default"); // Default to grid layout
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Initialize page from URL query parameter
+  useEffect(() => {
+    const pageFromUrl = parseInt(searchParams.get("page")) || 1;
+    setPage(pageFromUrl);
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchWallData = async () => {
@@ -88,7 +95,7 @@ const WallPage = () => {
         throw new Error("No tweets found for this wall");
       }
 
-      // Create a map of reordered tweets (visible tweets only)
+       // Create a map of reordered tweets (visible tweets only)
       const reorderedIdsMap = new Map(
         reorderedTweets.map((tweet, index) => [tweet.id, index])
       );
@@ -153,7 +160,7 @@ const WallPage = () => {
         shuffledTweets.map((tweet, index) => [tweet.id, index])
       );
 
-      // Sort all tweets based on the shuffled indices
+       // Sort all tweets based on the shuffled indices
       const orderedTweets = [...allTweets].sort((a, b) => {
         const aIndex = shuffledIdsMap.has(a.id)
           ? shuffledIdsMap.get(a.id)
@@ -198,6 +205,7 @@ const WallPage = () => {
       const filteredData = response.data || [];
       setTweets(Array.isArray(filteredData) ? filteredData : []);
       setPage(1);
+      setSearchParams({ page: 1 }); 
     } catch (error) {
       console.error("Error filtering tweets:", error);
       toast.error("Failed to fetch filtered tweets.");
@@ -223,6 +231,7 @@ const WallPage = () => {
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setPage(newPage);
+      setSearchParams({ page: newPage }); 
     }
   };
 
@@ -325,7 +334,7 @@ const WallPage = () => {
           <div className="flex justify-center mt-6 gap-4">
             <button
               disabled={page <= 1}
-              onClick={() => setPage(page - 1)}
+              onClick={() => handlePageChange(page - 1)}
               className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
             >
               Prev
@@ -335,7 +344,7 @@ const WallPage = () => {
             </span>
             <button
               disabled={page >= totalPages}
-              onClick={() => setPage(page + 1)}
+              onClick={() => handlePageChange(page + 1)}
               className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
             >
               Next
