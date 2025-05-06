@@ -59,8 +59,8 @@ export const verifyResetToken = async (token) => {
   return await api.get(`/auth/verify-reset-token/${token}`);
 };
 
-export const getAllWalls = (page = 1, limit = 8) => {
-  return axios.get(`/api/walls?page=${page}&limit=${limit}`);
+export const getAllWalls = async () => {
+  return api.get("/walls");
 };
 
 // Fetch Wall by ID
@@ -83,15 +83,8 @@ export const deleteWall = async (id) => {
 };
 
 // Fetch Tweets for a Wall
-export const getTweetsByWall = async (
-  wallId,
-  page = 1,
-  limit = 9,
-  all = false
-) => {
-  return api.get(`/walls/${wallId}/tweets`, {
-    params: { page, limit, all }, // Add all parameter
-  });
+export const getTweetsByWall = async (wallId) => {
+  return api.get(`/walls/${wallId}/tweets`);
 };
 
 export const deleteTweet = async (wallId, tweetId) => {

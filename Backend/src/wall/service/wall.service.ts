@@ -226,39 +226,16 @@ export class WallService {
     }
   }
 
-  async getAllWalls(
-    user,
-    page = 1,
-    limit = 10,
-  ): Promise<{
-    data: Wall[];
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  }> {
+  async getAllWalls(user): Promise<Wall[]> {
     try {
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) {
         throw new NotFoundException("User doesn't exist");
       }
 
-      const skip = (page - 1) * limit;
-
-      const [walls, total] = await this.wallRepository.findAndCount({
+      return await this.wallRepository.find({
         where: { user: { id: existingUser.id } },
-        skip,
-        take: limit,
-        order: { created_at: 'DESC' },
       });
-
-      return {
-        data: walls,
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      };
     } catch (error) {
       throw new BadRequestException(error.message || 'Failed to fetch walls');
     }
