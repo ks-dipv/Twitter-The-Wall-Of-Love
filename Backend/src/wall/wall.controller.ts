@@ -25,7 +25,7 @@ import { User } from 'src/common/decorator/user.decorater';
 import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
 import { AuthType } from 'src/common/enum/auth-type.enum';
 import { Auth } from 'src/common/decorator/auth.decorator';
-import { DefaultValuePipe, ParseIntPipe } from '@nestjs/common';
+
 @ApiTags('Walls')
 @Controller('api/walls')
 export class WallController {
@@ -53,24 +53,8 @@ export class WallController {
     summary: 'Get all Walls for the logged-in user',
     successDescription: 'List of walls retrieved',
   })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-    description: 'Page number for pagination (default: 1)',
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    description: 'Number of items per page (default: 10)',
-  })
-  async getAllWalls(
-    @User() user,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
-  ) {
-    return await this.wallService.getAllWalls(user, page, limit);
+  async getAllWalls(@User() user) {
+    return await this.wallService.getAllWalls(user);
   }
 
   @Get(':id')

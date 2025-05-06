@@ -163,17 +163,7 @@ export class TweetService {
     }
   }
 
-  async getAllTweetsByWall(
-    wallId: number,
-    user,
-    page: number = 1,
-    limit: number = 9,
-  ): Promise<{
-    tweets: Tweets[];
-    total: number;
-    page: number;
-    totalPages: number;
-  }> {
+  async getAllTweetsByWall(wallId: number, user): Promise<Tweets[]> {
     try {
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) throw new BadRequestException("User doesn't exist");
@@ -184,26 +174,7 @@ export class TweetService {
       );
       if (!wall) throw new NotFoundException('Wall not found or access denied');
 
-      // Calculate the offset (skip) for pagination
-      const skip = (page - 1) * limit;
-
-      // Fetch tweets with pagination
-      const [tweets, total] =
-        await this.tweetRepository.getTweetsByWallWithPagination(
-          wallId,
-          skip,
-          limit,
-        );
-
-      // Calculate total pages
-      const totalPages = Math.ceil(total / limit);
-
-      return {
-        tweets,
-        total,
-        page,
-        totalPages,
-      };
+      return await this.tweetRepository.getTweetsByWall(wallId);
     } catch (error) {
       if (
         error instanceof UnauthorizedException ||
@@ -215,7 +186,6 @@ export class TweetService {
       throw new InternalServerErrorException('Failed to fetch tweets');
     }
   }
-
   async deleteTweetByWall(tweetId: number, wallId: number, user) {
     try {
       const existingUser = await this.userRepository.getByEmail(user.email);
@@ -241,7 +211,12 @@ export class TweetService {
     }
   }
 
-  async reorderTweets(wallId: number, user, orderedTweetIds: number[]) {
+  async reorderTweets(
+    wallId: number,
+    user,
+    orderedTweetIds?: number[],
+    randomize?: boolean,
+  ) {
     try {
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) throw new BadRequestException("User doesn't exist");
@@ -252,43 +227,40 @@ export class TweetService {
       );
       if (!wall) throw new NotFoundException('Wall not found or access denied');
 
-      // Fetch all tweets for the wall
-      const allTweets = await this.tweetRepository.find({
-        where: { wall: { id: wallId } },
-        select: ['id'],
-      });
-      const allTweetIds = allTweets.map((tweet) => tweet.id);
+      const tweets = await this.tweetRepository.getTweetsByWall(wallId);
+      if (!tweets.length)
+        throw new BadRequestException('No tweets found for this wall');
 
-      // Validate orderedTweetIds
-      const invalidTweetIds = orderedTweetIds.filter(
-        (id) => !allTweetIds.includes(id),
-      );
-      if (invalidTweetIds.length > 0) {
-        console.warn(
-          `Invalid tweet IDs for wall ${wallId}: ${invalidTweetIds.join(', ')}`,
+      if (randomize) {
+        tweets.sort(() => Math.random() - 0.5);
+      } else if (orderedTweetIds) {
+        if (tweets.length !== orderedTweetIds.length) {
+          throw new BadRequestException('Invalid tweet order data.');
+        }
+
+        const tweetMap = new Map(tweets.map((tweet) => [tweet.id, tweet]));
+
+        for (const tweetId of orderedTweetIds) {
+          if (!tweetMap.has(tweetId)) {
+            throw new BadRequestException('Invalid tweet ID in reorder list.');
+          }
+        }
+
+        tweets.sort(
+          (a, b) =>
+            orderedTweetIds.indexOf(a.id) - orderedTweetIds.indexOf(b.id),
         );
-      }
-
-      // If no valid tweet IDs remain, throw an error
-      if (orderedTweetIds.length === 0) {
+      } else {
         throw new BadRequestException(
-          'No valid tweet IDs provided for reordering',
+          'Either provide an ordered list or set randomize to true.',
         );
       }
 
-      // Update order_index for valid tweet IDs
-      const updatePromises = orderedTweetIds
-        .filter((id) => allTweetIds.includes(id))
-        .map((tweetId, index) => {
-          return this.tweetRepository.update(tweetId, { order_index: index });
-        });
+      for (let i = 0; i < tweets.length; i++) {
+        await this.tweetRepository.update(tweets[i].id, { order_index: i });
+      }
 
-      await Promise.all(updatePromises);
-
-      return {
-        message: 'Tweets reordered successfully',
-        reorderedTweetIds: orderedTweetIds,
-      };
+      return await this.tweetRepository.getTweetsByWall(wallId);
     } catch (error) {
       if (
         error instanceof UnauthorizedException ||
@@ -381,7 +353,7 @@ export class TweetService {
       throw new InternalServerErrorException('Failed to filter tweets by date');
     }
   }
-  
+
   async addTweetsByHashtagToWall(
     hashtag: string,
     wallId: number,
@@ -390,20 +362,21 @@ export class TweetService {
     try {
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) throw new BadRequestException("User doesn't exist");
-  
+
       const wall = await this.wallRepository.getWallByIdAndUser(
         wallId,
         existingUser.id,
       );
       if (!wall) throw new NotFoundException('Wall not found or access denied');
-  
+
       // Fetch tweets by hashtag
-      const tweetsData = await this.twitterService.fetchTweetsByHashtag(hashtag);
-  
+      const tweetsData =
+        await this.twitterService.fetchTweetsByHashtag(hashtag);
+
       if (tweetsData.length === 0) {
         throw new BadRequestException('No tweets found for the given hashtag');
       }
-  
+
       // Add tweets to the wall
       const createdTweets = await Promise.all(
         tweetsData.map(async (tweetData) => {
@@ -411,16 +384,16 @@ export class TweetService {
           const existingTweet = await this.tweetRepository.findOne({
             where: {
               tweet_url: tweetData.tweet_url,
-              wall,  // Make sure the tweet belongs to the specific wall
+              wall, // Make sure the tweet belongs to the specific wall
             },
           });
-  
+
           if (existingTweet) {
             // If the tweet already exists, skip adding it
             console.log(`Tweet already exists: ${tweetData.tweet_url}`);
-            return null;  // Return null to avoid adding this tweet
+            return null; // Return null to avoid adding this tweet
           }
-  
+
           // If the tweet does not exist, create and save it
           const tweet = this.tweetRepository.create({
             ...tweetData,
@@ -429,10 +402,9 @@ export class TweetService {
           return await this.tweetRepository.save(tweet);
         }),
       );
-  
+
       // Filter out any null values from already existing tweets
       return createdTweets.flat().filter((tweet) => tweet !== null);
-  
     } catch (error) {
       if (
         error instanceof UnauthorizedException ||
@@ -441,7 +413,9 @@ export class TweetService {
       ) {
         throw error;
       }
-      throw new InternalServerErrorException('Failed to add tweets by hashtag to wall');
+      throw new InternalServerErrorException(
+        'Failed to add tweets by hashtag to wall',
+      );
     }
   }
 }

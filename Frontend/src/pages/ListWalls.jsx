@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import { toast, ToastContainer } from "react-toastify";
 import ConfirmationDialog from "../components/ConfirmationDialog";
 import { FaShareAlt } from "react-icons/fa";
-
 import ShareWallModal from "../components/ShareWallModal";
 const ListWalls = () => {
   const [walls, setWalls] = useState([]);
@@ -14,37 +13,27 @@ const ListWalls = () => {
   const [error, setError] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [wallToDelete, setWallToDelete] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(""); // state to store search query
   const [showShareModal, setShowShareModal] = useState(false);
   const [wallToShare, setWallToShare] = useState(null);
-
-  // Pagination state
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const limit = 8; // Items per page
 
   const navigate = useNavigate();
   useEffect(() => {
     const fetchWalls = async () => {
-      setLoading(true);
       try {
-        // Pass page and limit to API
-        const response = await getAllWalls(page, limit);
+        const response = await getAllWalls();
         if (!response || !response.data)
           throw new Error("Invalid API response");
-        setWalls(response.data.data || []);
-        const totalItems = response.data.total || 0;
-        setTotalPages(Math.ceil(totalItems / limit));
+        setWalls(response.data);
       } catch (err) {
         console.error("API Error:", err);
         setWalls([]);
-        setError(err.message || "Failed to fetch walls");
       } finally {
         setLoading(false);
       }
     };
     fetchWalls();
-  }, [page]);
+  }, []);
 
   const openDeleteDialog = (id, title) => {
     setWallToDelete({ id, title });
@@ -58,12 +47,10 @@ const ListWalls = () => {
     setWallToShare(wall);
     setShowShareModal(true);
   };
-
   const closeShareModal = () => {
     setWallToShare(null);
     setShowShareModal(false);
   };
-
   const handleDelete = async () => {
     if (!wallToDelete) return;
     try {
@@ -80,7 +67,7 @@ const ListWalls = () => {
     }
   };
 
-  // Filter walls by title or description
+  // First, filter for title matches, then for description matches
   const filteredWalls = walls
     .filter((wall) =>
       wall.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -92,11 +79,9 @@ const ListWalls = () => {
           !wall.title.toLowerCase().includes(searchQuery.toLowerCase())
       )
     );
-
   if (loading) return <div className="text-center mt-10">Loading walls...</div>;
   if (error)
     return <div className="text-center text-red-500 mt-10">{error}</div>;
-
   return (
     <div className="min-h-screen">
       <ToastContainer autoClose={2000} hideProgressBar />
@@ -104,7 +89,6 @@ const ListWalls = () => {
         <nav className="bg-gray-300 p-4 text-black flex justify-between mb-5">
           <h1 className="text-lg font-bold">Your walls</h1>
         </nav>
-
         {/* Search Box */}
         <div className="mb-5 flex justify-center">
           <input
@@ -116,7 +100,7 @@ const ListWalls = () => {
           />
         </div>
 
-        {filteredWalls.length > 0 ? (
+        {Array.isArray(filteredWalls) && filteredWalls.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {filteredWalls.map((wall) => (
               <motion.div
@@ -151,7 +135,6 @@ const ListWalls = () => {
                       {wall.visibility === "public" ? "Public" : "Private"}
                     </span>
                   </div>
-
                   <p
                     className="text-gray-600 mt-2 h-[80px] sm:h-[100px] overflow-hidden text-ellipsis p-2"
                     dangerouslySetInnerHTML={{
@@ -163,7 +146,7 @@ const ListWalls = () => {
                   ></p>
                 </div>
                 {/* Action Buttons */}
-                <div className="absolute bottom-4 left-4 right-4 flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 ">
+                <div className="absolute bottom-4 left-4 right-4 flex flex-col sm:flex-row justify-between gap-2 sm:gap-0">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -186,7 +169,6 @@ const ListWalls = () => {
                     <FaShareAlt className="shrink-0" />
                     <span className="hidden xs:inline">Share</span>
                   </button>
-
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -198,30 +180,6 @@ const ListWalls = () => {
                     <FiEdit className="shrink-0" />
                     <span className="hidden xs:inline">Update</span>
                   </button>
-
-                  {/* Views below buttons */}
-                  <div className="mt-6 flex justify-center items-center text-gray-600 text-sm font-medium space-x-1">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 text-gray-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                      />
-                    </svg>
-                    <span>{wall.views || 0} </span>
-                  </div>
                 </div>
               </motion.div>
             ))}
@@ -239,34 +197,12 @@ const ListWalls = () => {
             </motion.button>
           </div>
         )}
-
-        {/* Pagination Controls */}
-        <div className="flex justify-center mt-6 gap-4">
-          <button
-            disabled={page <= 1}
-            onClick={() => setPage(page - 1)}
-            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-          >
-            Prev
-          </button>
-          <span className="px-4 py-2">
-            Page {page} of {totalPages}
-          </span>
-          <button
-            disabled={page >= totalPages}
-            onClick={() => setPage(page + 1)}
-            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
       </div>
       <ShareWallModal
         wallId={wallToShare?.id}
         isOpen={showShareModal}
         onClose={closeShareModal}
       />
-
       {/* Delete Confirmation Dialog */}
       <ConfirmationDialog
         isOpen={showDeleteDialog}
