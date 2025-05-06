@@ -51,7 +51,7 @@ const SortableTweet = ({ tweet, onDelete, layout, index }) => {
       ? `shadow-md rounded-lg p-4 flex flex-col h-full relative cursor-pointer ${
           index % 2 === 0 ? "bg-gray-300" : "bg-white"
         } text-gray-800`
-      : "shadow-md rounded-lg p-4 flex flex-col h-full relative cursor-pointer bg-white text-gray-800";
+      : "shadow-md rounded-lg p-4 flex flex-col h-full relative cursor-pointer bg-white text-gray-800 break-inside-avoid w-full mb-4";
 
   return (
     <div
@@ -146,9 +146,9 @@ const TweetList = ({ tweets, onDelete, onReorder, layout }) => {
   // Determine container classes and sorting strategy based on layout
   let containerClasses, sortingStrategy;
   switch (layout) {
-    case "default":
     case "odd-even":
-      containerClasses = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4";
+      containerClasses =
+        "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4";
       sortingStrategy = rectSortingStrategy;
       break;
     case "horizontal":
@@ -160,7 +160,7 @@ const TweetList = ({ tweets, onDelete, onReorder, layout }) => {
       sortingStrategy = rectSortingStrategy;
       break;
     default:
-      containerClasses = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4";
+      containerClasses = "columns-1 sm:columns-2 md:columns-3 gap-4 p-4";
       sortingStrategy = rectSortingStrategy;
   }
 
