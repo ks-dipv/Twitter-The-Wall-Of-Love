@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
   getWallById,
   getTweetsByWall,
@@ -25,8 +25,7 @@ const WallPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [layout, setLayout] = useState("default"); // Default to grid layout
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [layout, setLayout] = useState("default");
 
   useEffect(() => {
     const fetchWallData = async () => {
