@@ -181,11 +181,13 @@ export class TweetController {
   @Auth(AuthType.None)
   async getTweetsByDate(
     @Param('wallId') wallId: number,
+    @Query() paginationQueryDto: PaginationQueryDto,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ) {
     return await this.tweetService.filterTweetsByDate(
       wallId,
+      paginationQueryDto,
       startDate,
       endDate,
     );

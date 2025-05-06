@@ -14,7 +14,7 @@ import Navbar from "../components/Navbar";
 import { toast } from "react-toastify";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShuffle } from "@fortawesome/free-solid-svg-icons";
-import { RefreshCcw, Search } from "lucide-react";
+import { RefreshCcw, Search, ChevronLeft, ChevronRight } from "lucide-react";
 
 const WallPage = () => {
   const { id } = useParams();
@@ -26,18 +26,22 @@ const WallPage = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [layout, setLayout] = useState("default");
+  const [isDateFiltered, setIsDateFiltered] = useState(false);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(12);
+  const [totalItems, setTotalItems] = useState(0);
 
   useEffect(() => {
     const fetchWallData = async () => {
       try {
         const wallResponse = await getWallById(id);
         setWall(wallResponse.data);
-
-        const tweetsResponse = await getTweetsByWall(id);
-        setTweets(tweetsResponse.data);
+        fetchTweets();
       } catch (error) {
         console.error("Error fetching wall:", error);
-      } finally {
         setLoading(false);
       }
     };
@@ -45,14 +49,35 @@ const WallPage = () => {
     fetchWallData();
   }, [id]);
 
+  const fetchTweets = async (page = 1, limit = itemsPerPage) => {
+    setLoading(true);
+    try {
+      const tweetsResponse = await getTweetsByWall(id, page, limit);
+      setTweets(tweetsResponse.data.data);
+      setCurrentPage(tweetsResponse.data.meta.currentPage);
+      setTotalPages(tweetsResponse.data.meta.totalPages);
+      setTotalItems(tweetsResponse.data.meta.totalItems);
+      setItemsPerPage(tweetsResponse.data.meta.itemsPerPage);
+      setIsDateFiltered(false);
+    } catch (error) {
+      console.error("Error fetching tweets:", error);
+      toast.error("Failed to fetch tweets");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDelete = async (tweetId) => {
     if (!tweetId) return;
 
     try {
       await deleteTweet(wall.id, tweetId);
-      setTweets((prevTweets) =>
-        prevTweets.filter((tweet) => tweet.id !== tweetId)
-      );
+      // After deleting, refresh the current page
+      if (isDateFiltered) {
+        handleFilter(currentPage);
+      } else {
+        fetchTweets(currentPage);
+      }
     } catch (error) {
       console.error("Error deleting tweet:", error);
     }
@@ -61,17 +86,42 @@ const WallPage = () => {
   const handleReorder = async (startIndex, endIndex) => {
     if (startIndex === endIndex) return;
 
+    // Only reorder within the current page
     const reorderedTweets = arrayMove(tweets, startIndex, endIndex);
     setTweets(reorderedTweets);
 
     setIsSaving(true);
     try {
-      const orderedTweetIds = reorderedTweets.map((tweet) => tweet.id);
+      // First get all tweets to preserve the full ordering
+      const allTweetsResponse = await getTweetsByWall(id, 1, totalItems);
+      const allTweets = allTweetsResponse.data.data;
+
+      // Calculate the offset in the full list based on current page
+      const offset = (currentPage - 1) * itemsPerPage;
+
+      // Create a map of all tweets by ID for quick lookup
+      const tweetMap = new Map(allTweets.map((tweet) => [tweet.id, tweet]));
+
+      // Replace the current page tweets in the full list
+      for (let i = 0; i < reorderedTweets.length; i++) {
+        const index = offset + i;
+        if (index < allTweets.length) {
+          allTweets[index] = reorderedTweets[i];
+        }
+      }
+
+      // Send the full ordered list of IDs
+      const orderedTweetIds = allTweets.map((tweet) => tweet.id);
       await reorderTweets(wall.id, orderedTweetIds);
     } catch (error) {
-      toast.error("Error reordering tweets:", error);
-      const tweetsResponse = await getTweetsByWall(id);
-      setTweets(tweetsResponse.data);
+      console.error("Error reordering tweets:", error);
+      toast.error("Error reordering tweets");
+      // Refresh the current page if there's an error
+      if (isDateFiltered) {
+        handleFilter(currentPage);
+      } else {
+        fetchTweets(currentPage);
+      }
     } finally {
       setIsSaving(false);
     }
@@ -80,41 +130,85 @@ const WallPage = () => {
   const handleShuffle = async () => {
     if (isSaving) return;
 
-    const shuffledTweets = [...tweets];
-    for (let i = shuffledTweets.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffledTweets[i], shuffledTweets[j]] = [
-        shuffledTweets[j],
-        shuffledTweets[i],
-      ];
-    }
-
-    setTweets(shuffledTweets);
-
     setIsSaving(true);
     try {
+      // Get all tweets first
+      const allTweetsResponse = await getTweetsByWall(id, 1, totalItems);
+      const allTweets = allTweetsResponse.data.data;
+
+      // Shuffle all tweets
+      const shuffledTweets = [...allTweets];
+      for (let i = shuffledTweets.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledTweets[i], shuffledTweets[j]] = [
+          shuffledTweets[j],
+          shuffledTweets[i],
+        ];
+      }
+
+      // Send the full shuffled list of IDs to the backend
       const orderedTweetIds = shuffledTweets.map((tweet) => tweet.id);
       await reorderTweets(wall.id, orderedTweetIds);
+
+      if (isDateFiltered) {
+        handleFilter(currentPage);
+      } else {
+        fetchTweets(currentPage);
+      }
     } catch (error) {
-      toast.error("Error updating shuffled tweets:", error);
+      console.error("Error shuffling tweets:", error);
+      toast.error("Error updating shuffled tweets");
+      if (isDateFiltered) {
+        handleFilter(currentPage);
+      } else {
+        fetchTweets(currentPage);
+      }
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleFilter = async () => {
+  const handleFilter = async (page = 1) => {
     if (!startDate || !endDate) {
       toast.error("Please select both start and end dates.");
       return;
     }
 
+    setLoading(true);
     try {
-      const response = await getFilteredTweetsByWall(id, startDate, endDate);
-      setTweets(response.data);
+      const response = await getFilteredTweetsByWall(
+        id,
+        startDate,
+        endDate,
+        page,
+        itemsPerPage
+      );
+      setTweets(response.data.data);
+      setCurrentPage(response.data.meta.currentPage);
+      setTotalPages(response.data.meta.totalPages);
+      setTotalItems(response.data.meta.totalItems);
+      setIsDateFiltered(true);
     } catch (error) {
       console.error("Error filtering tweets:", error);
       toast.error("Failed to fetch filtered tweets.");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages || newPage === currentPage) return;
+
+    setCurrentPage(newPage);
+
+    if (isDateFiltered) {
+      handleFilter(newPage);
+    } else {
+      fetchTweets(newPage);
+    }
+
+    // Scroll to top when page changes
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const filteredTweets = tweets.filter((tweet) =>
@@ -126,6 +220,90 @@ const WallPage = () => {
     const [movedItem] = newArray.splice(from, 1);
     newArray.splice(to, 0, movedItem);
     return newArray;
+  };
+
+  const renderPagination = () => {
+    const pageNumbers = [];
+    const maxVisiblePages = 5;
+
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(i);
+    }
+
+    return (
+      <div className="flex flex-col sm:flex-row justify-between items-center mt-6 mb-6">
+        <nav className="flex items-center">
+          <button
+            onClick={() => handlePageChange(1)}
+            disabled={currentPage === 1}
+            className={`mx-1 px-3 py-1 rounded ${
+              currentPage === 1
+                ? "text-gray-400 cursor-not-allowed"
+                : "text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            First
+          </button>
+
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`mx-1 p-1 rounded ${
+              currentPage === 1
+                ? "text-gray-400 cursor-not-allowed"
+                : "text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            <ChevronLeft size={18} />
+          </button>
+
+          {pageNumbers.map((number) => (
+            <button
+              key={number}
+              onClick={() => handlePageChange(number)}
+              className={`mx-1 px-3 py-1 rounded ${
+                currentPage === number
+                  ? "bg-[#334155] text-white"
+                  : "text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              {number}
+            </button>
+          ))}
+
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`mx-1 p-1 rounded ${
+              currentPage === totalPages
+                ? "text-gray-400 cursor-not-allowed"
+                : "text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            <ChevronRight size={18} />
+          </button>
+
+          <button
+            onClick={() => handlePageChange(totalPages)}
+            disabled={currentPage === totalPages}
+            className={`mx-1 px-3 py-1 rounded ${
+              currentPage === totalPages
+                ? "text-gray-400 cursor-not-allowed"
+                : "text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            Last
+          </button>
+        </nav>
+      </div>
+    );
   };
 
   if (loading) return <p className="text-center mt-10">Loading...</p>;
@@ -177,13 +355,18 @@ const WallPage = () => {
               className="px-2 py-2 border rounded-lg"
             />
             <button
-              onClick={handleFilter}
+              onClick={() => handleFilter(1)}
               className="p-2 bg-[#334155] text-white rounded transition-all duration-300 hover:bg-[#94A3B8]"
             >
               <Search size={20} />
             </button>
             <button
-              onClick={() => window.location.reload()}
+              onClick={() => {
+                setSearchQuery("");
+                setStartDate("");
+                setEndDate("");
+                fetchTweets(1);
+              }}
               className="p-2 bg-[#334155] rounded hover:bg-[#94A3B8] text-white"
             >
               <RefreshCcw size={20} />
@@ -219,6 +402,8 @@ const WallPage = () => {
             layout={layout}
           />
         </div>
+
+        {renderPagination()}
       </main>
       <Footer socialLinks={wall.social_links} />
     </div>

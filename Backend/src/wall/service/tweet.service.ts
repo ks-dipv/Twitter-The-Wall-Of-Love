@@ -14,7 +14,7 @@ import { Cron } from '@nestjs/schedule';
 import { XUserHandleService } from './x-user-handle.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TweetHandleQueue } from '../entity/tweet-handle-queue.entity';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { PaginationQueryDto } from 'src/pagination/dtos/pagination-query.dto';
 import { PaginationService } from 'src/pagination/services/pagination.service';
 import { Paginated } from 'src/pagination/interfaces/paginated.interface';
@@ -349,9 +349,10 @@ export class TweetService {
 
   async filterTweetsByDate(
     wallId: number,
+    paginationQueryDto: PaginationQueryDto,
     startDate?: string,
     endDate?: string,
-  ): Promise<Tweets[]> {
+  ): Promise<Paginated<Tweets>> {
     try {
       const start = startDate ? new Date(startDate) : new Date();
       let end = new Date();
@@ -360,10 +361,23 @@ export class TweetService {
         end.setHours(23, 59, 59, 999);
       }
 
-      return await this.tweetRepository.filterTweetsByDateRange(
-        wallId,
-        start,
-        end,
+      // Create pagination query DTO
+      const paginationQuery = new PaginationQueryDto();
+      paginationQuery.page = paginationQueryDto.page;
+      paginationQuery.limit = paginationQueryDto.limit;
+
+      // Define the where condition for date filtering
+      const whereCondition = {
+        wall: { id: wallId },
+        created_at: Between(start, end),
+      };
+
+      // Use the pagination service
+      return await this.paginationService.paginateQuery(
+        paginationQuery,
+        this.tweetRepository,
+        whereCondition,
+        { created_at: 'DESC' }, // Order by created_at in descending order
       );
     } catch (error) {
       console.log(error.message);
