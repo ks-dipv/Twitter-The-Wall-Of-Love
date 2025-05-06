@@ -14,6 +14,7 @@ import { User } from '../common/decorator/user.decorater';
 import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
 import { Auth } from 'src/common/decorator/auth.decorator';
 import { AuthType } from 'src/common/enum/auth-type.enum';
+import { PaginationQueryDto } from 'src/pagination/dtos/pagination-query.dto';
 
 @ApiTags('Tweets')
 @Controller('api/walls')
@@ -84,8 +85,16 @@ export class TweetController {
     errorDescription: 'Wall not found',
   })
   @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
-  async getAllTweetsByWall(@Param('wallId') wallId: number, @User() user) {
-    return await this.tweetService.getAllTweetsByWall(wallId, user);
+  async getAllTweetsByWall(
+    @Param('wallId') wallId: number,
+    @Query() paginationQueryDto: PaginationQueryDto,
+    @User() user,
+  ) {
+    return await this.tweetService.getAllTweetsByWall(
+      wallId,
+      paginationQueryDto,
+      user,
+    );
   }
 
   @Delete(':wallId/tweets/:tweetId')
