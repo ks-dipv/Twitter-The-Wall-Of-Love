@@ -5,6 +5,7 @@ import TweetList from "../components/TweetList";
 import Footer from "../components/Footer";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
+import { RefreshCcw, Search } from "lucide-react";
 
 const PublicShareableWallPage = () => {
   const { wallId } = useParams();
@@ -98,11 +99,17 @@ const PublicShareableWallPage = () => {
             className="px-2 py-2 border rounded-lg"
           />
           <button
-            onClick={handleFilter}
-            className="p-2 bg-[#334155] text-white rounded transition-all duration-300 hover:bg-[#94A3B8]"
-          >
-            🔍
-          </button>
+              onClick={handleFilter}
+              className="p-2 bg-[#334155] text-white rounded transition-all duration-300 hover:bg-[#94A3B8]"
+            >
+              <Search size={20} />
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              className="p-2 bg-[#334155] rounded hover:bg-[#94A3B8] text-white"
+            >
+              <RefreshCcw size={20} />
+            </button>
         </div>
 
         {/* Tweets Section */}

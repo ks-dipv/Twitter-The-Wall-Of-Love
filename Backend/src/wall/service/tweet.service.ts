@@ -11,7 +11,10 @@ import { TwitterService } from './twitter.service';
 import { Tweets } from '../entity/tweets.entity';
 import { UserRepository } from '../../user/repositories/user.repository';
 import { Cron } from '@nestjs/schedule';
-import { In } from 'typeorm';
+import { XUserHandleService } from './x-user-handle.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { TweetHandleQueue } from '../entity/tweet-handle-queue.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TweetService {
@@ -20,6 +23,10 @@ export class TweetService {
     private readonly wallRepository: WallRepository,
     private readonly twitterService: TwitterService,
     private readonly userRepository: UserRepository,
+    private readonly xUserHandleService: XUserHandleService,
+
+    @InjectRepository(TweetHandleQueue)
+    private readonly tweetHandleQueueRepository: Repository<TweetHandleQueue>,
   ) {}
 
   async addTweetToWall(tweetUrl: string, wallId: number, user) {
@@ -48,6 +55,111 @@ export class TweetService {
         throw error; // Rethrow known exceptions
       }
       throw new InternalServerErrorException('Failed to add tweet to wall');
+    }
+  }
+
+  async addTweetToWallByXHandle(
+    xHandle: string,
+    wallId: number,
+    user,
+  ): Promise<any> {
+    try {
+      const existingUser = await this.userRepository.getByEmail(user.email);
+      if (!existingUser) throw new BadRequestException("User doesn't exist");
+
+      const wall = await this.wallRepository.getWallByIdAndUser(
+        wallId,
+        existingUser.id,
+      );
+      if (!wall) throw new NotFoundException('Wall not found or access denied');
+
+      const tweetsData =
+        await this.xUserHandleService.fetchTweetsDetailsByXHandle(xHandle);
+      if (!tweetsData || tweetsData.length === 0)
+        throw new BadRequestException('Failed to fetch tweet data');
+
+      const createdTweets = [];
+      const skippedTweets = [];
+
+      for (const tweetData of tweetsData) {
+        try {
+          const tweetUrl = tweetData.tweet_url;
+          const existingTweet = await this.tweetRepository.findOne({
+            where: { tweet_url: tweetUrl, wall: { id: wall.id } },
+          });
+
+          if (existingTweet) {
+            skippedTweets.push(tweetUrl);
+            continue;
+          }
+
+          const tweet = this.tweetRepository.create({ ...tweetData, wall });
+          const savedTweet = await this.tweetRepository.save(tweet);
+          createdTweets.push(savedTweet);
+        } catch (err) {
+          console.error(`Error saving individual tweet: ${err.message}`);
+          // Continue with other tweets even if one fails
+          skippedTweets.push(tweetData.tweet_url);
+        }
+      }
+
+      const tweetUrls = await this.tweetHandleQueueRepository.findOne({
+        where: { url: xHandle },
+      });
+
+      if (!tweetUrls) {
+        const tweetHandleQueue = this.tweetHandleQueueRepository.create({
+          url: xHandle,
+          wall: wall,
+          processed: false,
+        });
+        await this.tweetHandleQueueRepository.save(tweetHandleQueue);
+      }
+
+      return {
+        tweets: createdTweets,
+      };
+    } catch (error) {
+      if (
+        error instanceof UnauthorizedException ||
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to add tweet to wall');
+    }
+  }
+
+  @Cron('*/15 * * * *')
+  async processNextHandleUrl() {
+    const nextHandle = await this.tweetHandleQueueRepository.findOne({
+      where: { processed: false },
+      relations: ['wall'],
+      order: { id: 'ASC' },
+    });
+
+    if (!nextHandle) {
+      await this.tweetHandleQueueRepository.update({}, { processed: false });
+      console.log('All handles processed. Resetting for a new round.');
+      return;
+    }
+
+    try {
+      console.log(`Processing handle: ${nextHandle.url}`);
+
+      await this.addTweetToWallByXHandle(
+        nextHandle.url,
+        nextHandle.wall.id,
+        nextHandle.wall.user,
+      );
+
+      nextHandle.processed = true;
+      await this.tweetHandleQueueRepository.save(nextHandle);
+
+      console.log(`Handle processed successfully: ${nextHandle.url}`);
+    } catch (error) {
+      console.error(`Error processing handle: ${nextHandle.url}`, error);
     }
   }
 
@@ -155,7 +267,6 @@ export class TweetService {
         console.warn(
           `Invalid tweet IDs for wall ${wallId}: ${invalidTweetIds.join(', ')}`,
         );
-        
       }
 
       // If no valid tweet IDs remain, throw an error
@@ -190,7 +301,6 @@ export class TweetService {
     }
   }
 
-
   @Cron('0 0 * * *')
   async updateTweetStatsDaily() {
     try {
@@ -220,7 +330,7 @@ export class TweetService {
         throw new BadRequestException("User doesn't exist");
       }
 
-       // Validate the wall exists for the given user
+      // Validate the wall exists for the given user
       const wall = await this.wallRepository.getWallByIdAndUser(
         wallId,
         existingUser.id,
@@ -269,6 +379,69 @@ export class TweetService {
     } catch (error) {
       console.log(error.message);
       throw new InternalServerErrorException('Failed to filter tweets by date');
+    }
+  }
+  
+  async addTweetsByHashtagToWall(
+    hashtag: string,
+    wallId: number,
+    user,
+  ): Promise<Tweets[]> {
+    try {
+      const existingUser = await this.userRepository.getByEmail(user.email);
+      if (!existingUser) throw new BadRequestException("User doesn't exist");
+  
+      const wall = await this.wallRepository.getWallByIdAndUser(
+        wallId,
+        existingUser.id,
+      );
+      if (!wall) throw new NotFoundException('Wall not found or access denied');
+  
+      // Fetch tweets by hashtag
+      const tweetsData = await this.twitterService.fetchTweetsByHashtag(hashtag);
+  
+      if (tweetsData.length === 0) {
+        throw new BadRequestException('No tweets found for the given hashtag');
+      }
+  
+      // Add tweets to the wall
+      const createdTweets = await Promise.all(
+        tweetsData.map(async (tweetData) => {
+          // Check if tweet already exists in the wall
+          const existingTweet = await this.tweetRepository.findOne({
+            where: {
+              tweet_url: tweetData.tweet_url,
+              wall,  // Make sure the tweet belongs to the specific wall
+            },
+          });
+  
+          if (existingTweet) {
+            // If the tweet already exists, skip adding it
+            console.log(`Tweet already exists: ${tweetData.tweet_url}`);
+            return null;  // Return null to avoid adding this tweet
+          }
+  
+          // If the tweet does not exist, create and save it
+          const tweet = this.tweetRepository.create({
+            ...tweetData,
+            wall,
+          });
+          return await this.tweetRepository.save(tweet);
+        }),
+      );
+  
+      // Filter out any null values from already existing tweets
+      return createdTweets.flat().filter((tweet) => tweet !== null);
+  
+    } catch (error) {
+      if (
+        error instanceof UnauthorizedException ||
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to add tweets by hashtag to wall');
     }
   }
 }
