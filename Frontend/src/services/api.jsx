@@ -119,10 +119,6 @@ export const userVerify = async (token) => {
   return api.post(`/auth/verify-email/${token}`, { token });
 };
 
-export const checkVerificationToken = async (token) => {
-  return await api.get(`/auth/check-verification/${token}`);
-};
-
 export const totalData = async () => {
   return api.post("/walls/total-data");
 };

@@ -11,7 +11,6 @@ import { UserRepository } from 'src/user/repositories/user.repository';
 import { HashingProvider } from 'src/auth/services/hashing.provider';
 import { MailService } from 'src/auth/services/mail.service';
 import { SignInDto } from '../dtos/signin.dto';
-import { User } from 'src/user/entity/user.entity';
 import { SignUpDto } from '../dtos/signup.dto';
 import { GenerateTokenProvider } from 'src/common/services/generate-token.provider';
 
@@ -112,40 +111,24 @@ export class AuthService {
     }
   }
 
-  public async verifyEmail(token: string): Promise<User> {
-    const user = await this.userRepository.findOne({
-      where: { email_verification_token: token },
-    });
+  public async verifyEmail(token: string): Promise<void> {
+    try {
+      const user = await this.userRepository.findOne({
+        where: {
+          email_verification_token: token,
+        },
+      });
 
-    if (!user) {
-      throw new BadRequestException('Invalid or expired verification token');
-    }
+      if (!user) {
+        throw new BadRequestException('Email has already been verified');
+      }
 
-    // Check if user is already verified
-    if (user.is_email_verified) {
-      throw new BadRequestException('Email has already been verified');
-    }
-
-    user.is_email_verified = true;
-    user.email_verification_token = null;
-    await this.userRepository.save(user);
-
-    return user;
-  }
-
-  // Add a new method to check if the token is valid
-  public async checkVerificationToken(token: string): Promise<void> {
-    const user = await this.userRepository.findOne({
-      where: { email_verification_token: token },
-    });
-
-    if (!user) {
-      throw new BadRequestException('Invalid or expired verification token');
-    }
-
-    // Check if user is already verified
-    if (user.is_email_verified) {
-      throw new BadRequestException('Email has already been verified');
+      user.is_email_verified = true;
+      user.email_verification_token = null;
+      await this.userRepository.save(user);
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException('Token is invalid or Expire');
     }
   }
 
