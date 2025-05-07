@@ -165,11 +165,7 @@ const PublicWalls = () => {
                 <p
                   className="text-gray-600 line-clamp-2"
                   dangerouslySetInnerHTML={{ __html: wall.description }}
-                  onClick={() =>
-                    navigate(
-                      `/walls/${wall.id}/link/71d0623b-013f-4bbb-8fe1-1f0168abd68a`
-                    )
-                  }
+                  onClick={() => navigate(`/walls/${wall.id}/public`)}
                 ></p>
                 {/* User Info */}
                 {wall.user && (
