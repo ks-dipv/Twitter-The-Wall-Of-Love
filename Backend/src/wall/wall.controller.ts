@@ -25,6 +25,7 @@ import { User } from 'src/common/decorator/user.decorater';
 import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
 import { AuthType } from 'src/common/enum/auth-type.enum';
 import { Auth } from 'src/common/decorator/auth.decorator';
+import { PaginationQueryDto } from 'src/pagination/dtos/pagination-query.dto';
 
 @ApiTags('Walls')
 @Controller('api/walls')
@@ -53,8 +54,11 @@ export class WallController {
     summary: 'Get all Walls for the logged-in user',
     successDescription: 'List of walls retrieved',
   })
-  async getAllWalls(@User() user) {
-    return await this.wallService.getAllWalls(user);
+  async getAllWalls(
+    @User() user,
+    @Query() paginationQueryDto: PaginationQueryDto,
+  ) {
+    return await this.wallService.getAllWalls(user, paginationQueryDto);
   }
 
   @Get(':id')
@@ -78,8 +82,11 @@ export class WallController {
   })
   @ApiParam({ name: 'id', description: 'ID of the Wall', type: Number })
   @Auth(AuthType.None)
-  async getPublicWallById(@Param('id') id: number) {
-    return await this.wallService.getPublicWallById(id);
+  async getPublicWallById(
+    @Param('id') id: number,
+    @Query() paginationQueryDto: PaginationQueryDto,
+  ) {
+    return await this.wallService.getPublicWallById(id, paginationQueryDto);
   }
 
   @Post(':wallId/generate-link')
@@ -92,6 +99,18 @@ export class WallController {
   @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
   async generateLink(@Param('wallId') wallId: number, @User() user) {
     return await this.wallService.generateLinks(wallId, user);
+  }
+
+  @Post(':wallId/regenerate-link')
+  @CommonApiDecorators({
+    summary: 'Generate a shareable link for a Wall',
+    successDescription: 'Shareable link generated',
+    errorStatus: 404,
+    errorDescription: 'Wall not found',
+  })
+  @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
+  async reGenerateLink(@Param('wallId') wallId: number, @User() user) {
+    return await this.wallService.reGenerateLinks(wallId, user);
   }
 
   @Get(':wallId/link/:uuid')

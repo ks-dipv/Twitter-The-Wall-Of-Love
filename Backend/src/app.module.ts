@@ -1,4 +1,4 @@
-import { Module, MiddlewareConsumer } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -15,6 +15,7 @@ import jwtConfig from './auth/config/jwt.config';
 import { JwtModule } from '@nestjs/jwt';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from './auth/auth.module';
+import { PaginationModule } from './pagination/pagination.module';
 const ENV = process.env.NODE_ENV;
 
 @Module({
@@ -45,6 +46,7 @@ const ENV = process.env.NODE_ENV;
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
     AuthModule,
+    PaginationModule,
   ],
   controllers: [AppController],
   providers: [
@@ -56,6 +58,4 @@ const ENV = process.env.NODE_ENV;
     AccessTokenGuard,
   ],
 })
-export class AppModule {
-
-}
+export class AppModule {}

@@ -12,6 +12,7 @@ import { WallVisibility } from '../enum/wall-visibility.enum';
 import { SocialLink } from './social-links.entity';
 import { Tweets } from './tweets.entity';
 import { Exclude } from 'class-transformer';
+import { TweetHandleQueue } from './tweet-handle-queue.entity';
 
 @Entity()
 export class Wall {
@@ -23,6 +24,9 @@ export class Wall {
 
   @Column({ type: 'varchar', nullable: true })
   logo?: string;
+
+  @Column({ type: 'int', nullable: true })
+  views: number;
 
   @Column({ type: 'varchar', length: 250, nullable: true })
   description?: string;
@@ -52,6 +56,12 @@ export class Wall {
     eager: true,
   })
   social_links: SocialLink[];
+
+  @OneToMany(
+    () => TweetHandleQueue,
+    (tweetHandleQueue) => tweetHandleQueue.wall,
+  )
+  handleQueue: TweetHandleQueue[];
 
   @OneToMany(() => Tweets, (tweet) => tweet.wall)
   tweets: Tweets[];

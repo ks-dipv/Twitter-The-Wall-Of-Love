@@ -6,7 +6,6 @@ import {
   Param,
   Body,
   Delete,
-  Request,
   Query,
 } from '@nestjs/common';
 import { TweetService } from './service/tweet.service';
@@ -15,6 +14,7 @@ import { User } from '../common/decorator/user.decorater';
 import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
 import { Auth } from 'src/common/decorator/auth.decorator';
 import { AuthType } from 'src/common/enum/auth-type.enum';
+import { PaginationQueryDto } from 'src/pagination/dtos/pagination-query.dto';
 
 @ApiTags('Tweets')
 @Controller('api/walls')
@@ -47,6 +47,36 @@ export class TweetController {
     return await this.tweetService.addTweetToWall(tweetUrl, wallId, user);
   }
 
+  @Post(':wallId/tweets/user')
+  @CommonApiDecorators({
+    summary: 'Add a tweet to a wall',
+    successStatus: 201,
+    successDescription: 'Tweet added successfully',
+  })
+  @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        tweetUrl: {
+          type: 'string',
+          example: 'https://x.com/SpiderVerse',
+        },
+      },
+    },
+  })
+  async addTweetByXHandle(
+    @Param('wallId') wallId: number,
+    @Body('xHandle') xHandle: string,
+    @User() user,
+  ) {
+    return await this.tweetService.addTweetToWallByXHandle(
+      xHandle,
+      wallId,
+      user,
+    );
+  }
+
   @Get(':wallId/tweets')
   @CommonApiDecorators({
     summary: 'Get all tweets for a specific wall',
@@ -55,8 +85,16 @@ export class TweetController {
     errorDescription: 'Wall not found',
   })
   @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
-  async getAllTweetsByWall(@Param('wallId') wallId: number, @User() user) {
-    return await this.tweetService.getAllTweetsByWall(wallId, user);
+  async getAllTweetsByWall(
+    @Param('wallId') wallId: number,
+    @Query() paginationQueryDto: PaginationQueryDto,
+    @User() user,
+  ) {
+    return await this.tweetService.getAllTweetsByWall(
+      wallId,
+      paginationQueryDto,
+      user,
+    );
   }
 
   @Delete(':wallId/tweets/:tweetId')
@@ -71,9 +109,9 @@ export class TweetController {
   async deleteTweetByWall(
     @Param('tweetId') tweetId: number,
     @Param('wallId') wallId: number,
-    @Request() req: Request,
+    @User() user,
   ) {
-    return await this.tweetService.deleteTweetByWall(tweetId, wallId, req);
+    return await this.tweetService.deleteTweetByWall(tweetId, wallId, user);
   }
 
   @Put(':wallId/tweets/reorder')
@@ -91,7 +129,6 @@ export class TweetController {
           items: { type: 'number' },
           example: [3, 1, 2],
         },
-        randomize: { type: 'boolean', example: true },
       },
     },
   })
@@ -144,13 +181,45 @@ export class TweetController {
   @Auth(AuthType.None)
   async getTweetsByDate(
     @Param('wallId') wallId: number,
+    @Query() paginationQueryDto: PaginationQueryDto,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ) {
     return await this.tweetService.filterTweetsByDate(
       wallId,
+      paginationQueryDto,
       startDate,
       endDate,
+    );
+  }
+
+  @Post(':wallId/tweets/hashtag')
+  @CommonApiDecorators({
+    summary: 'Add tweets based on hashtag to a wall',
+    successStatus: 201,
+    successDescription: 'Tweets added successfully',
+  })
+  @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        hashtag: {
+          type: 'string',
+          example: 'News',
+        },
+      },
+    },
+  })
+  async addTweetsByHashtag(
+    @Param('wallId') wallId: number,
+    @Body('hashtag') hashtag: string,
+    @User() user,
+  ) {
+    return await this.tweetService.addTweetsByHashtagToWall(
+      hashtag,
+      wallId,
+      user,
     );
   }
 }

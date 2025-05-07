@@ -1,6 +1,6 @@
 import { Repository, DataSource } from 'typeorm';
-import { Injectable } from '@nestjs/common';
 import { Tweets } from '../entity/tweets.entity';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class TweetRepository extends Repository<Tweets> {
@@ -15,8 +15,11 @@ export class TweetRepository extends Repository<Tweets> {
     });
   }
 
-  async getTweetByIdAndWall(tweetId: number, wallId: number): Promise<Tweets> {
-    return await this.findOne({
+  async getTweetByIdAndWall(
+    tweetId: number,
+    wallId: number,
+  ): Promise<Tweets | null> {
+    return this.findOne({
       where: { id: tweetId, wall: { id: wallId } },
     });
   }

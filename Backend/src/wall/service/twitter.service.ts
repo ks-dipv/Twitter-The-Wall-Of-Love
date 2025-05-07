@@ -72,4 +72,62 @@ export class TwitterService {
       throw new InternalServerErrorException('Failed to fetch tweet details');
     }
   }
+  async fetchTweetsByHashtag(
+    hashtag: string,
+    maxResults: number = 10,
+  ): Promise<any[]> {
+    if (!hashtag || typeof hashtag !== 'string') {
+      throw new BadRequestException('Invalid hashtag provided');
+    }
+
+    const token = this.config.get<string>('TWITTER_BEARER_TOKEN');
+    if (!token) {
+      throw new InternalServerErrorException(
+        'Twitter API token is not configured',
+      );
+    }
+
+    try {
+      const response = await axios.get(
+        `https://api.twitter.com/2/tweets/search/recent`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            query: `#${hashtag}`,
+            max_results: maxResults,
+            'tweet.fields': 'text,created_at,public_metrics',
+            expansions: 'author_id',
+            'user.fields': 'name,profile_image_url,username',
+          },
+        },
+      );
+
+      if (!response.data?.data) {
+        throw new BadRequestException('No tweets found for the given hashtag');
+      }
+
+      const tweets = response.data.data;
+      const users = response.data.includes?.users || [];
+
+      // Combine tweet data with author data
+      return tweets.map((tweet) => {
+        const user = users.find((user) => user.id === tweet.author_id);
+        return {
+          tweet_url: `https://twitter.com/${user.username}/status/${tweet.id}`,
+          content: tweet.text,
+          author_name: user.name,
+          author_profile_pic: user.profile_image_url,
+          author_profile_link: `https://twitter.com/${user.username}`,
+          likes: tweet.public_metrics?.like_count || 0,
+          comments: tweet.public_metrics?.reply_count || 0,
+        };
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to fetch tweets by hashtag',
+      );
+    }
+  }
 }

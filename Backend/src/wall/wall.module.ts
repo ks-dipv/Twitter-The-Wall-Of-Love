@@ -13,8 +13,15 @@ import { TweetRepository } from './repository/tweet.repository';
 import { UserModule } from '../user/user.module';
 import { UserRepository } from '../user/repositories/user.repository';
 import { UploadService } from '../common/services/upload.service';
+import { XUserHandleService } from './service/x-user-handle.service';
+import { TweetHandleQueue } from './entity/tweet-handle-queue.entity';
+import { PaginationModule } from 'src/pagination/pagination.module';
 @Module({
-  imports: [TypeOrmModule.forFeature([Wall, SocialLink, Tweets]), UserModule],
+  imports: [
+    TypeOrmModule.forFeature([Wall, SocialLink, Tweets, TweetHandleQueue]),
+    UserModule,
+    PaginationModule,
+  ],
   controllers: [WallController, TweetController],
   providers: [
     WallService,
@@ -24,6 +31,7 @@ import { UploadService } from '../common/services/upload.service';
     TweetService,
     TwitterService,
     TweetRepository,
+    XUserHandleService,
   ],
   exports: [WallRepository, TweetRepository],
 })

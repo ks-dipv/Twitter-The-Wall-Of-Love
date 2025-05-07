@@ -20,12 +20,19 @@ import { v4 as uuidv4 } from 'uuid';
 import { User } from 'src/common/decorator/user.decorater';
 
 import { ConfigService } from '@nestjs/config';
+import { PaginationQueryDto } from 'src/pagination/dtos/pagination-query.dto';
+import { PaginationService } from 'src/pagination/services/pagination.service';
+import { Paginated } from 'src/pagination/interfaces/paginated.interface';
+import { Tweets } from '../entity/tweets.entity';
+import { TweetRepository } from '../repository/tweet.repository';
 @Injectable()
 export class WallService {
   constructor(
     private readonly wallRepository: WallRepository,
     private readonly userRepository: UserRepository,
     private readonly uploadService: UploadService,
+    private readonly paginationService: PaginationService,
+    private readonly tweetRepository: TweetRepository,
 
     @InjectRepository(SocialLink)
     private readonly socialLinkRepository: Repository<SocialLink>,
@@ -70,7 +77,53 @@ export class WallService {
           ? wall.private_uuid
           : wall.public_uuid;
       const shareable_link = `${baseUrl}/walls/${wallId}/link/${uuid}`;
-      const embed_link = `<iframe src="${shareable_link}" width="600" height="400"></iframe>`;
+      const e_link = `${baseUrl}/walls/${wallId}/link/${uuid}?embed=true`;
+      const embed_link = `<iframe src="${e_link}" width="600" height="400"></iframe>`;
+
+      return {
+        shareable_link,
+        embed_link,
+      };
+    } catch (error) {
+      throw new BadRequestException(
+        error.message || 'Failed to generate links',
+      );
+    }
+  }
+
+  // ReGenerate links
+  public async reGenerateLinks(wallId: number, user) {
+    try {
+      const existingUser = await this.userRepository.getByEmail(user.email);
+      if (!existingUser) {
+        throw new NotFoundException('User not found');
+      }
+
+      const wall = await this.wallRepository.getWallByIdAndUser(
+        wallId,
+        existingUser.id,
+      );
+      if (!wall || wall.user.id !== existingUser.id) {
+        throw new NotFoundException('Wall not found or access denied');
+      }
+
+      wall.public_uuid = uuidv4();
+
+      wall.private_uuid = uuidv4();
+
+      // Save the wall with updated UUIDs
+      await this.wallRepository.save(wall);
+
+      const baseUrl = this.configService.get('appConfig.baseUrl');
+
+      // Generate shareable link based on visibility
+      const uuid =
+        wall.visibility === WallVisibility.PRIVATE
+          ? wall.private_uuid
+          : wall.public_uuid;
+      const shareable_link = `${baseUrl}/walls/${wallId}/link/${uuid}`;
+      const e_link = `${baseUrl}/walls/${wallId}/link/${uuid}?embed=true`;
+      const embed_link = `<iframe src="${e_link}" width="600" height="400"></iframe>`;
 
       return {
         shareable_link,
@@ -180,16 +233,24 @@ export class WallService {
     }
   }
 
-  async getAllWalls(user): Promise<Wall[]> {
+  async getAllWalls(
+    user,
+    paginationQueryDto: PaginationQueryDto,
+  ): Promise<Paginated<Wall>> {
     try {
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) {
         throw new NotFoundException("User doesn't exist");
       }
 
-      return await this.wallRepository.find({
-        where: { user: { id: existingUser.id } },
-      });
+      return await this.paginationService.paginateQuery(
+        {
+          limit: paginationQueryDto.limit,
+          page: paginationQueryDto.page,
+        },
+        this.wallRepository,
+        { user: { id: existingUser.id } },
+      );
     } catch (error) {
       throw new BadRequestException(error.message || 'Failed to fetch walls');
     }
@@ -215,24 +276,54 @@ export class WallService {
     }
   }
 
-  async getPublicWallById(id: number): Promise<Wall> {
+  async getPublicWallById(
+    id: number,
+    paginationQueryDto: PaginationQueryDto,
+  ): Promise<{ wall: Partial<Wall>; paginatedTweets: Paginated<Tweets> }> {
     try {
       const wall = await this.wallRepository.findOne({
-        where: { id: id },
-        relations: ['tweets', 'social_links'],
+        where: { id },
+        relations: ['social_links'],
       });
 
       if (!wall) {
-        throw new NotFoundException('wall not found');
+        throw new NotFoundException('Wall not found');
       }
 
-      return wall;
+      if (wall.visibility !== WallVisibility.PUBLIC) {
+        throw new NotFoundException('Wall not found or not public');
+      }
+
+      // Increment view count
+      wall.views = (wall.views || 0) + 1;
+      await this.wallRepository.save(wall);
+
+      // Get paginated tweets
+      const paginatedTweets = await this.paginationService.paginateQuery(
+        {
+          limit: paginationQueryDto.limit || 12,
+          page: paginationQueryDto.page || 1,
+        },
+        this.tweetRepository,
+        { wall: { id: wall.id } },
+      );
+
+      return {
+        wall: {
+          id: wall.id,
+          title: wall.title,
+          description: wall.description,
+          visibility: wall.visibility,
+          views: wall.views,
+          social_links: wall.social_links,
+        },
+        paginatedTweets,
+      };
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
-
-      throw new BadRequestException('Failed to fetch wall');
+      throw new BadRequestException(error.message || 'Failed to fetch wall');
     }
   }
 
@@ -260,6 +351,10 @@ export class WallService {
           'Invalid link or insufficient permissions',
         );
       }
+
+      // Count views for both public and private walls accessed by valid link
+      wall.views = (wall.views || 0) + 1;
+      await this.wallRepository.save(wall);
 
       return wall;
     } catch (error) {

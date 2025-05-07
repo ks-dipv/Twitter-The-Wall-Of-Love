@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
@@ -6,10 +6,19 @@ import { loginWithGoogle } from "../services/api";
 import { GoogleLogin } from "@react-oauth/google";
 
 const SignIn = () => {
-  const { login } = useAuth();
+  const { user, login } = useAuth();
   const navigate = useNavigate();
   const [credentials, setCredentials] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      navigate("/admin/dashboard");
+    } else {
+      setIsLoading(false);
+    }
+  }, [user, navigate]);
 
   const handleChange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
@@ -41,6 +50,14 @@ const SignIn = () => {
       toast.error("Google login failed, try again.");
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div

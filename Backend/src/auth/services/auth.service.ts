@@ -11,7 +11,6 @@ import { UserRepository } from 'src/user/repositories/user.repository';
 import { HashingProvider } from 'src/auth/services/hashing.provider';
 import { MailService } from 'src/auth/services/mail.service';
 import { SignInDto } from '../dtos/signin.dto';
-import { User } from 'src/user/entity/user.entity';
 import { SignUpDto } from '../dtos/signup.dto';
 import { GenerateTokenProvider } from 'src/common/services/generate-token.provider';
 
@@ -112,19 +111,25 @@ export class AuthService {
     }
   }
 
-  public async verifyEmail(token: string): Promise<User> {
-    const user = await this.userRepository.findOne({
-      where: { email_verification_token: token },
-    });
-    if (!user) {
-      throw new BadRequestException('Invalid or expired verification token');
+  public async verifyEmail(token: string): Promise<void> {
+    try {
+      const user = await this.userRepository.findOne({
+        where: {
+          email_verification_token: token,
+        },
+      });
+
+      if (!user) {
+        throw new BadRequestException('Email has already been verified');
+      }
+
+      user.is_email_verified = true;
+      user.email_verification_token = null;
+      await this.userRepository.save(user);
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException('Token is invalid or Expire');
     }
-
-    user.is_email_verified = true;
-    user.email_verification_token = null;
-    await this.userRepository.save(user);
-
-    return user;
   }
 
   public async signIn(signInDto: SignInDto, res): Promise<object> {
@@ -195,7 +200,11 @@ export class AuthService {
   public async resetPassword(token: string, password: string): Promise<void> {
     try {
       const user = await this.userRepository.getResetPasswordToken(token);
-      if (!user) throw new NotFoundException('Invalid or expired token');
+
+      // Check if token exists on the user
+      if (!user.reset_password_token) {
+        throw new NotFoundException('This reset link has already been used');
+      }
 
       user.password = await this.hashingProvider.hashPassword(password);
       user.reset_password_token = null;
@@ -205,6 +214,22 @@ export class AuthService {
       console.log(error);
       if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException('Failed to reset password');
+    }
+  }
+
+  public async verifyResetToken(token: string): Promise<void> {
+    try {
+      const user = await this.userRepository.getResetPasswordToken(token);
+      if (!user) throw new NotFoundException('Invalid or expired token');
+
+      // Check if token still exists on the user record
+      if (!user.reset_password_token) {
+        throw new NotFoundException('This reset link has already been used');
+      }
+    } catch (error) {
+      console.log(error);
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Failed to verify token');
     }
   }
 }

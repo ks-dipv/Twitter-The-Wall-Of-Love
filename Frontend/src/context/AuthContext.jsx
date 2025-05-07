@@ -6,7 +6,7 @@ import Cookies from "js-cookie";
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState();
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
         sameSite: "Strict",
       });
       setUser(response.data);
-      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("user", JSON.stringify(response.data)); // Store response.data instead of userData
     } catch (error) {
       console.error("Login failed:", error.response?.data?.message);
       throw error;
@@ -51,10 +51,16 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await logoutUser();
+      // Clear everything
       setUser(null);
       localStorage.removeItem("user");
+      Cookies.remove("access_token"); // Also remove the token cookie
     } catch (error) {
       console.error("Logout failed:", error);
+      // Even if the API call fails, we should clear local state
+      setUser(null);
+      localStorage.removeItem("user");
+      Cookies.remove("access_token");
     }
   };
 
