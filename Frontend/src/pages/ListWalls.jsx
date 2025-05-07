@@ -18,7 +18,7 @@ const ListWalls = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showShareModal, setShowShareModal] = useState(false);
   const [wallToShare, setWallToShare] = useState(null);
-  
+
   // Pagination state
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -30,8 +30,8 @@ const ListWalls = () => {
       last: "",
       next: "",
       previous: "",
-      current: ""
-    }
+      current: "",
+    },
   });
 
   const navigate = useNavigate();
@@ -41,24 +41,24 @@ const ListWalls = () => {
     // Get current page from URL query parameters if available
     const queryParams = new URLSearchParams(location.search);
     const page = parseInt(queryParams.get("page")) || 1;
-    const limit = parseInt(queryParams.get("limit")) || 12;
-    
+    const limit = 12;
+
     const fetchWalls = async () => {
       try {
         setLoading(true);
         const response = await getAllWalls(page, limit);
-        
+
         if (!response || !response.data) {
           throw new Error("Invalid API response");
         }
-        
+
         setWalls(response.data.data);
         setPagination({
           currentPage: response.data.meta.currentPage,
           totalPages: response.data.meta.totalPages,
           itemsPerPage: response.data.meta.itemsPerPage,
           totalItems: response.data.meta.totalItems,
-          links: response.data.links
+          links: response.data.links,
         });
       } catch (err) {
         console.error("API Error:", err);
@@ -68,7 +68,7 @@ const ListWalls = () => {
         setLoading(false);
       }
     };
-    
+
     fetchWalls();
   }, [location.search]);
 
@@ -76,22 +76,22 @@ const ListWalls = () => {
     setWallToDelete({ id, title });
     setShowDeleteDialog(true);
   };
-  
+
   const closeDeleteDialog = () => {
     setShowDeleteDialog(false);
     setWallToDelete(null);
   };
-  
+
   const openShareModal = (wall) => {
     setWallToShare(wall);
     setShowShareModal(true);
   };
-  
+
   const closeShareModal = () => {
     setWallToShare(null);
     setShowShareModal(false);
   };
-  
+
   const handleDelete = async () => {
     if (!wallToDelete) return;
     try {
@@ -110,9 +110,14 @@ const ListWalls = () => {
 
   // Navigate to a specific page
   const goToPage = (page) => {
-    if (page < 1 || page > pagination.totalPages || page === pagination.currentPage) return;
-    navigate(`?limit=${pagination.itemsPerPage}&page=${page}`);
-    
+    if (
+      page < 1 ||
+      page > pagination.totalPages ||
+      page === pagination.currentPage
+    )
+      return;
+    navigate(`?page=${page}`);
+
     // Scroll to top when page changes
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -129,7 +134,7 @@ const ListWalls = () => {
           !wall.title.toLowerCase().includes(searchQuery.toLowerCase())
       )
     );
-    
+
   if (loading) return <div className="text-center mt-10">Loading walls...</div>;
   if (error)
     return <div className="text-center text-red-500 mt-10">{error}</div>;
@@ -139,8 +144,14 @@ const ListWalls = () => {
     const pageNumbers = [];
     const maxVisiblePages = 5;
 
-    let startPage = Math.max(1, pagination.currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(pagination.totalPages, startPage + maxVisiblePages - 1);
+    let startPage = Math.max(
+      1,
+      pagination.currentPage - Math.floor(maxVisiblePages / 2)
+    );
+    let endPage = Math.min(
+      pagination.totalPages,
+      startPage + maxVisiblePages - 1
+    );
 
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
@@ -218,7 +229,7 @@ const ListWalls = () => {
       </div>
     );
   };
-    
+
   return (
     <div className="min-h-screen">
       <ToastContainer autoClose={2000} hideProgressBar />
@@ -334,17 +345,17 @@ const ListWalls = () => {
             </motion.button>
           </div>
         )}
-        
+
         {/* Pagination Component */}
         {renderPagination()}
       </div>
-      
+
       <ShareWallModal
         wallId={wallToShare?.id}
         isOpen={showShareModal}
         onClose={closeShareModal}
       />
-      
+
       {/* Delete Confirmation Dialog */}
       <ConfirmationDialog
         isOpen={showDeleteDialog}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import {
   getWallById,
   getTweetsByWall,
@@ -27,27 +27,41 @@ const WallPage = () => {
   const [endDate, setEndDate] = useState("");
   const [layout, setLayout] = useState("default");
   const [isDateFiltered, setIsDateFiltered] = useState(false);
-
+  const [searchParams, setSearchParams] = useSearchParams();
   // Pagination states
-  const [currentPage, setCurrentPage] = useState(1);
+  const pageFromUrl = parseInt(searchParams.get("page")) || 1;
+  const [currentPage, setCurrentPage] = useState(pageFromUrl);
   const [totalPages, setTotalPages] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
   const [totalItems, setTotalItems] = useState(0);
+
 
   useEffect(() => {
     const fetchWallData = async () => {
       try {
         const wallResponse = await getWallById(id);
         setWall(wallResponse.data);
-        fetchTweets();
+        fetchTweets(pageFromUrl); // fetch tweets for the page from URL
       } catch (error) {
         console.error("Error fetching wall:", error);
         setLoading(false);
       }
     };
-
+  
     fetchWallData();
-  }, [id]);
+  }, [id, pageFromUrl]);
+  
+
+  useEffect(() => {
+    const page = parseInt(searchParams.get("page")) || 1;
+    setCurrentPage(page);
+
+    if (isDateFiltered) {
+      handleFilter(page);
+    } else {
+      fetchTweets(page);
+    }
+  }, [searchParams]);
 
   const fetchTweets = async (page = 1, limit = itemsPerPage) => {
     setLoading(true);
@@ -199,6 +213,7 @@ const WallPage = () => {
   const handlePageChange = (newPage) => {
     if (newPage < 1 || newPage > totalPages || newPage === currentPage) return;
 
+    setSearchParams({ page: newPage });
     setCurrentPage(newPage);
 
     if (isDateFiltered) {
@@ -207,7 +222,6 @@ const WallPage = () => {
       fetchTweets(newPage);
     }
 
-    // Scroll to top when page changes
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
