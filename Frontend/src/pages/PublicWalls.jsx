@@ -3,11 +3,13 @@ import { Link as RouterLink } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { getPublicWalls } from "../services/api";
 import { FaTwitter, FaFacebookF, FaYoutube, FaInstagram } from "react-icons/fa";
+import { useAuth } from "../context/AuthContext";
 
 const PublicWalls = () => {
   const [walls, setWalls] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchWalls = async () => {
@@ -92,21 +94,35 @@ const PublicWalls = () => {
           </RouterLink>
         </div>
 
-        <div className="space-x-4">
-          <RouterLink
-            to="/signin"
-            className="px-6 py-2 text-white text-lg font-semibold rounded-lg bg-gray-700 hover:bg-[#D1D5DB] transition-all"
-          >
-            Sign In
-          </RouterLink>
-
-          <RouterLink
-            to="/signup"
-            className="px-6 py-2 text-white text-lg font-semibold rounded-lg bg-gray-700 hover:bg-[#D1D5DB] transition-all"
-          >
-            Sign Up
-          </RouterLink>
-        </div>
+        {/* Sign In/Sign Up - Desktop */}
+        {user ? (
+          <div className="hidden sm:flex space-x-4">
+            <RouterLink
+              to="/admin/dashboard"
+              className="relative px-6 py-2 text-white text-lg font-semibold rounded-lg overflow-hidden bg-[#334155] shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl"
+            >
+              Dashboard
+              <span className="absolute inset-0 bg-blue-600 opacity-0 transition-opacity duration-300 hover:opacity-20"></span>
+            </RouterLink>
+          </div>
+        ) : (
+          <div className="hidden sm:flex space-x-4">
+            <RouterLink
+              to="/signin"
+              className="relative px-6 py-2 text-white text-lg font-semibold rounded-lg overflow-hidden bg-[#334155] shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl"
+            >
+              Sign In
+              <span className="absolute inset-0 bg-blue-600 opacity-0 transition-opacity duration-300 hover:opacity-20"></span>
+            </RouterLink>
+            <RouterLink
+              to="/signup"
+              className="relative px-6 py-2 text-white text-lg font-semibold rounded-lg overflow-hidden bg-[#334155] shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl"
+            >
+              Sign Up
+              <span className="absolute inset-0 bg-green-600 opacity-0 transition-opacity duration-300 hover:opacity-20"></span>
+            </RouterLink>
+          </div>
+        )}
       </nav>
 
       {/* Public Walls Content */}
@@ -136,21 +152,13 @@ const PublicWalls = () => {
                     src={wall.logo}
                     alt={wall.title}
                     className="w-full h-24 sm:h-32 object-cover rounded-md mb-3"
-                    onClick={() => 
-                      navigate( 
-                        `/walls/${wall.id}/public`
-                      )
-                    }
+                    onClick={() => navigate(`/walls/${wall.id}/public`)}
                   />
                 )}
 
                 <h2
                   className="text-xl font-semibold mb-2"
-                  onClick={() => 
-                    navigate(
-                      `/walls/${wall.id}/public`
-                    )
-                  }
+                  onClick={() => navigate(`/walls/${wall.id}/public`)}
                 >
                   {wall.title}
                 </h2>
@@ -216,7 +224,6 @@ const PublicWalls = () => {
                     <span>{wall.views || 0}</span>
                   </p>
                 </div>
-                
               </div>
             ))}
           </div>
