@@ -17,7 +17,7 @@ const PublicShareableWallPage = () => {
   const [layout, setLayout] = useState("default");
   const [loading, setLoading] = useState(true);
   const [isDateFiltered, setIsDateFiltered] = useState(false);
-  
+
   // Pagination states
   const [searchParams, setSearchParams] = useSearchParams();
   const pageFromUrl = parseInt(searchParams.get("page")) || 1;
@@ -32,7 +32,7 @@ const PublicShareableWallPage = () => {
       const wallResponse = await getPublicWallsById(wallId, page, itemsPerPage);
       setWall(wallResponse.data.wall);
       setTweets(wallResponse.data.paginatedTweets.data || []);
-      
+
       // Set pagination metadata
       setCurrentPage(wallResponse.data.paginatedTweets.meta.currentPage);
       setTotalPages(wallResponse.data.paginatedTweets.meta.totalPages);
@@ -42,7 +42,6 @@ const PublicShareableWallPage = () => {
     } catch (error) {
       console.error("Error fetching wall:", error);
       toast.error("Failed to fetch wall data");
-
     } finally {
       setLoading(false);
     }
@@ -72,14 +71,14 @@ const PublicShareableWallPage = () => {
     setLoading(true);
     try {
       const response = await getFilteredTweetsByWall(
-        wallId, 
-        startDate, 
+        wallId,
+        startDate,
         endDate,
         page,
         itemsPerPage
       );
       setTweets(response.data.data);
-      
+
       // Update pagination metadata for filtered results
       setCurrentPage(response.data.meta.currentPage);
       setTotalPages(response.data.meta.totalPages);
@@ -258,7 +257,6 @@ const PublicShareableWallPage = () => {
           <button
             onClick={() => handleFilter(1)}
             className="p-2 bg-[#334155] text-white rounded transition-all duration-300 hover:bg-[#94A3B8]"
-
           >
             <Search size={20} />
           </button>
