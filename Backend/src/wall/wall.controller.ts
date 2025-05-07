@@ -82,8 +82,11 @@ export class WallController {
   })
   @ApiParam({ name: 'id', description: 'ID of the Wall', type: Number })
   @Auth(AuthType.None)
-  async getPublicWallById(@Param('id') id: number) {
-    return await this.wallService.getPublicWallById(id);
+  async getPublicWallById(
+    @Param('id') id: number,
+    @Query() paginationQueryDto: PaginationQueryDto,
+  ) {
+    return await this.wallService.getPublicWallById(id, paginationQueryDto);
   }
 
   @Post(':wallId/generate-link')

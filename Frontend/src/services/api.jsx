@@ -70,8 +70,13 @@ export const getWallById = async (wallId) => {
   return api.get(`/walls/${wallId}`);
 };
 
-export const getPublicWallsById = async (wallId) => {
-  return api.get(`/walls/${wallId}/public`);
+export const getPublicWallsById = async (id, page = 1, limit = 12) => {
+  return await api.get(`/walls/${id}/public`, {
+    params: {
+      page,
+      limit,
+    },
+  });
 };
 
 export const addWalls = async (data) => {
