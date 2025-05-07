@@ -20,12 +20,16 @@ import { v4 as uuidv4 } from 'uuid';
 import { User } from 'src/common/decorator/user.decorater';
 
 import { ConfigService } from '@nestjs/config';
+import { PaginationQueryDto } from 'src/pagination/dtos/pagination-query.dto';
+import { PaginationService } from 'src/pagination/services/pagination.service';
+import { Paginated } from 'src/pagination/interfaces/paginated.interface';
 @Injectable()
 export class WallService {
   constructor(
     private readonly wallRepository: WallRepository,
     private readonly userRepository: UserRepository,
     private readonly uploadService: UploadService,
+    private readonly paginationService: PaginationService,
 
     @InjectRepository(SocialLink)
     private readonly socialLinkRepository: Repository<SocialLink>,
@@ -226,16 +230,24 @@ export class WallService {
     }
   }
 
-  async getAllWalls(user): Promise<Wall[]> {
+  async getAllWalls(
+    user,
+    paginationQueryDto: PaginationQueryDto,
+  ): Promise<Paginated<Wall>> {
     try {
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) {
         throw new NotFoundException("User doesn't exist");
       }
 
-      return await this.wallRepository.find({
-        where: { user: { id: existingUser.id } },
-      });
+      return await this.paginationService.paginateQuery(
+        {
+          limit: paginationQueryDto.limit,
+          page: paginationQueryDto.page,
+        },
+        this.wallRepository,
+        { user: { id: existingUser.id } },
+      );
     } catch (error) {
       throw new BadRequestException(error.message || 'Failed to fetch walls');
     }

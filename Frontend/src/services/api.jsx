@@ -59,8 +59,10 @@ export const verifyResetToken = async (token) => {
   return await api.get(`/auth/verify-reset-token/${token}`);
 };
 
-export const getAllWalls = async () => {
-  return api.get("/walls");
+export const getAllWalls = async (page = 1, limit = 12) => {
+  return api.get("/walls", {
+    params: { page, limit },
+  });
 };
 
 // Fetch Wall by ID
