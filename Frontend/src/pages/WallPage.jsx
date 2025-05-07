@@ -386,6 +386,8 @@ const WallPage = () => {
               <RefreshCcw size={20} />
             </button>
           </div>
+
+          {/**tweets layout */}
           <div className="flex items-center gap-4">
             <select
               value={layout}

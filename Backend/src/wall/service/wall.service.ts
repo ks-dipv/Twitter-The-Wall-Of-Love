@@ -23,6 +23,8 @@ import { ConfigService } from '@nestjs/config';
 import { PaginationQueryDto } from 'src/pagination/dtos/pagination-query.dto';
 import { PaginationService } from 'src/pagination/services/pagination.service';
 import { Paginated } from 'src/pagination/interfaces/paginated.interface';
+import { Tweets } from '../entity/tweets.entity';
+import { TweetRepository } from '../repository/tweet.repository';
 @Injectable()
 export class WallService {
   constructor(
@@ -30,6 +32,7 @@ export class WallService {
     private readonly userRepository: UserRepository,
     private readonly uploadService: UploadService,
     private readonly paginationService: PaginationService,
+    private readonly tweetRepository: TweetRepository,
 
     @InjectRepository(SocialLink)
     private readonly socialLinkRepository: Repository<SocialLink>,
@@ -273,30 +276,54 @@ export class WallService {
     }
   }
 
-  async getPublicWallById(id: number): Promise<Wall> {
+  async getPublicWallById(
+    id: number,
+    paginationQueryDto: PaginationQueryDto,
+  ): Promise<{ wall: Partial<Wall>; paginatedTweets: Paginated<Tweets> }> {
     try {
       const wall = await this.wallRepository.findOne({
         where: { id },
-        relations: ['tweets', 'social_links'],
+        relations: ['social_links'],
       });
 
       if (!wall) {
         throw new NotFoundException('Wall not found');
       }
 
-      // Only count views for public walls
-      if (wall.visibility === WallVisibility.PUBLIC) {
-        wall.views = (wall.views || 0) + 1;
-        await this.wallRepository.save(wall);
+      if (wall.visibility !== WallVisibility.PUBLIC) {
+        throw new NotFoundException('Wall not found or not public');
       }
 
-      return wall;
+      // Increment view count
+      wall.views = (wall.views || 0) + 1;
+      await this.wallRepository.save(wall);
+
+      // Get paginated tweets
+      const paginatedTweets = await this.paginationService.paginateQuery(
+        {
+          limit: paginationQueryDto.limit || 12,
+          page: paginationQueryDto.page || 1,
+        },
+        this.tweetRepository,
+        { wall: { id: wall.id } },
+      );
+
+      return {
+        wall: {
+          id: wall.id,
+          title: wall.title,
+          description: wall.description,
+          visibility: wall.visibility,
+          views: wall.views,
+          social_links: wall.social_links,
+        },
+        paginatedTweets,
+      };
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
-
-      throw new BadRequestException('Failed to fetch wall');
+      throw new BadRequestException(error.message || 'Failed to fetch wall');
     }
   }
 
