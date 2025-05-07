@@ -59,8 +59,10 @@ export const verifyResetToken = async (token) => {
   return await api.get(`/auth/verify-reset-token/${token}`);
 };
 
-export const getAllWalls = async () => {
-  return api.get("/walls");
+export const getAllWalls = async (page = 1, limit = 12) => {
+  return api.get("/walls", {
+    params: { page, limit },
+  });
 };
 
 // Fetch Wall by ID
@@ -83,8 +85,10 @@ export const deleteWall = async (id) => {
 };
 
 // Fetch Tweets for a Wall
-export const getTweetsByWall = async (wallId) => {
-  return api.get(`/walls/${wallId}/tweets`);
+export const getTweetsByWall = async (wallId, page = 1, limit = 12) => {
+  return api.get(`/walls/${wallId}/tweets`, {
+    params: { page, limit },
+  });
 };
 
 export const deleteTweet = async (wallId, tweetId) => {
@@ -138,9 +142,15 @@ export const searchTweets = async (wallId, query) => {
   return api.get(`/walls/${wallId}/tweet?search=${query}`);
 };
 
-export const getFilteredTweetsByWall = async (wallId, startDate, endDate) => {
+export const getFilteredTweetsByWall = async (
+  wallId,
+  startDate,
+  endDate,
+  page = 1,
+  limit = 12
+) => {
   return api.get(`/walls/${wallId}/filter`, {
-    params: { startDate, endDate },
+    params: { startDate, endDate, page, limit },
   });
 };
 
@@ -151,7 +161,6 @@ export const getPublicWalls = async () => {
 // Add tweet based on hashtag
 export const addHashtagTweetsToWall = (wallId, hashtag) =>
   api.post(`/walls/${wallId}/tweets/hashtag`, { hashtag });
-
 
 export const addHandleTweetsToWall = (wallId, xHandle) => {
   return api.post(`/walls/${wallId}/tweets/user`, { xHandle });

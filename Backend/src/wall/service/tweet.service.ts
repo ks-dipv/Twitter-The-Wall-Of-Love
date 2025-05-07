@@ -14,7 +14,10 @@ import { Cron } from '@nestjs/schedule';
 import { XUserHandleService } from './x-user-handle.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TweetHandleQueue } from '../entity/tweet-handle-queue.entity';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
+import { PaginationQueryDto } from 'src/pagination/dtos/pagination-query.dto';
+import { PaginationService } from 'src/pagination/services/pagination.service';
+import { Paginated } from 'src/pagination/interfaces/paginated.interface';
 
 @Injectable()
 export class TweetService {
@@ -24,6 +27,7 @@ export class TweetService {
     private readonly twitterService: TwitterService,
     private readonly userRepository: UserRepository,
     private readonly xUserHandleService: XUserHandleService,
+    private readonly paginationService: PaginationService,
 
     @InjectRepository(TweetHandleQueue)
     private readonly tweetHandleQueueRepository: Repository<TweetHandleQueue>,
@@ -163,7 +167,11 @@ export class TweetService {
     }
   }
 
-  async getAllTweetsByWall(wallId: number, user): Promise<Tweets[]> {
+  async getAllTweetsByWall(
+    wallId: number,
+    paginationQueryDto: PaginationQueryDto,
+    user,
+  ): Promise<Paginated<Tweets>> {
     try {
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) throw new BadRequestException("User doesn't exist");
@@ -174,7 +182,15 @@ export class TweetService {
       );
       if (!wall) throw new NotFoundException('Wall not found or access denied');
 
-      return await this.tweetRepository.getTweetsByWall(wallId);
+      return await this.paginationService.paginateQuery(
+        {
+          limit: paginationQueryDto.limit,
+          page: paginationQueryDto.page,
+        },
+        this.tweetRepository,
+        { wall: { id: wallId } },
+        { order_index: 'ASC' },
+      );
     } catch (error) {
       if (
         error instanceof UnauthorizedException ||
@@ -186,6 +202,7 @@ export class TweetService {
       throw new InternalServerErrorException('Failed to fetch tweets');
     }
   }
+
   async deleteTweetByWall(tweetId: number, wallId: number, user) {
     try {
       const existingUser = await this.userRepository.getByEmail(user.email);
@@ -332,9 +349,10 @@ export class TweetService {
 
   async filterTweetsByDate(
     wallId: number,
+    paginationQueryDto: PaginationQueryDto,
     startDate?: string,
     endDate?: string,
-  ): Promise<Tweets[]> {
+  ): Promise<Paginated<Tweets>> {
     try {
       const start = startDate ? new Date(startDate) : new Date();
       let end = new Date();
@@ -343,10 +361,23 @@ export class TweetService {
         end.setHours(23, 59, 59, 999);
       }
 
-      return await this.tweetRepository.filterTweetsByDateRange(
-        wallId,
-        start,
-        end,
+      // Create pagination query DTO
+      const paginationQuery = new PaginationQueryDto();
+      paginationQuery.page = paginationQueryDto.page;
+      paginationQuery.limit = paginationQueryDto.limit;
+
+      // Define the where condition for date filtering
+      const whereCondition = {
+        wall: { id: wallId },
+        created_at: Between(start, end),
+      };
+
+      // Use the pagination service
+      return await this.paginationService.paginateQuery(
+        paginationQuery,
+        this.tweetRepository,
+        whereCondition,
+        { created_at: 'DESC' }, // Order by created_at in descending order
       );
     } catch (error) {
       console.log(error.message);

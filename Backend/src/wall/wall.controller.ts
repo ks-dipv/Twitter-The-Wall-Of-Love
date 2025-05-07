@@ -25,6 +25,7 @@ import { User } from 'src/common/decorator/user.decorater';
 import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
 import { AuthType } from 'src/common/enum/auth-type.enum';
 import { Auth } from 'src/common/decorator/auth.decorator';
+import { PaginationQueryDto } from 'src/pagination/dtos/pagination-query.dto';
 
 @ApiTags('Walls')
 @Controller('api/walls')
@@ -53,8 +54,11 @@ export class WallController {
     summary: 'Get all Walls for the logged-in user',
     successDescription: 'List of walls retrieved',
   })
-  async getAllWalls(@User() user) {
-    return await this.wallService.getAllWalls(user);
+  async getAllWalls(
+    @User() user,
+    @Query() paginationQueryDto: PaginationQueryDto,
+  ) {
+    return await this.wallService.getAllWalls(user, paginationQueryDto);
   }
 
   @Get(':id')
