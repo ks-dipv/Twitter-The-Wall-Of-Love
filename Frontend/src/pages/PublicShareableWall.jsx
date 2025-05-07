@@ -42,6 +42,7 @@ const PublicShareableWallPage = () => {
     } catch (error) {
       console.error("Error fetching wall:", error);
       toast.error("Failed to fetch wall data");
+
     } finally {
       setLoading(false);
     }
@@ -238,22 +239,26 @@ const PublicShareableWallPage = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search tweets..."
             className="px-4 py-2 border rounded-lg shadow-sm focus:ring-blue-400 focus:border-blue-400"
+            disabled={loading}
           />
           <input
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             className="px-2 py-2 border rounded-lg"
+            disabled={loading}
           />
           <input
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
             className="px-2 py-2 border rounded-lg"
+            disabled={loading}
           />
           <button
             onClick={() => handleFilter(1)}
             className="p-2 bg-[#334155] text-white rounded transition-all duration-300 hover:bg-[#94A3B8]"
+
           >
             <Search size={20} />
           </button>
@@ -267,13 +272,14 @@ const PublicShareableWallPage = () => {
             }}
             className="p-2 bg-[#334155] rounded hover:bg-[#94A3B8] text-white"
           >
-            <RefreshCcw size={20} />
+            <RefreshCcw size={20} className={loading ? "animate-spin" : ""} />
           </button>
           <select
             value={layout}
             onChange={(e) => setLayout(e.target.value)}
             className="px-4 py-2 border rounded-lg shadow-sm focus:ring-gray-400 focus:border-gray-400"
             aria-label="Select tweet layout"
+            disabled={loading}
           >
             <option value="default">Default</option>
             <option value="horizontal">Horizontal</option>
@@ -284,7 +290,9 @@ const PublicShareableWallPage = () => {
 
         {/* Tweets Section */}
         <div className="w-full mt-6">
-          {filteredTweets.length > 0 ? (
+          {loading ? (
+            <p className="text-center text-gray-500">Loading tweets...</p>
+          ) : filteredTweets.length > 0 ? (
             <TweetList tweets={filteredTweets} layout={layout} />
           ) : (
             <motion.div
