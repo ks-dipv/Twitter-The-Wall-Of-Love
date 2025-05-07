@@ -14,14 +14,16 @@ const PublicShareableWallPage = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [layout, setLayout] = useState("default");
 
   const handleWall = async () => {
-    try { 
+    try {
       const wallResponse = await getPublicWallsById(wallId);
       setWall(wallResponse.data);
       setTweets(wallResponse.data.tweets || []);
     } catch (error) {
       console.error("Error fetching wall:", error);
+     
     }
   };
 
@@ -36,11 +38,7 @@ const PublicShareableWallPage = () => {
     }
 
     try {
-      const response = await getFilteredTweetsByWall(
-        wallId,
-        startDate,
-        endDate
-      );
+      const response = await getFilteredTweetsByWall(wallId, startDate, endDate);
       setTweets(response.data);
     } catch (error) {
       console.error("Error filtering tweets:", error);
@@ -68,17 +66,26 @@ const PublicShareableWallPage = () => {
       </div>
 
       <main className="flex-grow flex flex-col items-center p-6">
-        <h1 className="text-4xl font-extrabold text-gray-900 md:text-5xl tracking-wide">
-          {wall.title}
-        </h1>
-
-        <p
-          className="text-lg mt-4 max-w-2xl mx-auto text-gray-700 font-medium leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: wall.description }}
-        ></p>
+        <motion.div
+          className="text-center mb-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
+          <h1 className="text-4xl font-extrabold text-gray-900 md:text-5xl tracking-wide">
+            {wall.title}
+          </h1>
+          <motion.p
+            className="text-lg mt-4 max-w-2xl mx-auto text-gray-700 font-medium leading-relaxed"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.8, ease: "easeOut" }}
+            dangerouslySetInnerHTML={{ __html: wall.description }}
+          ></motion.p>
+        </motion.div>
 
         {/* Search & Filter */}
-        <div className="flex justify-center items-center flex-grow space-x-2 mt-6">
+        <div className="flex justify-center items-center flex-wrap gap-2 mt-6">
           <input
             type="text"
             value={searchQuery}
@@ -99,23 +106,39 @@ const PublicShareableWallPage = () => {
             className="px-2 py-2 border rounded-lg"
           />
           <button
-              onClick={handleFilter}
-              className="p-2 bg-[#334155] text-white rounded transition-all duration-300 hover:bg-[#94A3B8]"
-            >
-              <Search size={20} />
-            </button>
-            <button
-              onClick={() => window.location.reload()}
-              className="p-2 bg-[#334155] rounded hover:bg-[#94A3B8] text-white"
-            >
-              <RefreshCcw size={20} />
-            </button>
+            onClick={handleFilter}
+            className="p-2 bg-[#334155] text-white rounded transition-all duration-300 hover:bg-[#94A3B8]"
+          >
+            <Search size={20} />
+          </button>
+          <button
+            onClick={() => {
+              setSearchQuery("");
+              setStartDate("");
+              setEndDate("");
+              handleWall();
+            }}
+            className="p-2 bg-[#334155] rounded hover:bg-[#94A3B8] text-white"
+          >
+            <RefreshCcw size={20} />
+          </button>
+          <select
+            value={layout}
+            onChange={(e) => setLayout(e.target.value)}
+            className="px-4 py-2 border rounded-lg shadow-sm focus:ring-gray-400 focus:border-gray-400"
+            aria-label="Select tweet layout"
+          >
+            <option value="default">Default</option>
+            <option value="horizontal">Horizontal</option>
+            <option value="vertical">Vertical</option>
+            <option value="odd-even">Odd-Even</option>
+          </select>
         </div>
 
         {/* Tweets Section */}
         <div className="w-full mt-6">
           {filteredTweets.length > 0 ? (
-            <TweetList tweets={filteredTweets} />
+            <TweetList tweets={filteredTweets} layout={layout} />
           ) : (
             <motion.div
               className="text-center py-12 bg-gray-50 rounded-lg shadow-inner"
