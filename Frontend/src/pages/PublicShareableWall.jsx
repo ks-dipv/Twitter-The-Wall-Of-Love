@@ -110,18 +110,7 @@ const PublicShareableWallPage = () => {
             className="p-2 bg-[#334155] text-white rounded transition-all duration-300 hover:bg-[#94A3B8]"
           >
             <Search size={20} />
-          </button>
-          <button
-            onClick={() => {
-              setSearchQuery("");
-              setStartDate("");
-              setEndDate("");
-              handleWall();
-            }}
-            className="p-2 bg-[#334155] rounded hover:bg-[#94A3B8] text-white"
-          >
-            <RefreshCcw size={20} />
-          </button>
+          </button>         
           <select
             value={layout}
             onChange={(e) => setLayout(e.target.value)}
