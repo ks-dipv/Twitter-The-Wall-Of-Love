@@ -1,4 +1,4 @@
-import { Entity } from 'typeorm';
+import { Entity, ManyToOne } from 'typeorm';
 import {
   Column,
   PrimaryGeneratedColumn,
@@ -6,8 +6,9 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Wall } from 'src/wall/entity/wall.entity';
-import { OneToMany } from 'typeorm';
+import { OneToMany, ManyToMany } from 'typeorm';
 import { Exclude } from 'class-transformer';
+import { Roles } from './roles.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -52,4 +53,7 @@ export class User {
 
   @OneToMany(() => Wall, (wall) => wall.user)
   walls: Wall[];
+
+  @ManyToOne(() => Roles, (role) => role.users)
+  roles: Roles;
 }

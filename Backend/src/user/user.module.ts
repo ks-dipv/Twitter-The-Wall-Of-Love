@@ -10,10 +10,13 @@ import jwtConfig from '../auth/config/jwt.config';
 
 import { UserRepository } from './repositories/user.repository';
 import { GenerateTokenProvider } from 'src/common/services/generate-token.provider';
+import { Permission } from './entity/permission.entity';
+import { Roles } from './entity/roles.entity';
+import { Rolespermission } from './entity/roles_permission.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Permission, Roles, Rolespermission]),
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
   ],
