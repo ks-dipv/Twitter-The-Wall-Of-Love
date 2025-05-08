@@ -3,5 +3,5 @@ export enum PermissionType {
   EditWall = 'edit_walls',
   AddTweet = 'add_tweet',
   DeleteWall = 'delete_wall',
-  DeleteTweet = 'delete_tweet'
+  DeleteTweet = 'delete_tweet',
 }
