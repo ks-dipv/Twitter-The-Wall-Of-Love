@@ -61,5 +61,6 @@ import { UserService } from 'src/user/services/user.service';
     MailService,
     GoogleAuthenticationService,
   ],
+  exports: [MailService],
 })
 export class AuthModule {}

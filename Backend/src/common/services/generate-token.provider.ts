@@ -93,4 +93,18 @@ export class GenerateTokenProvider {
 
     return varificationToken;
   }
+
+  public async generateInvitationToken(roleId, user: User) {
+    const varificationToken = await this.signToken<Partial<ActiveUserData>>(
+      user.id,
+      this.jwtConfiguration.resetPasswordTokenTtl,
+      this.jwtConfiguration.secret,
+      {
+        email: user.email,
+        role: roleId,
+      },
+    );
+
+    return varificationToken;
+  }
 }

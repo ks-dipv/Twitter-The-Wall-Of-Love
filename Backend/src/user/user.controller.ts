@@ -6,6 +6,7 @@ import {
   UploadedFile,
   Get,
   UseInterceptors,
+  Post,
 } from '@nestjs/common';
 import { UserService } from './services/user.service';
 import { AuthType } from '../common/enum/auth-type.enum';
@@ -17,6 +18,7 @@ import { UsePipes, ValidationPipe } from '@nestjs/common';
 import { SuccessDto } from 'src/common/dtos/success.dto';
 import { User } from 'src/common/decorator/user.decorator';
 import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
+import { AssignUserRoleDto } from './dtos/assign-user-role.dto';
 
 @ApiTags('Users')
 @Controller('api')
@@ -61,5 +63,22 @@ export class UserController {
   public remove(@User() user) {
     this.userService.remove(user);
     return new SuccessDto('User Deleted Successfully');
+  }
+
+  @Post('/role/assign/invitation')
+  @ApiBody({ type: AssignUserRoleDto })
+  @CommonApiDecorators({
+    summary: 'Send invitation mail to assign role',
+    successDescription: 'Successfully invitation mail to assign role',
+    errorStatus: 403,
+    errorDescription: 'User does not have admin access',
+  })
+  public invitationMail(
+    @Body() assignUserRoleDto: AssignUserRoleDto,
+    @User() user,
+  ) {
+    const { email, roleId } = assignUserRoleDto;
+    this.userService.sentInvitationLink(roleId, email, user);
+    return new SuccessDto('Successfuly invitation mail to assign role');
   }
 }

@@ -13,6 +13,7 @@ import { GenerateTokenProvider } from 'src/common/services/generate-token.provid
 import { Permission } from './entity/permission.entity';
 import { Roles } from './entity/roles.entity';
 import { Rolespermission } from './entity/roles_permission.entity';
+import { MailService } from 'src/auth/services/mail.service';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { Rolespermission } from './entity/roles_permission.entity';
     GenerateTokenProvider,
     UploadService,
     UserRepository,
+    MailService,
   ],
   exports: [UserService, UserRepository],
 })

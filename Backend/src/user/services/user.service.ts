@@ -13,6 +13,8 @@ import { UserRepository } from '../repositories/user.repository';
 import { User } from '../entity/user.entity';
 import { GenerateTokenProvider } from 'src/common/services/generate-token.provider';
 import { GoogleUser } from '../interfaces/google-user.interface';
+import { MailService } from 'src/auth/services/mail.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UserService {
@@ -20,6 +22,8 @@ export class UserService {
     private readonly userRepository: UserRepository,
     private readonly generateTokenProvider: GenerateTokenProvider,
     private readonly uploadService: UploadService,
+    private readonly mailService: MailService,
+    private readonly configService: ConfigService,
   ) {}
 
   public async createGoogleUser(googleUser: GoogleUser) {
@@ -116,6 +120,39 @@ export class UserService {
       )
         throw error;
       throw new InternalServerErrorException('Failed to delete user');
+    }
+  }
+
+  public async sentInvitationLink(roleId: number, email: string, user: User) {
+    try {
+      const existingUser = await this.userRepository.findOne({
+        where: { email: user.email },
+        relations: ['role'],
+      });
+
+      if (!existingUser || existingUser.role.id !== 1) {
+        throw new NotFoundException(
+          'User not found or user does not have admin access',
+        );
+      }
+
+      const token = await this.generateTokenProvider.generateInvitationToken(
+        roleId,
+        user,
+      );
+
+      const baseUrl = 'http://localhost:3000';
+      const invitationUrl = `${baseUrl}/invitation/${token}`;
+
+      await this.mailService.sendInvitationEmail(invitationUrl, email);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      } else {
+        throw new InternalServerErrorException(
+          'Failed to send invitation link',
+        );
+      }
     }
   }
 }
