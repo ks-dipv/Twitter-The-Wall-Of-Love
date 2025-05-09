@@ -56,4 +56,10 @@ export class User {
 
   @ManyToOne(() => Roles, (role) => role.users)
   roles: Roles;
+
+  @ManyToOne(() => User, (user) => user.assignedUsers, { nullable: true })
+  assignedBy?: User;
+
+  @OneToMany(() => User, (user) => user.assignedBy)
+  assignedUsers: User[];
 }
