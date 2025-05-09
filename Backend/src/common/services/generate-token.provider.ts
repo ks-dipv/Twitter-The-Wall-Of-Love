@@ -45,6 +45,7 @@ export class GenerateTokenProvider {
       this.jwtConfiguration.secret,
       {
         email: user.email,
+        role: user.role.id,
       },
     );
 
@@ -58,6 +59,7 @@ export class GenerateTokenProvider {
       this.jwtConfiguration.secret,
       {
         email: user.email,
+        role: user.role.id,
       },
     );
 
@@ -71,6 +73,7 @@ export class GenerateTokenProvider {
       this.jwtConfiguration.apiSecret,
       {
         email: user.email,
+        role: user.role.id,
       },
     );
 
@@ -84,6 +87,7 @@ export class GenerateTokenProvider {
       this.jwtConfiguration.secret,
       {
         email: user.email,
+        role: user.role.id,
       },
     );
 
