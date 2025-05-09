@@ -58,4 +58,7 @@ export class User {
     eager: true,
   })
   role: Roles;
+
+  @Column({ type: 'int', nullable: true })
+  assignedBy: number;
 }
