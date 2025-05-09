@@ -5,5 +5,5 @@ export enum PermissionType {
   DeleteWall = 'delete_wall',
   DeleteTweet = 'delete_tweet',
   GetAllTweet = 'get_tweets',
-  GetAllWall = 'get_walls'
+  GetAllWall = 'get_walls',
 }
