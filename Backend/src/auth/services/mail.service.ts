@@ -33,4 +33,17 @@ export class MailService {
       },
     });
   }
+
+  public async sendInvitationEmail(url: string, email: string): Promise<void> {
+    await this.mailerservices.sendMail({
+      to: email,
+      from: `Support Team <support@twitter.com>`,
+      subject: 'Role Assign Invite',
+      template: './invitation-mail',
+      context: {
+        email: email,
+        invitationUrl: url,
+      },
+    });
+  }
 }

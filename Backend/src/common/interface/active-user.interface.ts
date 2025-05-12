@@ -4,4 +4,6 @@ export interface ActiveUserData {
 
   // email of the user
   email: string;
+
+  role: number;
 }
