@@ -15,6 +15,7 @@ import { GenerateTokenProvider } from 'src/common/services/generate-token.provid
 import { GoogleUser } from '../interfaces/google-user.interface';
 import { MailService } from 'src/auth/services/mail.service';
 import { ConfigService } from '@nestjs/config';
+import { Roles } from '../entity/roles.entity';
 
 @Injectable()
 export class UserService {
