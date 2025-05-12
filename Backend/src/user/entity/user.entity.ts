@@ -61,4 +61,7 @@ export class User {
 
   @Column({ type: 'int', nullable: true })
   assignedBy: number;
+
+  @Column({ type: 'boolean', default: false })
+  is_invitation_accepted: boolean;
 }
