@@ -4,7 +4,7 @@ import { ConfigType } from '@nestjs/config';
 import { ActiveUserData } from '../../common/interface/active-user.interface';
 import jwtConfig from 'src/auth/config/jwt.config';
 import { User } from 'src/user/entity/user.entity';
-
+import { UnauthorizedException } from '@nestjs/common';
 @Injectable()
 export class GenerateTokenProvider {
   constructor(
@@ -102,9 +102,22 @@ export class GenerateTokenProvider {
       {
         email: user.email,
         role: roleId,
+       
       },
     );
 
     return varificationToken;
   }
+  public async verifyInvitationToken(token: string) {
+    try {
+      const decoded = await this.jwtService.verifyAsync(token, {
+        secret: this.jwtConfiguration.secret,
+      });
+      return decoded;
+    } catch (error) {
+      throw new UnauthorizedException('Invalid or expired invitation token');
+    }
+  }
+  
+
 }

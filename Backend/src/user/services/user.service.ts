@@ -155,4 +155,35 @@ export class UserService {
       }
     }
   }
+
+  public async getInvitationInfo(token: string) {
+    try {
+      const decoded = await this.generateTokenProvider.verifyInvitationToken(
+        token.trim(),
+      );
+
+      const { email, role } = decoded;
+      if (!email || !role) {
+        throw new BadRequestException('Invalid invitation token');
+      }
+
+      const existingUser = await this.userRepository.findOne({
+        where: { email },
+      });
+
+      if (existingUser) {
+        return {
+          email,
+          role,
+        };
+      } else {
+        return {
+          email,
+          role,
+        };
+      }
+    } catch (error) {
+      throw new BadRequestException('Invalid or expired invitation token');
+    }
+  }
 }
