@@ -211,4 +211,33 @@ export class UserService {
       throw new InternalServerErrorException('Failed to assign role to user');
     }
   }
+  public async getAssignedUsers(adminId: number) {
+    try {
+      const admin = await this.userRepository.findOne({
+        where: { id: adminId, role: { id: 1 } },
+        relations: ['role'],
+      });
+
+      if (!admin) {
+        throw new NotFoundException('User does not have admin access');
+      }
+
+      const assignedUsers = await this.userRepository.find({
+        where: { assignedBy: adminId, is_invitation_accepted: true },
+        relations: ['role'],
+      });
+
+      return assignedUsers.map((user) => ({
+        id: user.id,
+        email: user.email,
+        roleId: user.role.id,
+        roleName: user.role.name,
+      }));
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to fetch assigned users');
+    }
+  }
 }

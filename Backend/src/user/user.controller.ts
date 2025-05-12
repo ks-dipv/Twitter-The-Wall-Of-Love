@@ -96,4 +96,15 @@ export class UserController {
   ) {
     return this.userService.assignRoleToUser(token, user);
   }
+
+  @Get('/assigned-users')
+  @CommonApiDecorators({
+    summary: 'Get users assigned by admin',
+    successDescription: 'Successfully retrieved list of assigned users',
+    errorStatus: 403,
+    errorDescription: 'User does not have admin access',
+  })
+  public async getAssignedUsers(@User() user) {
+    return this.userService.getAssignedUsers(user.id);
+  }
 }
