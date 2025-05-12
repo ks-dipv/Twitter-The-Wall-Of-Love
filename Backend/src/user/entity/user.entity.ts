@@ -45,6 +45,10 @@ export class User {
   @Exclude()
   reset_password_token?: string;
 
+  @Column({ type: 'varchar', nullable: true })
+  @Exclude()
+  invitation_token?: string;
+
   @CreateDateColumn()
   created_at: Date;
 

@@ -7,7 +7,7 @@ import {
   Get,
   UseInterceptors,
   Post,
-  Query,
+  Param,
 } from '@nestjs/common';
 import { UserService } from './services/user.service';
 import { AuthType } from '../common/enum/auth-type.enum';
@@ -83,14 +83,17 @@ export class UserController {
     return new SuccessDto('Successfuly invitation mail to assign role');
   }
 
-  @Get('/invite')
+  @Post('/invitation/:token')
   @CommonApiDecorators({
     summary: 'Validate invitation token and store role info',
     successDescription: 'Successfully validated invitation and assigned role',
     errorStatus: 400,
     errorDescription: 'Invalid or expired invitation token',
   })
-  public async validateInvitationToken(@Query('token') token: string) {
-    return this.userService.getInvitationInfo(token);
+  public async validateInvitationToken(
+    @Param('token') token: string,
+    @User() user,
+  ) {
+    return this.userService.assignRoleToUser(token, user);
   }
 }

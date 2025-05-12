@@ -138,11 +138,16 @@ export class UserService {
 
       const token = await this.generateTokenProvider.generateInvitationToken(
         roleId,
+        email,
         user,
       );
 
+      existingUser.invitation_token = token;
+
+      await this.userRepository.save(existingUser);
+
       const baseUrl = 'http://localhost:3000';
-      const invitationUrl = `${baseUrl}/invitation/${token}`;
+      const invitationUrl = `${baseUrl}/api/invitation/${token}`;
 
       await this.mailService.sendInvitationEmail(invitationUrl, email);
     } catch (error) {
@@ -156,34 +161,54 @@ export class UserService {
     }
   }
 
-  public async getInvitationInfo(token: string) {
+  public async assignRoleToUser(token: string, user: User) {
     try {
-      const decoded = await this.generateTokenProvider.verifyInvitationToken(
-        token.trim(),
-      );
+      const splitToken = token.split('.');
 
-      const { email, role } = decoded;
-      if (!email || !role) {
-        throw new BadRequestException('Invalid invitation token');
+      const payload = JSON.parse(atob(splitToken[1]));
+
+      const adminUserMail = payload.email;
+      const roleId = payload.role;
+      const assignUserMail = payload.assignUserMail;
+
+      const assignUser = await this.userRepository.getByEmail(user.email);
+      const adminUser = await this.userRepository.getByEmail(adminUserMail);
+
+      if (!assignUser || !adminUser) {
+        throw new NotFoundException('User not found');
       }
 
-      const existingUser = await this.userRepository.findOne({
-        where: { email },
-      });
-
-      if (existingUser) {
-        return {
-          email,
-          role,
-        };
-      } else {
-        return {
-          email,
-          role,
-        };
+      if (
+        !adminUser.invitation_token ||
+        assignUser.is_invitation_accepted === true
+      ) {
+        throw new BadRequestException('Invitation already accepted or invalid');
       }
+
+      if (assignUserMail !== user.email) {
+        throw new BadRequestException(
+          'User does not have permission to accept role invitation',
+        );
+      }
+
+      assignUser.role = roleId;
+      assignUser.assignedBy = adminUser.id;
+      assignUser.is_invitation_accepted = true;
+      adminUser.invitation_token = null;
+
+      await this.userRepository.save(assignUser);
+      await this.userRepository.save(adminUser);
+
+      return assignUser;
     } catch (error) {
-      throw new BadRequestException('Invalid or expired invitation token');
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
+      }
+      console.error('Error while assigning role to user:', error);
+      throw new InternalServerErrorException('Failed to assign role to user');
     }
   }
 }
