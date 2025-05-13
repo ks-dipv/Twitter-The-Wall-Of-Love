@@ -64,4 +64,11 @@ export class UserController {
     this.userService.remove(user);
     return new SuccessDto('User Deleted Successfully');
   }
+
+
+  @Get('wall/:wallId/assigned-users')
+  async getAssignedUsers(@Param('wallId') wallId: number, @User() user) {
+    return this.userService.getAssignedUsers(wallId, user.id);
+  }
+  
 }

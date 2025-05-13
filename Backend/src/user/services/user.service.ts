@@ -5,6 +5,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
   ConflictException,
+  ForbiddenException
 } from '@nestjs/common';
 
 import { UploadService } from '../../common/services/upload.service';
@@ -15,7 +16,11 @@ import { GenerateTokenProvider } from 'src/common/services/generate-token.provid
 import { GoogleUser } from '../interfaces/google-user.interface';
 import { MailService } from 'src/auth/services/mail.service';
 import { ConfigService } from '@nestjs/config';
-
+import { AccessType } from '../enum/accesstype.enum';
+import { WallRepository } from 'src/wall/repository/wall.repository';
+import { WallAccess } from '../entity/wall-access.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 @Injectable()
 export class UserService {
   constructor(
@@ -24,6 +29,9 @@ export class UserService {
     private readonly uploadService: UploadService,
     private readonly mailService: MailService,
     private readonly configService: ConfigService,
+    private readonly wallRepository: WallRepository,
+    @InjectRepository(WallAccess)
+  private wallAccessRepository: Repository<WallAccess>,
   ) {}
 
   public async createGoogleUser(googleUser: GoogleUser) {
@@ -122,4 +130,43 @@ export class UserService {
       throw new InternalServerErrorException('Failed to delete user');
     }
   }
+
+  async getAssignedUsers(wallId: number, requestingUserId: number) {
+    const wall = await this.wallRepository.findOne({
+      where: { id: wallId },
+      relations: ['user'],
+    });
+  
+    if (!wall) {
+      throw new NotFoundException('Wall not found');
+    }
+  
+    const requestingUser = await this.userRepository.findOne({
+      where: { id: requestingUserId },
+    });
+  
+    if (!requestingUser) {
+      throw new NotFoundException('Requesting user not found');
+    }
+  
+    const isOwner = wall.user.id === requestingUserId;
+    const isAdmin = requestingUser.access_type === AccessType.ADMIN;
+  
+    if (!isOwner && !isAdmin) {
+      throw new ForbiddenException('You do not have permission to view this wall\'s users.');
+    }
+  
+    const accesses = await this.wallAccessRepository.find({
+      where: { wall: { id: wallId } },
+      relations: ['user'],
+      order: { created_at: 'ASC' },
+    });
+  
+    return accesses.map((access) => ({
+      email: access.user.email,
+      access_type: access.access_type,
+      assigned_at: access.created_at,
+    }));
+  }
+
 }

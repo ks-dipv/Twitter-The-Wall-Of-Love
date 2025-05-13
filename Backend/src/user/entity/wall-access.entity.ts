@@ -27,9 +27,9 @@ export class WallAccess {
   @Column({
     type: 'enum',
     enum: AccessType,
-    default: AccessType.ADMIN,
+    // default: AccessType.ADMIN,
   })
-  access_type: AccessType;
+  access_type?: AccessType;
 
   @CreateDateColumn()
   created_at: Date;

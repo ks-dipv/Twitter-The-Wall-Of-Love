@@ -14,6 +14,7 @@ import { MailService } from 'src/auth/services/mail.service';
 import { Invitation } from './entity/invitation.entity';
 import { Wall } from 'src/wall/entity/wall.entity';
 import { WallAccess } from './entity/wall-access.entity';
+import { WallRepository } from 'src/wall/repository/wall.repository';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { WallAccess } from './entity/wall-access.entity';
     UploadService,
     UserRepository,
     MailService,
+    WallRepository
   ],
   exports: [UserService, UserRepository],
 })
