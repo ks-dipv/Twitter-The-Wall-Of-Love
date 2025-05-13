@@ -16,10 +16,11 @@ import { MailService } from './services/mail.service';
 import { UserRepository } from 'src/user/repositories/user.repository';
 import { GoogleAuthenticationService } from './services/google-authentication.service';
 import { UserService } from 'src/user/services/user.service';
+import { Invitation } from 'src/user/entity/invitation.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Invitation]),
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
     MailerModule.forRootAsync({

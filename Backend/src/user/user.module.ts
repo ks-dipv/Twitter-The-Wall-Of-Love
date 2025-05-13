@@ -12,7 +12,6 @@ import { UserRepository } from './repositories/user.repository';
 import { GenerateTokenProvider } from 'src/common/services/generate-token.provider';
 import { MailService } from 'src/auth/services/mail.service';
 import { Invitation } from './entity/invitation.entity';
-import { Wall } from 'src/wall/entity/wall.entity';
 import { WallAccess } from './entity/wall-access.entity';
 
 @Module({

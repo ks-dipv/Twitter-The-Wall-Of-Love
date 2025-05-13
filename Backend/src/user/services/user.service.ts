@@ -15,6 +15,9 @@ import { GenerateTokenProvider } from 'src/common/services/generate-token.provid
 import { GoogleUser } from '../interfaces/google-user.interface';
 import { MailService } from 'src/auth/services/mail.service';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Invitation } from '../entity/invitation.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UserService {
@@ -24,6 +27,9 @@ export class UserService {
     private readonly uploadService: UploadService,
     private readonly mailService: MailService,
     private readonly configService: ConfigService,
+
+    @InjectRepository(Invitation)
+    private readonly invitationRepository: Repository<Invitation>,
   ) {}
 
   public async createGoogleUser(googleUser: GoogleUser) {
@@ -121,5 +127,21 @@ export class UserService {
         throw error;
       throw new InternalServerErrorException('Failed to delete user');
     }
+  }
+
+  public async sentInvitation(email: string, wallId, user) {
+    const existingUser = await this.userRepository.getByEmail(user.email);
+
+    const baseUrl = 'http://localhost:3000';
+    const invitationUrl = `${baseUrl}/api/walls/${wallId}`;
+
+    await this.mailService.sendInvitationEmail(invitationUrl, email);
+
+    const invite = this.invitationRepository.create({
+      email: email,
+      user: existingUser,
+    });
+
+    await this.invitationRepository.save(invite);
   }
 }
