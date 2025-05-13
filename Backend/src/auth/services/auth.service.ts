@@ -49,7 +49,6 @@ export class AuthService {
         password: await this.hashingProvider.hashPassword(signupDto.password),
         profile_pic: profilePicUrl,
         is_email_verified: false,
-        
       });
 
       newUser.email_verification_token =

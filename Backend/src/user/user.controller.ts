@@ -19,6 +19,7 @@ import { UsePipes, ValidationPipe } from '@nestjs/common';
 import { SuccessDto } from 'src/common/dtos/success.dto';
 import { User } from 'src/common/decorator/user.decorator';
 import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
+import { AssignUserRoleDto } from './dtos/assign-user-role.dto';
 
 @ApiTags('Users')
 @Controller('api')
@@ -65,10 +66,18 @@ export class UserController {
     return new SuccessDto('User Deleted Successfully');
   }
 
-
   @Get('wall/:wallId/assigned-users')
   async getAssignedUsers(@Param('wallId') wallId: number, @User() user) {
     return this.userService.getAssignedUsers(wallId, user.id);
   }
-  
+
+  @Post('user/wall/invitation')
+  public sentInvitation(
+    @Body() assignUserRoleDto: AssignUserRoleDto,
+    @User() user,
+  ) {
+    const { email, wallId } = assignUserRoleDto;
+    this.userService.sentInvitation(email, wallId, user);
+    return new SuccessDto('Successfuly invitation mail to assign role of wall');
+  }
 }

@@ -18,10 +18,11 @@ import { GoogleAuthenticationService } from './services/google-authentication.se
 import { UserService } from 'src/user/services/user.service';
 import { WallRepository } from 'src/wall/repository/wall.repository';
 import { WallAccess } from 'src/user/entity/wall-access.entity';
+import { Invitation } from 'src/user/entity/invitation.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, WallAccess]),
+    TypeOrmModule.forFeature([User, WallAccess, Invitation]),
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
     MailerModule.forRootAsync({
@@ -63,7 +64,6 @@ import { WallAccess } from 'src/user/entity/wall-access.entity';
     MailService,
     GoogleAuthenticationService,
     WallRepository,
-    
   ],
   exports: [MailService],
 })

@@ -4,7 +4,6 @@ import { ConfigType } from '@nestjs/config';
 import { ActiveUserData } from '../../common/interface/active-user.interface';
 import jwtConfig from 'src/auth/config/jwt.config';
 import { User } from 'src/user/entity/user.entity';
-import { RoleAssignUser } from '../interface/role-assign-user.interface';
 
 @Injectable()
 export class GenerateTokenProvider {
@@ -90,6 +89,4 @@ export class GenerateTokenProvider {
 
     return varificationToken;
   }
-
- 
 }

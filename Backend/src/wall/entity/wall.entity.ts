@@ -75,6 +75,4 @@ export class Wall {
 
   @OneToMany(() => WallAccess, (wallAccess) => wallAccess.wall)
   wallAccesses: WallAccess[];
-  
-
 }

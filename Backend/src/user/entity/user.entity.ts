@@ -1,4 +1,4 @@
-import { Entity, ManyToOne } from 'typeorm';
+import { Entity } from 'typeorm';
 import {
   Column,
   PrimaryGeneratedColumn,
@@ -62,13 +62,13 @@ export class User {
   @OneToMany(() => WallAccess, (wallAccess) => wallAccess.user)
   userWallAccess: WallAccess[];
 
-  @OneToMany(()=>WallAccess, (wallaccess)=>wallaccess.assigned_by)
-  WallAccess : WallAccess[];
+  @OneToMany(() => WallAccess, (wallaccess) => wallaccess.assigned_by)
+  WallAccess: WallAccess[];
 
   @Column({
-      type: 'enum',
-      enum: AccessType,
-      default: AccessType.ADMIN,
-    })
-    access_type?: AccessType;
+    type: 'enum',
+    enum: AccessType,
+    default: AccessType.ADMIN,
+  })
+  access_type?: AccessType;
 }
