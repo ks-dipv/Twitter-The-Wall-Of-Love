@@ -8,7 +8,8 @@ import {
 import { Wall } from 'src/wall/entity/wall.entity';
 import { OneToMany } from 'typeorm';
 import { Exclude } from 'class-transformer';
-import { Roles } from './roles.entity';
+import { Invitation } from './invitation.entity';
+import { WallAccess } from './wall-access.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -45,10 +46,6 @@ export class User {
   @Exclude()
   reset_password_token?: string;
 
-  @Column({ type: 'varchar', nullable: true })
-  @Exclude()
-  invitation_token?: string;
-
   @CreateDateColumn()
   created_at: Date;
 
@@ -58,14 +55,13 @@ export class User {
   @OneToMany(() => Wall, (wall) => wall.user)
   walls: Wall[];
 
-  @ManyToOne(() => Roles, (role) => role.users, {
-    eager: true,
-  })
-  role: Roles;
+  @OneToMany(() => Invitation, (invitation) => invitation.user)
+  invitations: Invitation[];
 
-  @Column({ type: 'int', nullable: true })
-  assignedBy: number;
+  @OneToMany(() => WallAccess, (wallAccess) => wallAccess.user)
+  userWallAccess: WallAccess[];
 
-  @Column({ type: 'boolean', default: false })
-  is_invitation_accepted: boolean;
+  @OneToMany(()=>WallAccess, (wallaccess)=>wallaccess.assigned_by)
+  WallAccess : WallAccess[];
+
 }

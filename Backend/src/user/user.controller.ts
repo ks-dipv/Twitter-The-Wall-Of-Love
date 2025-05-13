@@ -19,7 +19,6 @@ import { UsePipes, ValidationPipe } from '@nestjs/common';
 import { SuccessDto } from 'src/common/dtos/success.dto';
 import { User } from 'src/common/decorator/user.decorator';
 import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
-import { AssignUserRoleDto } from './dtos/assign-user-role.dto';
 
 @ApiTags('Users')
 @Controller('api')
@@ -64,47 +63,5 @@ export class UserController {
   public remove(@User() user) {
     this.userService.remove(user);
     return new SuccessDto('User Deleted Successfully');
-  }
-
-  @Post('/role/assign/invitation')
-  @ApiBody({ type: AssignUserRoleDto })
-  @CommonApiDecorators({
-    summary: 'Send invitation mail to assign role',
-    successDescription: 'Successfully invitation mail to assign role',
-    errorStatus: 403,
-    errorDescription: 'User does not have admin access',
-  })
-  public invitationMail(
-    @Body() assignUserRoleDto: AssignUserRoleDto,
-    @User() user,
-  ) {
-    const { email, roleId } = assignUserRoleDto;
-    this.userService.sentInvitationLink(roleId, email, user);
-    return new SuccessDto('Successfuly invitation mail to assign role');
-  }
-
-  @Post('/invitation/:token')
-  @CommonApiDecorators({
-    summary: 'Validate invitation token and store role info',
-    successDescription: 'Successfully validated invitation and assigned role',
-    errorStatus: 400,
-    errorDescription: 'Invalid or expired invitation token',
-  })
-  public async validateInvitationToken(
-    @Param('token') token: string,
-    @User() user,
-  ) {
-    return this.userService.assignRoleToUser(token, user);
-  }
-
-  @Get('/assigned-users')
-  @CommonApiDecorators({
-    summary: 'Get users assigned by admin',
-    successDescription: 'Successfully retrieved list of assigned users',
-    errorStatus: 403,
-    errorDescription: 'User does not have admin access',
-  })
-  public async getAssignedUsers(@User() user) {
-    return this.userService.getAssignedUsers(user.id);
   }
 }

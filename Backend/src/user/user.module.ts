@@ -10,14 +10,14 @@ import jwtConfig from '../auth/config/jwt.config';
 
 import { UserRepository } from './repositories/user.repository';
 import { GenerateTokenProvider } from 'src/common/services/generate-token.provider';
-import { Permission } from './entity/permission.entity';
-import { Roles } from './entity/roles.entity';
-import { Rolespermission } from './entity/roles_permission.entity';
 import { MailService } from 'src/auth/services/mail.service';
+import { Invitation } from './entity/invitation.entity';
+import { Wall } from 'src/wall/entity/wall.entity';
+import { WallAccess } from './entity/wall-access.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Permission, Roles, Rolespermission]),
+    TypeOrmModule.forFeature([User, Invitation, WallAccess]),
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
   ],

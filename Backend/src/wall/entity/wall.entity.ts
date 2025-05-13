@@ -13,6 +13,7 @@ import { SocialLink } from './social-links.entity';
 import { Tweets } from './tweets.entity';
 import { Exclude } from 'class-transformer';
 import { TweetHandleQueue } from './tweet-handle-queue.entity';
+import { WallAccess } from 'src/user/entity/wall-access.entity';
 
 @Entity()
 export class Wall {
@@ -71,4 +72,9 @@ export class Wall {
     eager: true,
   })
   user: User;
+
+  @OneToMany(() => WallAccess, (wallAccess) => wallAccess.wall)
+  wallAccesses: WallAccess[];
+  
+
 }

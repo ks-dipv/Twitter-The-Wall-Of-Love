@@ -46,7 +46,6 @@ export class GenerateTokenProvider {
       this.jwtConfiguration.secret,
       {
         email: user.email,
-        role: user.role.id,
       },
     );
 
@@ -60,7 +59,6 @@ export class GenerateTokenProvider {
       this.jwtConfiguration.secret,
       {
         email: user.email,
-        role: user.role.id,
       },
     );
 
@@ -74,7 +72,6 @@ export class GenerateTokenProvider {
       this.jwtConfiguration.apiSecret,
       {
         email: user.email,
-        role: user.role.id,
       },
     );
 
@@ -88,25 +85,11 @@ export class GenerateTokenProvider {
       this.jwtConfiguration.secret,
       {
         email: user.email,
-        role: user.role.id,
       },
     );
 
     return varificationToken;
   }
 
-  public async generateInvitationToken(roleId, email: string, user: User) {
-    const varificationToken = await this.signToken<Partial<RoleAssignUser>>(
-      user.id,
-      this.jwtConfiguration.resetPasswordTokenTtl,
-      this.jwtConfiguration.secret,
-      {
-        email: user.email,
-        assignUserMail: email,
-        role: roleId,
-      },
-    );
-
-    return varificationToken;
-  }
+ 
 }
