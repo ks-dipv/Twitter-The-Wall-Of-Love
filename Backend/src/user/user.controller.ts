@@ -80,4 +80,15 @@ export class UserController {
     this.userService.sentInvitation(email, wallId, user);
     return new SuccessDto('Successfuly invitation mail to assign role of wall');
   }
+
+  @Delete('wall/:wallId/assigned-user/:userId')
+  async deleteAssignedUser(
+    @Param('wallId') wallId: number,
+    @Param('userId') userId: number,
+    @User() user,
+  ) {
+    await this.userService.deleteAssignedUser(wallId, userId, user.id);
+    return new SuccessDto('User successfully removed from wall');
+  }
+  
 }

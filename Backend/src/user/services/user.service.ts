@@ -193,4 +193,50 @@ export class UserService {
 
     await this.invitationRepository.save(invite);
   }
+
+  async deleteAssignedUser(
+    wallId: number,
+    targetUserId: number,
+    requestingUserId: number,
+  ): Promise<void> {
+    const wall = await this.wallRepository.findOne({
+      where: { id: wallId },
+      relations: ['user'],
+    });
+
+    if (!wall) {
+      throw new NotFoundException('Wall not found');
+    }
+
+    const requestingUser = await this.userRepository.findOne({
+      where: { id: requestingUserId },
+    });
+
+    if (!requestingUser) {
+      throw new NotFoundException('Requesting user not found');
+    }
+
+    const isOwner = wall.user.id === requestingUserId;
+    const isAdmin = requestingUser.access_type === AccessType.ADMIN;
+
+    if (!isOwner && !isAdmin) {
+      throw new ForbiddenException(
+        'You do not have permission to remove users from this wall.',
+      );
+    }
+
+    const access = await this.wallAccessRepository.findOne({
+      where: { wall: { id: wallId }, user: { id: targetUserId } },
+    });
+
+    if (!access) {
+      throw new NotFoundException('user does not have access to this wall.');
+    }
+
+    if (isOwner && targetUserId === requestingUserId) {
+      throw new BadRequestException('Wall owner cannot remove themselves.');
+    }
+
+    await this.wallAccessRepository.delete(access.id);
+  }
 }

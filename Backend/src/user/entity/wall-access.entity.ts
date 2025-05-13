@@ -34,7 +34,7 @@ export class WallAccess {
   @Column({
     type: 'enum',
     enum: AccessType,
-    // default: AccessType.ADMIN,
+    default: AccessType.ADMIN,
   })
   access_type?: AccessType;
 
