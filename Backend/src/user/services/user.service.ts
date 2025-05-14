@@ -21,7 +21,7 @@ import { WallRepository } from 'src/wall/repository/wall.repository';
 import { WallAccess } from '../entity/wall-access.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-
+import { UpdateUserAccessDto } from '../dtos/update-user-role.dto';
 import { Invitation } from '../entity/invitation.entity';
 
 @Injectable()
@@ -195,7 +195,7 @@ export class UserService {
     await this.invitationRepository.save(invite);
   }
 
-  async deleteAssignedUser(
+  public async deleteAssignedUser(
     wallId: number,
     targetUserId: number,
     requestingUserId: number,
@@ -239,5 +239,64 @@ export class UserService {
     }
 
     await this.wallAccessRepository.delete(access.id);
+  }
+
+  public async updateAssignedUserAccess(
+    currentWallId: number,
+    targetUserId: number,
+    updateUserAccessDto: UpdateUserAccessDto,
+    user,
+  ): Promise<void> {
+    if (!user || (!user.sub && !user.id)) {
+      throw new UnauthorizedException('User not authenticated');
+    }
+
+    const { access_type } = updateUserAccessDto;
+
+    const requestingUser = await this.userRepository.getByEmail(user.email);
+    if (!requestingUser) {
+      throw new NotFoundException('Requesting user not found');
+    }
+
+    const targetUser = await this.userRepository.findOne({
+      where: { id: targetUserId },
+    });
+    if (!targetUser) {
+      throw new NotFoundException('Target user not found');
+    }
+
+    const currentWall = await this.wallRepository.findOne({
+      where: { id: currentWallId },
+      relations: ['user'],
+    });
+    if (!currentWall) {
+      throw new NotFoundException('Current wall not found');
+    }
+
+    const isOwner = currentWall.user.id === user.id;
+    const isAdmin = requestingUser.access_type === AccessType.ADMIN;
+    if (!isOwner && !isAdmin) {
+      throw new ForbiddenException(
+        'You do not have permission to update user access for this wall.',
+      );
+    }
+
+    if (isOwner && targetUserId === user.id) {
+      throw new BadRequestException(
+        'Wall owner cannot modify their own access.',
+      );
+    }
+
+    const access = await this.wallAccessRepository.findOne({
+      where: { wall: { id: currentWallId }, user: { id: targetUserId } },
+    });
+    if (!access) {
+      throw new NotFoundException(
+        'User does not have access to the current wall.',
+      );
+    }
+
+    access.access_type = access_type;
+    await this.wallAccessRepository.save(access);
   }
 }
