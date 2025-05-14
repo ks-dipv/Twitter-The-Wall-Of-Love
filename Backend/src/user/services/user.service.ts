@@ -327,7 +327,14 @@ export class UserService {
 
     return accesses.map((access) => ({
       assigned_me: access.assigned_by.email ,
-      wall_id: access.wall.id,
+      wall: {
+        id: access.wall.id,
+        name: access.wall.title,
+        logo : access.wall.logo,
+        description: access.wall.description,
+        wall_visibility: access.wall.visibility,
+        created_at: access.wall.created_at,
+      },
       assigned_at: access.created_at,
       access_type: access.access_type,
     }));
