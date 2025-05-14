@@ -6,6 +6,7 @@ import {
 } from 'typeorm';
 import { ManyToOne } from 'typeorm';
 import { User } from './user.entity';
+import { AccessType } from '../enum/accesstype.enum';
 @Entity()
 export class Invitation {
   @PrimaryGeneratedColumn()
@@ -13,6 +14,12 @@ export class Invitation {
 
   @Column({ type: 'varchar', length: 100, nullable: false, unique: true })
   email: string;
+
+  @Column({
+    type: 'enum',
+    enum: AccessType,
+  })
+  access_type: AccessType;
 
   @ManyToOne(() => User, (user) => user.invitations, {
     nullable: false,

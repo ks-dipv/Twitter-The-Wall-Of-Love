@@ -1,4 +1,5 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsString } from 'class-validator';
+import { AccessType } from '../enum/accesstype.enum';
 
 export class AssignUserRoleDto {
   @IsString()
@@ -6,4 +7,7 @@ export class AssignUserRoleDto {
 
   @IsNumber()
   wallId: number;
+
+  @IsEnum(AccessType)
+  accessType: AccessType;
 }

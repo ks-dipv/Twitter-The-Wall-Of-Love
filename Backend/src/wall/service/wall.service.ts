@@ -25,6 +25,8 @@ import { PaginationService } from 'src/pagination/services/pagination.service';
 import { Paginated } from 'src/pagination/interfaces/paginated.interface';
 import { Tweets } from '../entity/tweets.entity';
 import { TweetRepository } from '../repository/tweet.repository';
+import { Invitation } from 'src/user/entity/invitation.entity';
+import { WallAccess } from 'src/user/entity/wall-access.entity';
 @Injectable()
 export class WallService {
   constructor(
@@ -36,6 +38,12 @@ export class WallService {
 
     @InjectRepository(SocialLink)
     private readonly socialLinkRepository: Repository<SocialLink>,
+
+    @InjectRepository(Invitation)
+    private readonly invitationRepository: Repository<Invitation>,
+
+    @InjectRepository(WallAccess)
+    private readonly wallAccessRepository: Repository<WallAccess>,
 
     private readonly dataSource: DataSource,
     private readonly configService: ConfigService,

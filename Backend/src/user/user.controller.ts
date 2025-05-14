@@ -76,8 +76,8 @@ export class UserController {
     @Body() assignUserRoleDto: AssignUserRoleDto,
     @User() user,
   ) {
-    const { email, wallId } = assignUserRoleDto;
-    this.userService.sentInvitation(email, wallId, user);
+    const { email, wallId, accessType } = assignUserRoleDto;
+    this.userService.sentInvitation(email, wallId, accessType, user);
     return new SuccessDto('Successfuly invitation mail to assign role of wall');
   }
 
@@ -90,5 +90,4 @@ export class UserController {
     await this.userService.deleteAssignedUser(wallId, userId, user.id);
     return new SuccessDto('User successfully removed from wall');
   }
-  
 }

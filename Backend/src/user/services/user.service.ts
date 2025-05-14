@@ -178,7 +178,7 @@ export class UserService {
     }));
   }
 
-  public async sentInvitation(email: string, wallId, user) {
+  public async sentInvitation(email: string, wallId, accessType, user) {
     const existingUser = await this.userRepository.getByEmail(user.email);
 
     const baseUrl = 'http://localhost:3000';
@@ -188,6 +188,7 @@ export class UserService {
 
     const invite = this.invitationRepository.create({
       email: email,
+      access_type: accessType,
       user: existingUser,
     });
 
