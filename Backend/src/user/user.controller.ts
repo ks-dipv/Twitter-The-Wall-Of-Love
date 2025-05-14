@@ -105,7 +105,7 @@ export class UserController {
     @Param('userId') userId: number,
     @User() user,
   ) {
-    await this.userService.deleteAssignedUser(wallId, userId,user);
+    await this.userService.deleteAssignedUser(wallId, userId, user);
     return new SuccessDto('User successfully removed from wall');
   }
 
@@ -127,5 +127,16 @@ export class UserController {
       user,
     );
     return new SuccessDto('User access type updated successfully');
+  }
+
+  @Get('wall/assigned-me')
+  @CommonApiDecorators({
+    summary: 'Get list of my wall assignments',
+    successDescription:
+      'List of wall assignments for the authenticated user retrieved',
+  })
+  @Auth(AuthType.Bearer)
+  async getMyAssignments(@User() user: any) {
+    return await this.userService.getAssignedByme(user);
   }
 }
