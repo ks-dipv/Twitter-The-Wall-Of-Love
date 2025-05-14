@@ -22,8 +22,8 @@ export class Invitation {
   access_type: AccessType;
 
   @ManyToOne(() => User, (user) => user.invitations, {
-    nullable: false,
     onDelete: 'CASCADE',
+    eager: true,
   })
   user: User;
 
