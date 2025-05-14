@@ -311,4 +311,32 @@ export class UserService {
     access.access_type = access_type;
     await this.wallAccessRepository.save(access);
   }
+  async getAssignedByme(user) {
+    if (!user || (!user.id && !user.sub)) {
+      throw new UnauthorizedException('User not authenticated');
+    }
+    const userId = user.id || user.sub;
+
+    const accesses = await this.wallAccessRepository.find({
+      where: {
+        user: { id: userId },
+      },
+      relations: ['user', 'wall', 'assigned_by'],
+      order: { created_at: 'ASC' },
+    });
+
+    return accesses.map((access) => ({
+      assigned_me: access.assigned_by.email ,
+      wall: {
+        id: access.wall.id,
+        name: access.wall.title,
+        logo : access.wall.logo,
+        description: access.wall.description,
+        wall_visibility: access.wall.visibility,
+        created_at: access.wall.created_at,
+      },
+      assigned_at: access.created_at,
+      access_type: access.access_type,
+    }));
+  }
 }

@@ -128,4 +128,15 @@ export class UserController {
     );
     return new SuccessDto('User access type updated successfully');
   }
+
+  @Get('wall/assigned-me')
+  @CommonApiDecorators({
+    summary: 'Get list of my wall assignments',
+    successDescription:
+      'List of wall assignments for the authenticated user retrieved',
+  })
+  @Auth(AuthType.Bearer)
+  async getMyAssignments(@User() user: any) {
+    return await this.userService.getAssignedByme(user);
+  }
 }
