@@ -4,6 +4,7 @@ import {
   NotFoundException,
   UnauthorizedException,
   InternalServerErrorException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { WallRepository } from '../repository/wall.repository';
 import { CreateWallDto } from '../dtos/create-wall.dto';
@@ -27,6 +28,7 @@ import { Tweets } from '../entity/tweets.entity';
 import { TweetRepository } from '../repository/tweet.repository';
 import { Invitation } from 'src/user/entity/invitation.entity';
 import { WallAccess } from 'src/user/entity/wall-access.entity';
+
 @Injectable()
 export class WallService {
   constructor(
@@ -273,9 +275,35 @@ export class WallService {
       }
 
       const wall = await this.wallRepository.getById(id);
+      if (!wall) {
+        throw new NotFoundException('Wall not found');
+      }
 
-      if (!wall || wall.user.id !== existingUser.id) {
-        throw new NotFoundException('Wall not found or access denied');
+      const invitation = await this.invitationRepository.findOne({
+        where: { email: user.email },
+      });
+
+      if (invitation) {
+        const wallAccess = this.wallAccessRepository.create({
+          user: existingUser,
+          wall: wall,
+          access_type: invitation.access_type,
+          assigned_by: invitation.user,
+        });
+
+        await this.wallAccessRepository.save(wallAccess);
+        await this.invitationRepository.remove(invitation);
+      }
+
+      const wallAccess = await this.wallAccessRepository.findOne({
+        where: {
+          wall: { id },
+          user: { id: existingUser.id },
+        },
+      });
+
+      if (!(wall.user.id === existingUser.id) && !wallAccess) {
+        throw new ForbiddenException('You do not have access to this wall');
       }
 
       return wall;
