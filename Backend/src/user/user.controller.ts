@@ -67,11 +67,21 @@ export class UserController {
   }
 
   @Get('wall/:wallId/assigned-users')
+  @CommonApiDecorators({
+    summary: 'Get list Assigned user',
+    successDescription: 'List of assigned users retrieved'
+  })
   async getAssignedUsers(@Param('wallId') wallId: number, @User() user) {
     return this.userService.getAssignedUsers(wallId, user.id);
   }
 
   @Post('user/wall/invitation')
+  @CommonApiDecorators({
+    summary : 'Invitation mail send to assigned user',
+    successDescription : 'Invitation mail sent successfully',
+    errorStatus: 404,
+    errorDescription: 'User not found'
+  })
   public sentInvitation(
     @Body() assignUserRoleDto: AssignUserRoleDto,
     @User() user,
@@ -82,6 +92,12 @@ export class UserController {
   }
 
   @Delete('wall/:wallId/assigned-user/:userId')
+  @CommonApiDecorators({
+    summary: 'Delete assigned user',
+    successDescription: 'Assigned user successfully',
+    errorStatus : 404,
+    errorDescription : 'User not found'
+  })
   async deleteAssignedUser(
     @Param('wallId') wallId: number,
     @Param('userId') userId: number,
