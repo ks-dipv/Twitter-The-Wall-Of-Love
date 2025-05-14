@@ -7,6 +7,7 @@ import {
   Get,
   UseInterceptors,
   Post,
+  Patch,
   Param,
 } from '@nestjs/common';
 import { UserService } from './services/user.service';
@@ -20,7 +21,7 @@ import { SuccessDto } from 'src/common/dtos/success.dto';
 import { User } from 'src/common/decorator/user.decorator';
 import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
 import { AssignUserRoleDto } from './dtos/assign-user-role.dto';
-
+import { UpdateUserAccessDto } from './dtos/update-user-role.dto';
 @ApiTags('Users')
 @Controller('api')
 export class UserController {
@@ -105,5 +106,25 @@ export class UserController {
   ) {
     await this.userService.deleteAssignedUser(wallId, userId, user.id);
     return new SuccessDto('User successfully removed from wall');
+  }
+
+  @Patch('wall/:wallId/assigned-user/:userId')
+  @CommonApiDecorators({
+    summary: 'Update assigned user access type',
+    successDescription: 'User access type updated successfully',
+  })
+  public async updateAssignedUserAccess(
+    @Param('wallId') wallId: number,
+    @Param('userId') userId: number,
+    @Body() updateUserAccessDto: UpdateUserAccessDto,
+    @User() user,
+  ) {
+    await this.userService.updateAssignedUserAccess(
+      wallId,
+      userId,
+      updateUserAccessDto,
+      user,
+    );
+    return new SuccessDto('User access type updated successfully');
   }
 }
