@@ -105,7 +105,7 @@ export class UserController {
     @Param('userId') userId: number,
     @User() user,
   ) {
-    await this.userService.deleteAssignedUser(wallId, userId,user);
+    await this.userService.deleteAssignedUser(wallId, userId, user);
     return new SuccessDto('User successfully removed from wall');
   }
 

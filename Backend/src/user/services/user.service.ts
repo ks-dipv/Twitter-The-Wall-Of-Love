@@ -138,7 +138,7 @@ export class UserService {
     }
   }
 
-   public async getAssignedUsers(wallId: number, user) {
+  public async getAssignedUsers(wallId: number, user) {
     if (!user || (!user.sub && !user.id)) {
       throw new UnauthorizedException('User not authenticated');
     }
@@ -210,7 +210,7 @@ export class UserService {
   public async deleteAssignedUser(
     wallId: number,
     targetUserId: number,
-    user
+    user,
   ): Promise<void> {
     const wall = await this.wallRepository.findOne({
       where: { id: wallId },

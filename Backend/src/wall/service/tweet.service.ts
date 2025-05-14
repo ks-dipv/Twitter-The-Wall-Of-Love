@@ -4,6 +4,7 @@ import {
   BadRequestException,
   UnauthorizedException,
   InternalServerErrorException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { TweetRepository } from '../repository/tweet.repository';
 import { WallRepository } from '../repository/wall.repository';
@@ -18,6 +19,8 @@ import { Between, Repository } from 'typeorm';
 import { PaginationQueryDto } from 'src/pagination/dtos/pagination-query.dto';
 import { PaginationService } from 'src/pagination/services/pagination.service';
 import { Paginated } from 'src/pagination/interfaces/paginated.interface';
+import { WallAccess } from 'src/user/entity/wall-access.entity';
+import { AccessType } from 'src/user/enum/accesstype.enum';
 
 @Injectable()
 export class TweetService {
@@ -29,6 +32,9 @@ export class TweetService {
     private readonly xUserHandleService: XUserHandleService,
     private readonly paginationService: PaginationService,
 
+    @InjectRepository(WallAccess)
+    private readonly wallAccessRepository: Repository<WallAccess>,
+
     @InjectRepository(TweetHandleQueue)
     private readonly tweetHandleQueueRepository: Repository<TweetHandleQueue>,
   ) {}
@@ -36,17 +42,42 @@ export class TweetService {
   async addTweetToWall(tweetUrl: string, wallId: number, user) {
     try {
       const existingUser = await this.userRepository.getByEmail(user.email);
-      if (!existingUser) throw new BadRequestException("User doesn't exist");
+      if (!existingUser) {
+        throw new BadRequestException("User doesn't exist");
+      }
 
-      const wall = await this.wallRepository.getWallByIdAndUser(
-        wallId,
-        existingUser.id,
-      );
-      if (!wall) throw new NotFoundException('Wall not found or access denied');
+      const wall = await this.wallRepository.getById(wallId);
+      if (!wall) {
+        throw new NotFoundException('Wall not found');
+      }
+
+      let hasEditAccess = false;
+
+      const wallAccess = await this.wallAccessRepository.findOne({
+        where: {
+          wall: { id: wallId },
+          user: { id: existingUser.id },
+        },
+      });
+
+      if (
+        wallAccess &&
+        (wallAccess.access_type === AccessType.EDITOR ||
+          wallAccess.access_type === AccessType.ADMIN)
+      ) {
+        hasEditAccess = true;
+      }
+
+      if (!(wall.user.id === existingUser.id) && !hasEditAccess) {
+        throw new ForbiddenException(
+          'You do not have access to add tweets to this wall',
+        );
+      }
 
       const tweetData = await this.twitterService.fetchTweetDetails(tweetUrl);
-      if (!tweetData)
+      if (!tweetData) {
         throw new BadRequestException('Invalid tweet URL or tweet not found');
+      }
 
       const tweet = this.tweetRepository.create({ ...tweetData, wall });
       return await this.tweetRepository.save(tweet);
@@ -54,9 +85,10 @@ export class TweetService {
       if (
         error instanceof UnauthorizedException ||
         error instanceof BadRequestException ||
-        error instanceof NotFoundException
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
       ) {
-        throw error; // Rethrow known exceptions
+        throw error;
       }
       throw new InternalServerErrorException('Failed to add tweet to wall');
     }
@@ -71,12 +103,33 @@ export class TweetService {
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) throw new BadRequestException("User doesn't exist");
 
-      const wall = await this.wallRepository.getWallByIdAndUser(
-        wallId,
-        existingUser.id,
-      );
-      if (!wall) throw new NotFoundException('Wall not found or access denied');
+      const wall = await this.wallRepository.getById(wallId);
+      if (!wall) {
+        throw new NotFoundException('Wall not found');
+      }
 
+      let hasEditAccess = false;
+
+      const wallAccess = await this.wallAccessRepository.findOne({
+        where: {
+          wall: { id: wallId },
+          user: { id: existingUser.id },
+        },
+      });
+
+      if (
+        wallAccess &&
+        (wallAccess.access_type === AccessType.EDITOR ||
+          wallAccess.access_type === AccessType.ADMIN)
+      ) {
+        hasEditAccess = true;
+      }
+
+      if (!(wall.user.id === existingUser.id) && !hasEditAccess) {
+        throw new ForbiddenException(
+          'You do not have access to add tweets to this wall',
+        );
+      }
       const tweetsData =
         await this.xUserHandleService.fetchTweetsDetailsByXHandle(xHandle);
       if (!tweetsData || tweetsData.length === 0)
@@ -127,7 +180,8 @@ export class TweetService {
       if (
         error instanceof UnauthorizedException ||
         error instanceof BadRequestException ||
-        error instanceof NotFoundException
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
       ) {
         throw error;
       }
@@ -174,13 +228,27 @@ export class TweetService {
   ): Promise<Paginated<Tweets>> {
     try {
       const existingUser = await this.userRepository.getByEmail(user.email);
-      if (!existingUser) throw new BadRequestException("User doesn't exist");
+      if (!existingUser) {
+        throw new BadRequestException("User doesn't exist");
+      }
 
-      const wall = await this.wallRepository.getWallByIdAndUser(
-        wallId,
-        existingUser.id,
-      );
-      if (!wall) throw new NotFoundException('Wall not found or access denied');
+      const wall = await this.wallRepository.getById(wallId);
+      if (!wall) {
+        throw new NotFoundException('Wall not found');
+      }
+
+      const wallAccess = await this.wallAccessRepository.findOne({
+        where: {
+          wall: { id: wallId },
+          user: { id: existingUser.id },
+        },
+      });
+
+      if (!(wall.user.id === existingUser.id) && !wallAccess) {
+        throw new ForbiddenException(
+          'You do not have access to view tweets of this wall',
+        );
+      }
 
       return await this.paginationService.paginateQuery(
         {
@@ -195,7 +263,8 @@ export class TweetService {
       if (
         error instanceof UnauthorizedException ||
         error instanceof BadRequestException ||
-        error instanceof NotFoundException
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
       ) {
         throw error;
       }
@@ -207,6 +276,30 @@ export class TweetService {
     try {
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) throw new BadRequestException("User doesn't exist");
+
+      const wall = await this.wallRepository.getById(wallId);
+      if (!wall) {
+        throw new NotFoundException('Wall not found');
+      }
+
+      let hasEditAccess = false;
+
+      const wallAccess = await this.wallAccessRepository.findOne({
+        where: {
+          wall: { id: wallId },
+          user: { id: existingUser.id },
+        },
+      });
+
+      if (wallAccess && wallAccess.access_type === AccessType.ADMIN) {
+        hasEditAccess = true;
+      }
+
+      if (!(wall.user.id === existingUser.id) && !hasEditAccess) {
+        throw new ForbiddenException(
+          'You do not have access to delete tweet to this wall',
+        );
+      }
 
       const tweet = await this.tweetRepository.getTweetByIdAndWall(
         tweetId,
@@ -220,7 +313,8 @@ export class TweetService {
       if (
         error instanceof UnauthorizedException ||
         error instanceof BadRequestException ||
-        error instanceof NotFoundException
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
       ) {
         throw error;
       }
@@ -394,12 +488,33 @@ export class TweetService {
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) throw new BadRequestException("User doesn't exist");
 
-      const wall = await this.wallRepository.getWallByIdAndUser(
-        wallId,
-        existingUser.id,
-      );
-      if (!wall) throw new NotFoundException('Wall not found or access denied');
+      const wall = await this.wallRepository.getById(wallId);
+      if (!wall) {
+        throw new NotFoundException('Wall not found');
+      }
 
+      let hasEditAccess = false;
+
+      const wallAccess = await this.wallAccessRepository.findOne({
+        where: {
+          wall: { id: wallId },
+          user: { id: existingUser.id },
+        },
+      });
+
+      if (
+        wallAccess &&
+        (wallAccess.access_type === AccessType.EDITOR ||
+          wallAccess.access_type === AccessType.ADMIN)
+      ) {
+        hasEditAccess = true;
+      }
+
+      if (!(wall.user.id === existingUser.id) && !hasEditAccess) {
+        throw new ForbiddenException(
+          'You do not have access to add tweets to this wall',
+        );
+      }
       // Fetch tweets by hashtag
       const tweetsData =
         await this.twitterService.fetchTweetsByHashtag(hashtag);
@@ -440,7 +555,8 @@ export class TweetService {
       if (
         error instanceof UnauthorizedException ||
         error instanceof BadRequestException ||
-        error instanceof NotFoundException
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
       ) {
         throw error;
       }
