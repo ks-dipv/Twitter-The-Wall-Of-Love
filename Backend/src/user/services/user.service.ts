@@ -180,20 +180,31 @@ export class UserService {
   }
 
   public async sentInvitation(email: string, wallId, accessType, user) {
-    const existingUser = await this.userRepository.getByEmail(user.email);
+    try {
+      const existingUser = await this.userRepository.getByEmail(user.email);
 
-    const baseUrl = 'http://localhost:3000';
-    const invitationUrl = `${baseUrl}/api/walls/${wallId}`;
+      if (!existingUser) {
+        throw new NotFoundException("User doesn't exist");
+      }
 
-    await this.mailService.sendInvitationEmail(invitationUrl, email);
+      const baseUrl = 'http://localhost:3000';
+      const invitationUrl = `${baseUrl}/api/walls/${wallId}`;
 
-    const invite = this.invitationRepository.create({
-      email: email,
-      access_type: accessType,
-      user: existingUser,
-    });
+      await this.mailService.sendInvitationEmail(invitationUrl, email);
 
-    await this.invitationRepository.save(invite);
+      const invite = this.invitationRepository.create({
+        email: email,
+        access_type: accessType,
+        user: existingUser,
+      });
+
+      await this.invitationRepository.save(invite);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to send invitation email');
+    }
   }
 
   public async deleteAssignedUser(
