@@ -69,11 +69,12 @@ export class UserController {
 
   @Get('wall/:wallId/assigned-users')
   @CommonApiDecorators({
-    summary: 'Get list Assigned user',
+    summary: 'Get list of assigned users',
     successDescription: 'List of assigned users retrieved',
   })
-  async getAssignedUsers(@Param('wallId') wallId: number, @User() user) {
-    return this.userService.getAssignedUsers(wallId, user.id);
+  @Auth(AuthType.Bearer)
+  async getAssignedUsers(@Param('wallId') wallId: number, @User() user: any) {
+    return await this.userService.getAssignedUsers(wallId, user);
   }
 
   @Post('user/wall/invitation')
@@ -104,7 +105,7 @@ export class UserController {
     @Param('userId') userId: number,
     @User() user,
   ) {
-    await this.userService.deleteAssignedUser(wallId, userId, user.id);
+    await this.userService.deleteAssignedUser(wallId, userId,user);
     return new SuccessDto('User successfully removed from wall');
   }
 

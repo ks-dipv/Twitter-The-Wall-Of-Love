@@ -138,7 +138,16 @@ export class UserService {
     }
   }
 
-  async getAssignedUsers(wallId: number, requestingUserId: number) {
+   public async getAssignedUsers(wallId: number, user) {
+    if (!user || (!user.sub && !user.id)) {
+      throw new UnauthorizedException('User not authenticated');
+    }
+
+    const requestingUser = await this.userRepository.getByEmail(user.email);
+    if (!requestingUser) {
+      throw new NotFoundException('Requesting user not found');
+    }
+
     const wall = await this.wallRepository.findOne({
       where: { id: wallId },
       relations: ['user'],
@@ -148,15 +157,7 @@ export class UserService {
       throw new NotFoundException('Wall not found');
     }
 
-    const requestingUser = await this.userRepository.findOne({
-      where: { id: requestingUserId },
-    });
-
-    if (!requestingUser) {
-      throw new NotFoundException('Requesting user not found');
-    }
-
-    const isOwner = wall.user.id === requestingUserId;
+    const isOwner = wall.user.id === user.id;
     const isAdmin = requestingUser.access_type === AccessType.ADMIN;
 
     if (!isOwner && !isAdmin) {
@@ -198,7 +199,7 @@ export class UserService {
   public async deleteAssignedUser(
     wallId: number,
     targetUserId: number,
-    requestingUserId: number,
+    user
   ): Promise<void> {
     const wall = await this.wallRepository.findOne({
       where: { id: wallId },
@@ -209,15 +210,15 @@ export class UserService {
       throw new NotFoundException('Wall not found');
     }
 
-    const requestingUser = await this.userRepository.findOne({
-      where: { id: requestingUserId },
-    });
+    if (!user || (!user.sub && !user.id)) {
+      throw new UnauthorizedException('User not authenticated');
+    }
 
+    const requestingUser = await this.userRepository.getByEmail(user.email);
     if (!requestingUser) {
       throw new NotFoundException('Requesting user not found');
     }
-
-    const isOwner = wall.user.id === requestingUserId;
+    const isOwner = wall.user.id === user.id;
     const isAdmin = requestingUser.access_type === AccessType.ADMIN;
 
     if (!isOwner && !isAdmin) {
@@ -234,7 +235,7 @@ export class UserService {
       throw new NotFoundException('user does not have access to this wall.');
     }
 
-    if (isOwner && targetUserId === requestingUserId) {
+    if (isOwner && targetUserId === user.id) {
       throw new BadRequestException('Wall owner cannot remove themselves.');
     }
 
@@ -281,7 +282,7 @@ export class UserService {
       );
     }
 
-    if (isOwner && targetUserId === user.id) {
+    if (isOwner && targetUserId === user.i) {
       throw new BadRequestException(
         'Wall owner cannot modify their own access.',
       );
