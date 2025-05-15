@@ -11,6 +11,7 @@ import UpdateWallPage from "./UpdateWallPage";
 import Home from "./Home";
 import PublicWalls from "./PublicWalls";
 import ShareWithMe from "./ShareWithMe";
+import AddUser from "./AddUser";
 
 const AdminDashboard = () => {
   return (
@@ -28,6 +29,7 @@ const AdminDashboard = () => {
           <Route path="list-walls" element={<ListWalls />} />
           <Route path="walls/:wallId/add-tweet" element={<AddTweet />} />
           <Route path="share-with-me" element={<ShareWithMe />} />
+          <Route path="walls/:id/add-user" element={< AddUser/>} />
         </Routes>
       </div>
     </div>

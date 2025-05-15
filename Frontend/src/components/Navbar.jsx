@@ -3,12 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { deleteWall } from "../services/api";
 import ShareWallModal from "./ShareWallModal";
 import ConfirmationDialog from "./ConfirmationDialog";
-import {
-  FaShare,
-  FaEdit,
-  FaTrash,
-  FaCog,
-} from "react-icons/fa";
+import { FaShare, FaEdit, FaTrash, FaCog } from "react-icons/fa";
 
 const Navbar = ({ logo, wallId }) => {
   const navigate = useNavigate();
@@ -77,6 +72,14 @@ const Navbar = ({ logo, wallId }) => {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex gap-4">
+          {/* Add User Button */}
+          <button
+            className="px-4 py-2 bg-[#334155] text-white rounded font-semibold hover:bg-[#94A3B8] transition"
+            onClick={() => navigate(`/admin/walls/${wallId}/add-user`)}
+          >
+            + Add User
+          </button>
+
           {/* Add Tweet Button */}
           <button
             className="px-4 py-2 bg-[#334155] text-white rounded font-semibold  hover:bg-[#94A3B8] transition"
@@ -91,7 +94,8 @@ const Navbar = ({ logo, wallId }) => {
               className="px-4 py-2 bg-[#334155] text-white font-semibold rounded shadow-md hover:bg-[#94A3B8] transition"
               onClick={() => setDropdownOpen((prev) => !prev)}
             >
-              <FaCog className="inline mr-2" />Wall Settings
+              <FaCog className="inline mr-2" />
+              Wall Settings
             </button>
 
             {/* Dropdown Menu */}
