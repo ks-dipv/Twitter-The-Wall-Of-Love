@@ -96,7 +96,7 @@ export class UserController {
   @Delete('wall/:wallId/assigned-user/:userId')
   @CommonApiDecorators({
     summary: 'Delete assigned user',
-    successDescription: 'Assigned user successfully',
+    successDescription: 'Assigned user Deleted successfully',
     errorStatus: 404,
     errorDescription: 'User not found',
   })

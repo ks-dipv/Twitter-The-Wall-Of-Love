@@ -10,7 +10,6 @@ import { OneToMany } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { Invitation } from './invitation.entity';
 import { WallAccess } from './wall-access.entity';
-import { AccessType } from '../enum/accesstype.enum';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -64,11 +63,4 @@ export class User {
 
   @OneToMany(() => WallAccess, (wallaccess) => wallaccess.assigned_by)
   WallAccess: WallAccess[];
-
-  @Column({
-    type: 'enum',
-    enum: AccessType,
-    default: AccessType.ADMIN,
-  })
-  access_type?: AccessType;
 }

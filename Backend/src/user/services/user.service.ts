@@ -12,7 +12,6 @@ import { UploadService } from '../../common/services/upload.service';
 import { UpdateDto } from '../dtos/update.dto';
 import { UserRepository } from '../repositories/user.repository';
 import { User } from '../entity/user.entity';
-import { GenerateTokenProvider } from 'src/common/services/generate-token.provider';
 import { GoogleUser } from '../interfaces/google-user.interface';
 import { MailService } from 'src/auth/services/mail.service';
 import { ConfigService } from '@nestjs/config';
@@ -28,7 +27,6 @@ import { Invitation } from '../entity/invitation.entity';
 export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly generateTokenProvider: GenerateTokenProvider,
     private readonly uploadService: UploadService,
     private readonly mailService: MailService,
     private readonly configService: ConfigService,
@@ -139,44 +137,62 @@ export class UserService {
   }
 
   public async getAssignedUsers(wallId: number, user) {
-    if (!user || (!user.sub && !user.id)) {
-      throw new UnauthorizedException('User not authenticated');
-    }
+    try {
+      const requestingUser = await this.userRepository.getByEmail(user.email);
+      if (!requestingUser) {
+        throw new NotFoundException('Requesting user not found');
+      }
 
-    const requestingUser = await this.userRepository.getByEmail(user.email);
-    if (!requestingUser) {
-      throw new NotFoundException('Requesting user not found');
-    }
+      const wall = await this.wallRepository.findOne({
+        where: { id: wallId },
+        relations: ['user'],
+      });
 
-    const wall = await this.wallRepository.findOne({
-      where: { id: wallId },
-      relations: ['user'],
-    });
+      if (!wall) {
+        throw new NotFoundException('Wall not found');
+      }
 
-    if (!wall) {
-      throw new NotFoundException('Wall not found');
-    }
+      let hasAdminAccess = false;
 
-    const isOwner = wall.user.id === user.id;
-    const isAdmin = requestingUser.access_type === AccessType.ADMIN;
+      const wallAccess = await this.wallAccessRepository.findOne({
+        where: {
+          wall: { id: wallId },
+          user: { id: requestingUser.id },
+        },
+      });
 
-    if (!isOwner && !isAdmin) {
-      throw new ForbiddenException(
-        "You do not have permission to view this wall's users.",
+      if (wallAccess?.access_type === AccessType.ADMIN) {
+        hasAdminAccess = true;
+      }
+
+      if (!(wall.user.id === requestingUser.id) && !hasAdminAccess) {
+        throw new ForbiddenException(
+          "You do not have permission to view this wall's assigned users.",
+        );
+      }
+
+      const accesses = await this.wallAccessRepository.find({
+        where: { wall: { id: wallId } },
+        relations: ['user'],
+        order: { created_at: 'ASC' },
+      });
+
+      return accesses.map((access) => ({
+        email: access.user.email,
+        access_type: access.access_type,
+        assigned_at: access.created_at,
+      }));
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      throw new BadRequestException(
+        error.message || 'Failed to get assigned user',
       );
     }
-
-    const accesses = await this.wallAccessRepository.find({
-      where: { wall: { id: wallId } },
-      relations: ['user'],
-      order: { created_at: 'ASC' },
-    });
-
-    return accesses.map((access) => ({
-      email: access.user.email,
-      access_type: access.access_type,
-      assigned_at: access.created_at,
-    }));
   }
 
   public async sentInvitation(email: string, wallId, accessType, user) {
@@ -212,45 +228,55 @@ export class UserService {
     targetUserId: number,
     user,
   ): Promise<void> {
-    const wall = await this.wallRepository.findOne({
-      where: { id: wallId },
-      relations: ['user'],
-    });
+    try {
+      const requestingUser = await this.userRepository.getByEmail(user.email);
+      if (!requestingUser) {
+        throw new NotFoundException('Requesting user not found');
+      }
 
-    if (!wall) {
-      throw new NotFoundException('Wall not found');
-    }
+      const wall = await this.wallRepository.findOne({
+        where: { id: wallId },
+        relations: ['user'],
+      });
 
-    if (!user || (!user.sub && !user.id)) {
-      throw new UnauthorizedException('User not authenticated');
-    }
+      if (!wall) {
+        throw new NotFoundException('Wall not found');
+      }
 
-    const requestingUser = await this.userRepository.getByEmail(user.email);
-    if (!requestingUser) {
-      throw new NotFoundException('Requesting user not found');
-    }
-    const isOwner = wall.user.id === user.id;
-    const isAdmin = requestingUser.access_type === AccessType.ADMIN;
+      const wallAccess = await this.wallAccessRepository.findOne({
+        where: {
+          wall: { id: wallId },
+          user: { id: requestingUser.id },
+        },
+      });
 
-    if (!isOwner && !isAdmin) {
-      throw new ForbiddenException(
-        'You do not have permission to remove users from this wall.',
+      if (!(wall.user.id === requestingUser.id) && !wallAccess) {
+        throw new ForbiddenException(
+          'You do not have permission to remove users from this wall.',
+        );
+      }
+
+      const access = await this.wallAccessRepository.findOne({
+        where: { wall: { id: wallId }, user: { id: targetUserId } },
+      });
+
+      if (wall.user.id === requestingUser.id && targetUserId === user.id) {
+        throw new BadRequestException('Wall owner cannot remove themselves.');
+      }
+
+      await this.wallAccessRepository.delete(access.id);
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      throw new BadRequestException(
+        error.message || 'Failed to Delete assigned user',
       );
     }
-
-    const access = await this.wallAccessRepository.findOne({
-      where: { wall: { id: wallId }, user: { id: targetUserId } },
-    });
-
-    if (!access) {
-      throw new NotFoundException('user does not have access to this wall.');
-    }
-
-    if (isOwner && targetUserId === user.id) {
-      throw new BadRequestException('Wall owner cannot remove themselves.');
-    }
-
-    await this.wallAccessRepository.delete(access.id);
   }
 
   public async updateAssignedUserAccess(
@@ -259,62 +285,77 @@ export class UserService {
     updateUserAccessDto: UpdateUserAccessDto,
     user,
   ): Promise<void> {
-    if (!user || (!user.sub && !user.id)) {
-      throw new UnauthorizedException('User not authenticated');
-    }
+    try {
+      const { access_type } = updateUserAccessDto;
 
-    const { access_type } = updateUserAccessDto;
+      const requestingUser = await this.userRepository.getByEmail(user.email);
+      if (!requestingUser) {
+        throw new NotFoundException('Requesting user not found');
+      }
 
-    const requestingUser = await this.userRepository.getByEmail(user.email);
-    if (!requestingUser) {
-      throw new NotFoundException('Requesting user not found');
-    }
+      const currentWall = await this.wallRepository.findOne({
+        where: { id: currentWallId },
+        relations: ['user'],
+      });
+      if (!currentWall) {
+        throw new NotFoundException('Current wall not found');
+      }
 
-    const targetUser = await this.userRepository.findOne({
-      where: { id: targetUserId },
-    });
-    if (!targetUser) {
-      throw new NotFoundException('Target user not found');
-    }
+      let hasAdminAccess = false;
 
-    const currentWall = await this.wallRepository.findOne({
-      where: { id: currentWallId },
-      relations: ['user'],
-    });
-    if (!currentWall) {
-      throw new NotFoundException('Current wall not found');
-    }
+      const wallAccess = await this.wallAccessRepository.findOne({
+        where: {
+          wall: { id: currentWallId },
+          user: { id: requestingUser.id },
+        },
+      });
 
-    const isOwner = currentWall.user.id === user.id;
-    const isAdmin = requestingUser.access_type === AccessType.ADMIN;
-    if (!isOwner && !isAdmin) {
-      throw new ForbiddenException(
-        'You do not have permission to update user access for this wall.',
-      );
-    }
+      if (wallAccess?.access_type === AccessType.ADMIN) {
+        hasAdminAccess = true;
+      }
 
-    if (isOwner && targetUserId === user.i) {
+      if (!(currentWall.user.id === requestingUser.id) && !hasAdminAccess) {
+        throw new ForbiddenException(
+          'You do not have permission to update user access for this wall.',
+        );
+      }
+
+      if (
+        currentWall.user.id === requestingUser.id &&
+        targetUserId === requestingUser.id
+      ) {
+        throw new BadRequestException(
+          'Wall owner cannot modify their own access.',
+        );
+      }
+
+      const access = await this.wallAccessRepository.findOne({
+        where: { wall: { id: currentWallId }, user: { id: targetUserId } },
+      });
+
+      if (!access) {
+        throw new NotFoundException(
+          'User does not have access to the current wall.',
+        );
+      }
+
+      access.access_type = access_type;
+      await this.wallAccessRepository.save(access);
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
       throw new BadRequestException(
-        'Wall owner cannot modify their own access.',
+        error.message || 'Failed to update assigned user',
       );
     }
-
-    const access = await this.wallAccessRepository.findOne({
-      where: { wall: { id: currentWallId }, user: { id: targetUserId } },
-    });
-    if (!access) {
-      throw new NotFoundException(
-        'User does not have access to the current wall.',
-      );
-    }
-
-    access.access_type = access_type;
-    await this.wallAccessRepository.save(access);
   }
+
   async getAssignedByme(user) {
-    if (!user || (!user.id && !user.sub)) {
-      throw new UnauthorizedException('User not authenticated');
-    }
     const userId = user.id || user.sub;
 
     const accesses = await this.wallAccessRepository.find({
@@ -326,11 +367,11 @@ export class UserService {
     });
 
     return accesses.map((access) => ({
-      assigned_me: access.assigned_by.email ,
+      assigned_me: access.assigned_by.email,
       wall: {
         id: access.wall.id,
         name: access.wall.title,
-        logo : access.wall.logo,
+        logo: access.wall.logo,
         description: access.wall.description,
         wall_visibility: access.wall.visibility,
         created_at: access.wall.created_at,
