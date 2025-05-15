@@ -332,11 +332,33 @@ export class TweetService {
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) throw new BadRequestException("User doesn't exist");
 
-      const wall = await this.wallRepository.getWallByIdAndUser(
-        wallId,
-        existingUser.id,
-      );
-      if (!wall) throw new NotFoundException('Wall not found or access denied');
+      const wall = await this.wallRepository.getById(wallId);
+      if (!wall) {
+        throw new NotFoundException('Wall not found');
+      }
+
+      let hasEditAccess = false;
+
+      const wallAccess = await this.wallAccessRepository.findOne({
+        where: {
+          wall: { id: wallId },
+          user: { id: existingUser.id },
+        },
+      });
+
+      if (
+        wallAccess &&
+        (wallAccess.access_type === AccessType.EDITOR ||
+          wallAccess.access_type === AccessType.ADMIN)
+      ) {
+        hasEditAccess = true;
+      }
+
+      if (!(wall.user.id === existingUser.id) && !hasEditAccess) {
+        throw new ForbiddenException(
+          'You do not have access to add tweets to this wall',
+        );
+      }
 
       const tweets = await this.tweetRepository.getTweetsByWall(wallId);
       if (!tweets.length)
