@@ -4,6 +4,7 @@ import {
   NotFoundException,
   UnauthorizedException,
   InternalServerErrorException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { WallRepository } from '../repository/wall.repository';
 import { CreateWallDto } from '../dtos/create-wall.dto';
@@ -25,6 +26,10 @@ import { PaginationService } from 'src/pagination/services/pagination.service';
 import { Paginated } from 'src/pagination/interfaces/paginated.interface';
 import { Tweets } from '../entity/tweets.entity';
 import { TweetRepository } from '../repository/tweet.repository';
+import { Invitation } from 'src/user/entity/invitation.entity';
+import { WallAccess } from 'src/user/entity/wall-access.entity';
+import { AccessType } from 'src/user/enum/accesstype.enum';
+
 @Injectable()
 export class WallService {
   constructor(
@@ -36,6 +41,12 @@ export class WallService {
 
     @InjectRepository(SocialLink)
     private readonly socialLinkRepository: Repository<SocialLink>,
+
+    @InjectRepository(Invitation)
+    private readonly invitationRepository: Repository<Invitation>,
+
+    @InjectRepository(WallAccess)
+    private readonly wallAccessRepository: Repository<WallAccess>,
 
     private readonly dataSource: DataSource,
     private readonly configService: ConfigService,
@@ -49,12 +60,25 @@ export class WallService {
         throw new NotFoundException('User not found');
       }
 
-      const wall = await this.wallRepository.getWallByIdAndUser(
-        wallId,
-        existingUser.id,
-      );
-      if (!wall || wall.user.id !== existingUser.id) {
-        throw new NotFoundException('Wall not found or access denied');
+      const wall = await this.wallRepository.getById(wallId);
+
+      let hasEditAccess = false;
+
+      const wallAccess = await this.wallAccessRepository.findOne({
+        where: {
+          wall: { id: wallId },
+          user: { id: existingUser.id },
+        },
+      });
+
+      if (wallAccess && wallAccess.access_type === AccessType.ADMIN) {
+        hasEditAccess = true;
+      }
+
+      if (!(wall.user.id === existingUser.id) && !hasEditAccess) {
+        throw new ForbiddenException(
+          'You do not have access to generate link for share wall',
+        );
       }
 
       // Generate UUIDs if they don't exist
@@ -85,6 +109,12 @@ export class WallService {
         embed_link,
       };
     } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
       throw new BadRequestException(
         error.message || 'Failed to generate links',
       );
@@ -99,12 +129,25 @@ export class WallService {
         throw new NotFoundException('User not found');
       }
 
-      const wall = await this.wallRepository.getWallByIdAndUser(
-        wallId,
-        existingUser.id,
-      );
-      if (!wall || wall.user.id !== existingUser.id) {
-        throw new NotFoundException('Wall not found or access denied');
+      const wall = await this.wallRepository.getById(wallId);
+
+      let hasEditAccess = false;
+
+      const wallAccess = await this.wallAccessRepository.findOne({
+        where: {
+          wall: { id: wallId },
+          user: { id: existingUser.id },
+        },
+      });
+
+      if (wallAccess && wallAccess.access_type === AccessType.ADMIN) {
+        hasEditAccess = true;
+      }
+
+      if (!(wall.user.id === existingUser.id) && !hasEditAccess) {
+        throw new ForbiddenException(
+          'You do not have access to generate link for share wall',
+        );
       }
 
       wall.public_uuid = uuidv4();
@@ -130,6 +173,12 @@ export class WallService {
         embed_link,
       };
     } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
       throw new BadRequestException(
         error.message || 'Failed to generate links',
       );
@@ -265,9 +314,35 @@ export class WallService {
       }
 
       const wall = await this.wallRepository.getById(id);
+      if (!wall) {
+        throw new NotFoundException('Wall not found');
+      }
 
-      if (!wall || wall.user.id !== existingUser.id) {
-        throw new NotFoundException('Wall not found or access denied');
+      const invitation = await this.invitationRepository.findOne({
+        where: { email: user.email },
+      });
+
+      if (invitation) {
+        const wallAccess = this.wallAccessRepository.create({
+          user: existingUser,
+          wall: wall,
+          access_type: invitation.access_type,
+          assigned_by: invitation.user,
+        });
+
+        await this.wallAccessRepository.save(wallAccess);
+        await this.invitationRepository.remove(invitation);
+      }
+
+      const wallAccess = await this.wallAccessRepository.findOne({
+        where: {
+          wall: { id },
+          user: { id: existingUser.id },
+        },
+      });
+
+      if (!(wall.user.id === existingUser.id) && !wallAccess) {
+        throw new ForbiddenException('You do not have access to this wall');
       }
 
       return wall;
@@ -373,8 +448,21 @@ export class WallService {
 
       const wall = await this.wallRepository.getById(id);
 
-      if (!wall || wall.user.id !== existingUser.id) {
-        throw new NotFoundException('Wall not found or access denied');
+      let hasEditAccess = false;
+
+      const wallAccess = await this.wallAccessRepository.findOne({
+        where: {
+          wall: { id },
+          user: { id: existingUser.id },
+        },
+      });
+
+      if (wallAccess && wallAccess.access_type === AccessType.ADMIN) {
+        hasEditAccess = true;
+      }
+
+      if (!(wall.user.id === existingUser.id) && !hasEditAccess) {
+        throw new ForbiddenException('You do not have access to delete wall');
       }
 
       if (wall.logo) {
@@ -385,6 +473,12 @@ export class WallService {
       await this.wallRepository.delete(id);
       return { message: 'Wall deleted successfully' };
     } catch (error) {
+      if (
+        error instanceof ForbiddenException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
+      }
       throw new BadRequestException(error.message || 'Failed to delete wall');
     }
   }
@@ -413,11 +507,25 @@ export class WallService {
         throw new NotFoundException(`Wall with ID ${id} not found`);
       }
 
-      // Ensure the user owns the wall
-      if (wall.user.id !== existingUser.id) {
-        throw new UnauthorizedException(
-          'You do not have permission to update this wall',
-        );
+      let hasEditAccess = false;
+
+      const wallAccess = await this.wallAccessRepository.findOne({
+        where: {
+          wall: { id },
+          user: { id: existingUser.id },
+        },
+      });
+
+      if (
+        wallAccess &&
+        (wallAccess.access_type === AccessType.EDITOR ||
+          wallAccess.access_type === AccessType.ADMIN)
+      ) {
+        hasEditAccess = true;
+      }
+
+      if (!(wall.user.id === existingUser.id) && !hasEditAccess) {
+        throw new ForbiddenException('You do not have access to update wall ');
       }
 
       let logoUrl: string | null = wall.logo;
@@ -517,7 +625,8 @@ export class WallService {
         error instanceof BadRequestException ||
         error instanceof UnauthorizedException ||
         error instanceof NotFoundException ||
-        error instanceof InternalServerErrorException
+        error instanceof InternalServerErrorException ||
+        error instanceof ForbiddenException
       ) {
         throw error;
       }

@@ -5,26 +5,38 @@ import {
   InternalServerErrorException,
   NotFoundException,
   ConflictException,
+  ForbiddenException,
 } from '@nestjs/common';
 
 import { UploadService } from '../../common/services/upload.service';
 import { UpdateDto } from '../dtos/update.dto';
 import { UserRepository } from '../repositories/user.repository';
 import { User } from '../entity/user.entity';
-import { GenerateTokenProvider } from 'src/common/services/generate-token.provider';
 import { GoogleUser } from '../interfaces/google-user.interface';
 import { MailService } from 'src/auth/services/mail.service';
 import { ConfigService } from '@nestjs/config';
-import { Roles } from '../entity/roles.entity';
+import { AccessType } from '../enum/accesstype.enum';
+import { WallRepository } from 'src/wall/repository/wall.repository';
+import { WallAccess } from '../entity/wall-access.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { UpdateUserAccessDto } from '../dtos/update-user-role.dto';
+import { Invitation } from '../entity/invitation.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly generateTokenProvider: GenerateTokenProvider,
     private readonly uploadService: UploadService,
     private readonly mailService: MailService,
     private readonly configService: ConfigService,
+
+    private readonly wallRepository: WallRepository,
+    @InjectRepository(WallAccess)
+    private wallAccessRepository: Repository<WallAccess>,
+
+    @InjectRepository(Invitation)
+    private readonly invitationRepository: Repository<Invitation>,
   ) {}
 
   public async createGoogleUser(googleUser: GoogleUser) {
@@ -124,121 +136,248 @@ export class UserService {
     }
   }
 
-  public async sentInvitationLink(roleId: number, email: string, user: User) {
+  public async getAssignedUsers(wallId: number, user) {
     try {
-      const existingUser = await this.userRepository.findOne({
-        where: { email: user.email },
-        relations: ['role'],
+      const requestingUser = await this.userRepository.getByEmail(user.email);
+      if (!requestingUser) {
+        throw new NotFoundException('Requesting user not found');
+      }
+
+      const wall = await this.wallRepository.findOne({
+        where: { id: wallId },
+        relations: ['user'],
       });
 
-      if (!existingUser || existingUser.role.id !== 1) {
-        throw new NotFoundException(
-          'User not found or user does not have admin access',
+      if (!wall) {
+        throw new NotFoundException('Wall not found');
+      }
+
+      let hasAdminAccess = false;
+
+      const wallAccess = await this.wallAccessRepository.findOne({
+        where: {
+          wall: { id: wallId },
+          user: { id: requestingUser.id },
+        },
+      });
+
+      if (wallAccess?.access_type === AccessType.ADMIN) {
+        hasAdminAccess = true;
+      }
+
+      if (!(wall.user.id === requestingUser.id) && !hasAdminAccess) {
+        throw new ForbiddenException(
+          "You do not have permission to view this wall's assigned users.",
         );
       }
 
-      const token = await this.generateTokenProvider.generateInvitationToken(
-        roleId,
-        email,
-        user,
-      );
-
-      existingUser.invitation_token = token;
-
-      await this.userRepository.save(existingUser);
-
-      const baseUrl = 'http://localhost:3000';
-      const invitationUrl = `${baseUrl}/api/invitation/${token}`;
-
-      await this.mailService.sendInvitationEmail(invitationUrl, email);
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      } else {
-        throw new InternalServerErrorException(
-          'Failed to send invitation link',
-        );
-      }
-    }
-  }
-
-  public async assignRoleToUser(token: string, user: User) {
-    try {
-      const splitToken = token.split('.');
-
-      const payload = JSON.parse(atob(splitToken[1]));
-
-      const adminUserMail = payload.email;
-      const roleId = payload.role;
-      const assignUserMail = payload.assignUserMail;
-
-      const assignUser = await this.userRepository.getByEmail(user.email);
-      const adminUser = await this.userRepository.getByEmail(adminUserMail);
-
-      if (!assignUser || !adminUser) {
-        throw new NotFoundException('User not found');
-      }
-
-      if (
-        !adminUser.invitation_token ||
-        assignUser.is_invitation_accepted === true
-      ) {
-        throw new BadRequestException('Invitation already accepted or invalid');
-      }
-
-      if (assignUserMail !== user.email) {
-        throw new BadRequestException(
-          'User does not have permission to accept role invitation',
-        );
-      }
-
-      assignUser.role = roleId;
-      assignUser.assignedBy = adminUser.id;
-      assignUser.is_invitation_accepted = true;
-      adminUser.invitation_token = null;
-
-      await this.userRepository.save(assignUser);
-      await this.userRepository.save(adminUser);
-
-      return assignUser;
-    } catch (error) {
-      if (
-        error instanceof BadRequestException ||
-        error instanceof NotFoundException
-      ) {
-        throw error;
-      }
-      console.error('Error while assigning role to user:', error);
-      throw new InternalServerErrorException('Failed to assign role to user');
-    }
-  }
-  public async getAssignedUsers(adminId: number) {
-    try {
-      const admin = await this.userRepository.findOne({
-        where: { id: adminId, role: { id: 1 } },
-        relations: ['role'],
+      const accesses = await this.wallAccessRepository.find({
+        where: { wall: { id: wallId } },
+        relations: ['user'],
+        order: { created_at: 'ASC' },
       });
 
-      if (!admin) {
-        throw new NotFoundException('User does not have admin access');
-      }
-
-      const assignedUsers = await this.userRepository.find({
-        where: { assignedBy: adminId, is_invitation_accepted: true },
-        relations: ['role'],
-      });
-
-      return assignedUsers.map((user) => ({
-        id: user.id,
-        email: user.email,
-        roleId: user.role.id,
-        roleName: user.role.name,
+      return accesses.map((access) => ({
+        email: access.user.email,
+        access_type: access.access_type,
+        assigned_at: access.created_at,
       }));
     } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      throw new BadRequestException(
+        error.message || 'Failed to get assigned user',
+      );
+    }
+  }
+
+  public async sentInvitation(email: string, wallId, accessType, user) {
+    try {
+      const existingUser = await this.userRepository.getByEmail(user.email);
+
+      if (!existingUser) {
+        throw new NotFoundException("User doesn't exist");
+      }
+
+      const baseUrl = 'http://localhost:3000';
+      const invitationUrl = `${baseUrl}/api/walls/${wallId}`;
+
+      await this.mailService.sendInvitationEmail(invitationUrl, email);
+
+      const invite = this.invitationRepository.create({
+        email: email,
+        access_type: accessType,
+        user: existingUser,
+      });
+
+      await this.invitationRepository.save(invite);
+    } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException('Failed to fetch assigned users');
+      throw new InternalServerErrorException('Failed to send invitation email');
     }
+  }
+
+  public async deleteAssignedUser(
+    wallId: number,
+    targetUserId: number,
+    user,
+  ): Promise<void> {
+    try {
+      const requestingUser = await this.userRepository.getByEmail(user.email);
+      if (!requestingUser) {
+        throw new NotFoundException('Requesting user not found');
+      }
+
+      const wall = await this.wallRepository.findOne({
+        where: { id: wallId },
+        relations: ['user'],
+      });
+
+      if (!wall) {
+        throw new NotFoundException('Wall not found');
+      }
+
+      const wallAccess = await this.wallAccessRepository.findOne({
+        where: {
+          wall: { id: wallId },
+          user: { id: requestingUser.id },
+        },
+      });
+
+      if (!(wall.user.id === requestingUser.id) && !wallAccess) {
+        throw new ForbiddenException(
+          'You do not have permission to remove users from this wall.',
+        );
+      }
+
+      const access = await this.wallAccessRepository.findOne({
+        where: { wall: { id: wallId }, user: { id: targetUserId } },
+      });
+
+      if (wall.user.id === requestingUser.id && targetUserId === user.id) {
+        throw new BadRequestException('Wall owner cannot remove themselves.');
+      }
+
+      await this.wallAccessRepository.delete(access.id);
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      throw new BadRequestException(
+        error.message || 'Failed to Delete assigned user',
+      );
+    }
+  }
+
+  public async updateAssignedUserAccess(
+    currentWallId: number,
+    targetUserId: number,
+    updateUserAccessDto: UpdateUserAccessDto,
+    user,
+  ): Promise<void> {
+    try {
+      const { access_type } = updateUserAccessDto;
+
+      const requestingUser = await this.userRepository.getByEmail(user.email);
+      if (!requestingUser) {
+        throw new NotFoundException('Requesting user not found');
+      }
+
+      const currentWall = await this.wallRepository.findOne({
+        where: { id: currentWallId },
+        relations: ['user'],
+      });
+      if (!currentWall) {
+        throw new NotFoundException('Current wall not found');
+      }
+
+      let hasAdminAccess = false;
+
+      const wallAccess = await this.wallAccessRepository.findOne({
+        where: {
+          wall: { id: currentWallId },
+          user: { id: requestingUser.id },
+        },
+      });
+
+      if (wallAccess?.access_type === AccessType.ADMIN) {
+        hasAdminAccess = true;
+      }
+
+      if (!(currentWall.user.id === requestingUser.id) && !hasAdminAccess) {
+        throw new ForbiddenException(
+          'You do not have permission to update user access for this wall.',
+        );
+      }
+
+      if (
+        currentWall.user.id === requestingUser.id &&
+        targetUserId === requestingUser.id
+      ) {
+        throw new BadRequestException(
+          'Wall owner cannot modify their own access.',
+        );
+      }
+
+      const access = await this.wallAccessRepository.findOne({
+        where: { wall: { id: currentWallId }, user: { id: targetUserId } },
+      });
+
+      if (!access) {
+        throw new NotFoundException(
+          'User does not have access to the current wall.',
+        );
+      }
+
+      access.access_type = access_type;
+      await this.wallAccessRepository.save(access);
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      throw new BadRequestException(
+        error.message || 'Failed to update assigned user',
+      );
+    }
+  }
+
+  async getAssignedByme(user) {
+    const userId = user.id || user.sub;
+
+    const accesses = await this.wallAccessRepository.find({
+      where: {
+        user: { id: userId },
+      },
+      relations: ['user', 'wall', 'assigned_by'],
+      order: { created_at: 'ASC' },
+    });
+
+    return accesses.map((access) => ({
+      assigned_me: access.assigned_by.email,
+      wall: {
+        id: access.wall.id,
+        name: access.wall.title,
+        logo: access.wall.logo,
+        description: access.wall.description,
+        wall_visibility: access.wall.visibility,
+        created_at: access.wall.created_at,
+      },
+      assigned_at: access.created_at,
+      access_type: access.access_type,
+    }));
   }
 }

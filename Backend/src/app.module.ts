@@ -16,8 +16,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from './auth/auth.module';
 import { PaginationModule } from './pagination/pagination.module';
-import { PermissionGuard } from './common/guards/permission/permission.guard';
-import { Rolespermission } from './user/entity/roles_permission.entity';
 const ENV = process.env.NODE_ENV;
 
 @Module({
@@ -28,7 +26,6 @@ const ENV = process.env.NODE_ENV;
       load: [appConfig, databaseConfig],
       validationSchema: environmentValidation,
     }),
-    TypeOrmModule.forFeature([Rolespermission]),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule, ScheduleModule.forRoot()],
       inject: [ConfigService],
@@ -57,10 +54,6 @@ const ENV = process.env.NODE_ENV;
     {
       provide: APP_GUARD,
       useClass: AuthenticationGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: PermissionGuard,
     },
     AccessTokenGuard,
   ],

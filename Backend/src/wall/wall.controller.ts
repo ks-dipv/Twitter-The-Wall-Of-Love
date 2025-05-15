@@ -26,8 +26,6 @@ import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
 import { AuthType } from 'src/common/enum/auth-type.enum';
 import { Auth } from 'src/common/decorator/auth.decorator';
 import { PaginationQueryDto } from 'src/pagination/dtos/pagination-query.dto';
-import { Permission } from 'src/common/decorator/permission.decorator';
-import { PermissionType } from 'src/common/enum/permission-type.enum';
 
 @ApiTags('Walls')
 @Controller('api/walls')
@@ -42,7 +40,6 @@ export class WallController {
   })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('logo'))
-  @Permission(PermissionType.AddWall)
   async createWall(
     @Body() createWallDto: CreateWallDto,
     @User() user,
@@ -57,7 +54,6 @@ export class WallController {
     summary: 'Get all Walls for the logged-in user',
     successDescription: 'List of walls retrieved',
   })
-  @Permission(PermissionType.GetAllWall)
   async getAllWalls(
     @User() user,
     @Query() paginationQueryDto: PaginationQueryDto,
@@ -145,7 +141,6 @@ export class WallController {
     errorStatus: 404,
     errorDescription: 'Wall not found',
   })
-  @Permission(PermissionType.DeleteWall)
   @ApiParam({ name: 'id', description: 'ID of the Wall', type: Number })
   async deleteWall(@Param('id') id: number, @User() user) {
     return await this.wallService.deleteWall(id, user);
@@ -162,7 +157,6 @@ export class WallController {
   @ApiParam({ name: 'id', description: 'ID of the Wall', type: Number })
   @ApiBody({ type: UpdateWallDto })
   @UseInterceptors(FileInterceptor('logo'))
-  @Permission(PermissionType.EditWall)
   async updateWall(
     @Param('id') id: number,
     @Body() updateWallDto: UpdateWallDto,

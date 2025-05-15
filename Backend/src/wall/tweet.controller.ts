@@ -15,8 +15,6 @@ import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
 import { Auth } from 'src/common/decorator/auth.decorator';
 import { AuthType } from 'src/common/enum/auth-type.enum';
 import { PaginationQueryDto } from 'src/pagination/dtos/pagination-query.dto';
-import { Permission } from 'src/common/decorator/permission.decorator';
-import { PermissionType } from 'src/common/enum/permission-type.enum';
 
 @ApiTags('Tweets')
 @Controller('api/walls')
@@ -41,7 +39,6 @@ export class TweetController {
       },
     },
   })
-  @Permission(PermissionType.AddTweet)
   async addTweet(
     @Param('wallId') wallId: number,
     @Body('tweetUrl') tweetUrl: string,
@@ -68,7 +65,6 @@ export class TweetController {
       },
     },
   })
-  @Permission(PermissionType.AddTweet)
   async addTweetByXHandle(
     @Param('wallId') wallId: number,
     @Body('xHandle') xHandle: string,
@@ -89,7 +85,6 @@ export class TweetController {
     errorDescription: 'Wall not found',
   })
   @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
-  @Permission(PermissionType.GetAllTweet)
   async getAllTweetsByWall(
     @Param('wallId') wallId: number,
     @Query() paginationQueryDto: PaginationQueryDto,
@@ -111,7 +106,6 @@ export class TweetController {
   })
   @ApiParam({ name: 'wallId', description: 'ID of the Wall', type: Number })
   @ApiParam({ name: 'tweetId', description: 'ID of the Tweet', type: Number })
-  @Permission(PermissionType.DeleteTweet)
   async deleteTweetByWall(
     @Param('tweetId') tweetId: number,
     @Param('wallId') wallId: number,
@@ -217,7 +211,6 @@ export class TweetController {
       },
     },
   })
-  @Permission(PermissionType.AddTweet)
   async addTweetsByHashtag(
     @Param('wallId') wallId: number,
     @Body('hashtag') hashtag: string,

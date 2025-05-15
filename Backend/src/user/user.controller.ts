@@ -7,6 +7,7 @@ import {
   Get,
   UseInterceptors,
   Post,
+  Patch,
   Param,
 } from '@nestjs/common';
 import { UserService } from './services/user.service';
@@ -20,7 +21,7 @@ import { SuccessDto } from 'src/common/dtos/success.dto';
 import { User } from 'src/common/decorator/user.decorator';
 import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
 import { AssignUserRoleDto } from './dtos/assign-user-role.dto';
-
+import { UpdateUserAccessDto } from './dtos/update-user-role.dto';
 @ApiTags('Users')
 @Controller('api')
 export class UserController {
@@ -66,45 +67,76 @@ export class UserController {
     return new SuccessDto('User Deleted Successfully');
   }
 
-  @Post('/role/assign/invitation')
-  @ApiBody({ type: AssignUserRoleDto })
+  @Get('wall/:wallId/assigned-users')
   @CommonApiDecorators({
-    summary: 'Send invitation mail to assign role',
-    successDescription: 'Successfully invitation mail to assign role',
-    errorStatus: 403,
-    errorDescription: 'User does not have admin access',
+    summary: 'Get list of assigned users',
+    successDescription: 'List of assigned users retrieved',
   })
-  public invitationMail(
+  @Auth(AuthType.Bearer)
+  async getAssignedUsers(@Param('wallId') wallId: number, @User() user: any) {
+    return await this.userService.getAssignedUsers(wallId, user);
+  }
+
+  @Post('user/wall/invitation')
+  @CommonApiDecorators({
+    summary: 'Invitation mail send to assigned user',
+    successDescription: 'Invitation mail sent successfully',
+    errorStatus: 404,
+    errorDescription: 'User not found',
+  })
+  public sentInvitation(
     @Body() assignUserRoleDto: AssignUserRoleDto,
     @User() user,
   ) {
-    const { email, roleId } = assignUserRoleDto;
-    this.userService.sentInvitationLink(roleId, email, user);
-    return new SuccessDto('Successfuly invitation mail to assign role');
+    const { email, wallId, accessType } = assignUserRoleDto;
+    this.userService.sentInvitation(email, wallId, accessType, user);
+    return new SuccessDto('Successfuly invitation mail to assign role of wall');
   }
 
-  @Post('/invitation/:token')
+  @Delete('wall/:wallId/assigned-user/:userId')
   @CommonApiDecorators({
-    summary: 'Validate invitation token and store role info',
-    successDescription: 'Successfully validated invitation and assigned role',
-    errorStatus: 400,
-    errorDescription: 'Invalid or expired invitation token',
+    summary: 'Delete assigned user',
+    successDescription: 'Assigned user Deleted successfully',
+    errorStatus: 404,
+    errorDescription: 'User not found',
   })
-  public async validateInvitationToken(
-    @Param('token') token: string,
+  async deleteAssignedUser(
+    @Param('wallId') wallId: number,
+    @Param('userId') userId: number,
     @User() user,
   ) {
-    return this.userService.assignRoleToUser(token, user);
+    await this.userService.deleteAssignedUser(wallId, userId, user);
+    return new SuccessDto('User successfully removed from wall');
   }
 
-  @Get('/assigned-users')
+  @Patch('wall/:wallId/assigned-user/:userId')
   @CommonApiDecorators({
-    summary: 'Get users assigned by admin',
-    successDescription: 'Successfully retrieved list of assigned users',
-    errorStatus: 403,
-    errorDescription: 'User does not have admin access',
+    summary: 'Update assigned user access type',
+    successDescription: 'User access type updated successfully',
   })
-  public async getAssignedUsers(@User() user) {
-    return this.userService.getAssignedUsers(user.id);
+  public async updateAssignedUserAccess(
+    @Param('wallId') wallId: number,
+    @Param('userId') userId: number,
+    @Body() updateUserAccessDto: UpdateUserAccessDto,
+    @User() user,
+  ) {
+    await this.userService.updateAssignedUserAccess(
+      wallId,
+      userId,
+      updateUserAccessDto,
+      user,
+    );
+    return new SuccessDto('User access type updated successfully');
+  }
+
+  @Get('wall/assigned-me')
+  @CommonApiDecorators({
+    summary: 'Get list of my wall assignments',
+    successDescription:
+      'List of wall assignments for the authenticated user retrieved',
+  })
+  @Auth(AuthType.Bearer)
+  async getMyAssignments(@User() user: any) {
+    return await this.userService.getAssignedByme(user);
   }
 }
