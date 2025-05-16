@@ -187,8 +187,8 @@ export class UserService {
         throw new NotFoundException("User doesn't exist");
       }
 
-      const baseUrl = 'http://localhost:3000';
-      const invitationUrl = `${baseUrl}/api/walls/${wallId}`;
+      const baseUrl = this.configService.get('appConfig.baseUrl');
+      const invitationUrl = `${baseUrl}/admin/walls/${wallId}`;
 
       await this.mailService.sendInvitationEmail(invitationUrl, email);
 
@@ -326,11 +326,11 @@ export class UserService {
     });
 
     return accesses.map((access) => ({
-      assigned_me: access.assigned_by.email ,
+      assigned_me: access.assigned_by.email,
       wall: {
         id: access.wall.id,
         name: access.wall.title,
-        logo : access.wall.logo,
+        logo: access.wall.logo,
         description: access.wall.description,
         wall_visibility: access.wall.visibility,
         created_at: access.wall.created_at,

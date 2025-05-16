@@ -166,9 +166,13 @@ export const addHashtagTweetsToWall = (wallId, hashtag) =>
 export const addHandleTweetsToWall = (wallId, xHandle) => {
   return api.post(`/walls/${wallId}/tweets/user`, { xHandle });
 };
+
 export const getAssignedWalls = async () => {
   return await api.get("/wall/assigned-me");
 };
 
+export const sentInvitation = async (data) => {
+  return await api.post("/user/wall/invitation", data);
+};
 
 export default api;
