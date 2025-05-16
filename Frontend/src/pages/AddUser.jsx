@@ -105,7 +105,7 @@ export default function AddUser() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition"
+            className="w-full bg-[#334155] text-white py-2 px-4 rounded-md hover:bg-[#94A3B8] transition"
           >
             {loading ? "Sending..." : "Send Invitation"}
           </button>
