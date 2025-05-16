@@ -175,4 +175,12 @@ export const sentInvitation = async (data) => {
   return await api.post("/user/wall/invitation", data);
 };
 
+export const getAssignedUsers = async (id) => {
+  return await api.get(`/wall/${id}/assigned-users`);
+};
+
+export const deleteAssignUser = async (id, assignedUserId) => {
+  return await api.delete(`/wall/${id}/assigned-user/${assignedUserId}`);
+};
+
 export default api;

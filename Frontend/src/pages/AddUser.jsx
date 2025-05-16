@@ -1,17 +1,33 @@
 import { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { sentInvitation } from "../services/api";
+import {
+  deleteAssignUser,
+  getAssignedUsers,
+  sentInvitation,
+} from "../services/api";
 import { useParams } from "react-router-dom";
-import api from "../services/api";
 
 export default function AddUser() {
   const { id } = useParams();
   const [email, setEmail] = useState("");
   const [accessType, setAccessType] = useState("viewer");
   const [loading, setLoading] = useState(false);
-
   const [assignedUsers, setAssignedUsers] = useState([]);
+
+  useEffect(() => {
+    fetchAssignedUsers();
+  }, []);
+
+  const fetchAssignedUsers = async () => {
+    try {
+      const res = await getAssignedUsers(id);
+      setAssignedUsers(res.data);
+    } catch (err) {
+      console.error("Error fetching assigned users:", err);
+      toast.error("Failed to load assigned users");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,7 +42,6 @@ export default function AddUser() {
 
       await sentInvitation(payload);
       toast.success("Invitation sent successfully");
-
       setEmail("");
       setAccessType("viewer");
       fetchAssignedUsers();
@@ -38,30 +53,16 @@ export default function AddUser() {
     }
   };
 
-  const fetchAssignedUsers = async () => {
+  const handleDelete = async (userId) => {
     try {
-      const res = await api.get(`/wall/${id}/assigned-users`);
-      setAssignedUsers(res.data);
-    } catch (err) {
-      console.error("Error fetching assigned users:", err);
-      toast.error("Failed to load assigned users");
-    }
-  };
-
-  const handleDelete = async (assignedUserId) => {
-    try {
-      await api.delete(`/wall/${id}/assigned-user/${assignedUserId}`);
+      await deleteAssignUser(id, userId);
       toast.success("User removed successfully");
       fetchAssignedUsers();
     } catch (error) {
       console.error("Error deleting assigned user:", error);
-      toast.error("Failed to remove user");
+      toast.error(error.response?.data?.message || "Failed to remove user");
     }
   };
-
-  useEffect(() => {
-    fetchAssignedUsers();
-  }, []);
 
   return (
     <div className="max-w-4xl mx-auto mt-10 bg-white p-6 rounded-lg shadow-lg">
@@ -104,14 +105,13 @@ export default function AddUser() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#334155] text-white py-2 px-4 rounded-md hover:bg-[#94A3B8] transition duration-200"
+            className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition"
           >
             {loading ? "Sending..." : "Send Invitation"}
           </button>
         </div>
       </form>
 
-      {/* Assigned Users Table */}
       <div className="mt-10">
         <h3 className="text-xl font-semibold mb-4 text-center">
           Assigned Users
@@ -131,7 +131,7 @@ export default function AddUser() {
             </thead>
             <tbody>
               {assignedUsers.map((user) => (
-                <tr key={user.id} className="border-t">
+                <tr key={user.userId} className="border-t">
                   <td className="px-4 py-2">{user.email}</td>
                   <td className="px-4 py-2 capitalize">{user.access_type}</td>
                   <td className="px-4 py-2">
@@ -139,7 +139,7 @@ export default function AddUser() {
                   </td>
                   <td className="px-4 py-2">
                     <button
-                      onClick={() => handleDelete(user.id)}
+                      onClick={() => handleDelete(user.userId)}
                       className="text-red-600 hover:underline"
                     >
                       Remove

@@ -176,6 +176,7 @@ export class UserService {
       email: access.user.email,
       access_type: access.access_type,
       assigned_at: access.created_at,
+      userId: access.user.id,
     }));
   }
 
