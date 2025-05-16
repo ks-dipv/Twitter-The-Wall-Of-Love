@@ -331,7 +331,7 @@ const ListWalls = () => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate(`/admin/walls/:id/add-user`);
+                      navigate(`/admin/walls/${wall.id}/add-user`);
                     }}
                     className="flex items-center justify-center gap-1 sm:gap-2 bg-[#94A3B8] hover:bg-[#D1D5DB] px-2 py-1 sm:px-3 sm:py-2 rounded-md bg-white border border-[#94A3B8] hover:bg-[#94A3B8] transition text-sm sm:text-base w-full sm:w-auto"
                     title="Update this wall"
