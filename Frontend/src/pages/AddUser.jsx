@@ -29,7 +29,7 @@ export default function AddUser() {
 
       setEmail("");
       setAccessType("viewer");
-      fetchAssignedUsers(); 
+      fetchAssignedUsers();
     } catch (error) {
       console.error("Error sending invitation:", error);
       toast.error(error.response?.data?.message || "Failed to send invitation");
@@ -113,7 +113,9 @@ export default function AddUser() {
 
       {/* Assigned Users Table */}
       <div className="mt-10">
-        <h3 className="text-xl font-semibold mb-4 text-center">Assigned Users</h3>
+        <h3 className="text-xl font-semibold mb-4 text-center">
+          Assigned Users
+        </h3>
 
         {assignedUsers.length === 0 ? (
           <p className="text-center text-gray-500">No users assigned yet.</p>
@@ -133,7 +135,7 @@ export default function AddUser() {
                   <td className="px-4 py-2">{user.email}</td>
                   <td className="px-4 py-2 capitalize">{user.access_type}</td>
                   <td className="px-4 py-2">
-                    {new Date(user.assigned_at).toLocaleString()}
+                    {new Date(user.assigned_at).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-2">
                     <button
