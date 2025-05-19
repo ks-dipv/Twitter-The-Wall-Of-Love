@@ -27,12 +27,13 @@ export default function ShareWithMe() {
 
   return (
     <div className="min-h-screen bg-gray-100 py-8 px-4">
-      <ToastContainer autoClose={2000} hideProgressBar />
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">
-          Walls Shared With Me
-        </h1>
+       <nav className="bg-gray-300 p-4 text-black flex justify-between">
+        <h1 className="text-lg font-bold">Wall share with me</h1>
+      </nav>
 
+      <ToastContainer autoClose={2000} hideProgressBar />
+      <div className="max-w-7xl mx-auto pt-10">
+     
         {loading ? (
           <p className="text-center text-gray-600">Loading...</p>
         ) : assignedWalls.length === 0 ? (
