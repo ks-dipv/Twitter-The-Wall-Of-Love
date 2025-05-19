@@ -183,4 +183,8 @@ export const deleteAssignUser = async (id, assignedUserId) => {
   return await api.delete(`/wall/${id}/assigned-user/${assignedUserId}`);
 };
 
+export const updateAssignedUserAccess = async (wallId, assignedUserId, accessType) => {
+  return api.patch(`/wall/${wallId}/assigned-user/${assignedUserId}`, { access_type: accessType });
+};
+
 export default api;
