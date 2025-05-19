@@ -8,6 +8,7 @@ import {
   updateAssignedUserAccess,
 } from "../services/api";
 import { useParams } from "react-router-dom";
+import { FiTrash2 } from "react-icons/fi";
 
 export default function AddUser() {
   const { id } = useParams();
@@ -167,15 +168,16 @@ export default function AddUser() {
                     <td className="px-4 py-2">
                       <button
                         onClick={() => handleUpdateClick(user)}
-                        className="text-black hover:underline ml-2"
+                        className="bg-[#334155] text-white px-2 py-1 rounded-md hover:bg-[#94A3B8] ml-2"
                       >
-                        Update |
+                        Update 
                       </button>
+                      <span className="mx-2">|</span>
                       <button
                         onClick={() => handleDelete(user.userId)}
-                        className="text-red-600 hover:underline"
+                        className=" px-2 py-2 rounded-md hover:bg-[#94A3B8] ml-2"
                       >
-                        Remove
+                        <FiTrash2 className="shrink-0" />
                       </button>
                     </td>
                   </tr>
