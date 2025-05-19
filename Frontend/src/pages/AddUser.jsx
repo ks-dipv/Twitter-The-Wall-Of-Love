@@ -109,7 +109,7 @@ export default function AddUser() {
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="Enter user email"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="mt-1 block w-full px-3 py-2 border border-[#334155] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#94A3B8]"
             />
           </div>
 
@@ -120,7 +120,7 @@ export default function AddUser() {
             <select
               value={accessType}
               onChange={(e) => setAccessType(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="mt-1 block w-full px-3 py-2 border border-[#334155] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#94A3B8]"
             >
               <option value="editor">Editor</option>
               <option value="admin">Admin</option>
@@ -201,7 +201,7 @@ export default function AddUser() {
                   type="email"
                   value={selectedUser.email}
                   disabled
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100"
+                  className="mt-1 block w-full px-3 py-2 border border-[#334155] rounded-md shadow-sm bg-gray-100"
                 />
               </div>
               <div>
@@ -211,7 +211,7 @@ export default function AddUser() {
                 <select
                   value={updateAccessType}
                   onChange={(e) => setUpdateAccessType(e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="mt-1 block w-full px-3 py-2 border border-[#334155] rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#94A3B8]"
                 >
                   <option value="editor">Editor</option>
                   <option value="admin">Admin</option>
