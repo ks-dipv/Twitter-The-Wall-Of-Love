@@ -141,50 +141,51 @@ export default function AddUser() {
       </div>
 
       <div className="max-w-4xl mx-auto mt-10  p-6 rounded-lg shadow-lg">
-          <h3 className="text-xl font-semibold mb-4 text-center">
-            Assigned Users
-          </h3>
+        <h3 className="text-xl font-semibold mb-4 text-center">
+          Assigned Users
+        </h3>
 
-          {assignedUsers.length === 0 ? (
-            <p className="text-center text-gray-500">No users assigned yet.</p>
-          ) : (
-            <table className="w-full border-collapse table-auto">
-              <thead>
-                <tr className="bg-gray-100 text-left">
-                  <th className="px-4 py-2">Email</th>
-                  <th className="px-4 py-2">Access Type</th>
-                  <th className="px-4 py-2">Assigned At</th>
-                  <th className="px-4 py-2">Action</th>
+        {assignedUsers.length === 0 ? (
+          <p className="text-center text-gray-500">No users assigned yet.</p>
+        ) : (
+          <table className="w-full border-collapse table-auto">
+            <thead>
+              <tr className="bg-gray-100 text-left">
+                <th className="px-4 py-2">Email</th>
+                <th className="px-4 py-2">Access Type</th>
+                <th className="px-4 py-2">Assigned At</th>
+                <th className="px-4 py-2">Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {assignedUsers.map((user) => (
+                <tr key={user.userId} className="border-t">
+                  <td className="px-4 py-2">{user.email}</td>
+                  <td className="px-4 py-2 capitalize">{user.access_type}</td>
+                  <td className="px-4 py-2">
+                    {new Date(user.assigned_at).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-2">
+                    <button
+                      onClick={() => handleUpdateClick(user)}
+                      className="bg-[#334155] text-white px-2 py-1 rounded-md hover:bg-[#94A3B8] ml-2"
+                    >
+                      Update
+                    </button>
+                    <span className="mx-2">|</span>
+                    <button
+                      onClick={() => handleDelete(user.userId)}
+                      className=" px-2 py-2 rounded-md hover:bg-[#94A3B8] ml-2"
+                    >
+                      <FiTrash2 className="shrink-0" />
+                    </button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {assignedUsers.map((user) => (
-                  <tr key={user.userId} className="border-t">
-                    <td className="px-4 py-2">{user.email}</td>
-                    <td className="px-4 py-2 capitalize">{user.access_type}</td>
-                    <td className="px-4 py-2">
-                      {new Date(user.assigned_at).toLocaleDateString()}
-                    </td>
-                    <td className="px-4 py-2">
-                      <button
-                        onClick={() => handleUpdateClick(user)}
-                        className="bg-[#334155] text-white px-2 py-1 rounded-md hover:bg-[#94A3B8] ml-2"
-                      >
-                        Update 
-                      </button>
-                      <span className="mx-2">|</span>
-                      <button
-                        onClick={() => handleDelete(user.userId)}
-                        className=" px-2 py-2 rounded-md hover:bg-[#94A3B8] ml-2"
-                      >
-                        <FiTrash2 className="shrink-0" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {isUpdateModalOpen && selectedUser && (
