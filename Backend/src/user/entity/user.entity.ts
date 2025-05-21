@@ -8,6 +8,8 @@ import {
 import { Wall } from 'src/wall/entity/wall.entity';
 import { OneToMany } from 'typeorm';
 import { Exclude } from 'class-transformer';
+import { Invitation } from './invitation.entity';
+import { WallAccess } from './wall-access.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -52,4 +54,13 @@ export class User {
 
   @OneToMany(() => Wall, (wall) => wall.user)
   walls: Wall[];
+
+  @OneToMany(() => Invitation, (invitation) => invitation.user)
+  invitations: Invitation[];
+
+  @OneToMany(() => WallAccess, (wallAccess) => wallAccess.user)
+  userWallAccess: WallAccess[];
+
+  @OneToMany(() => WallAccess, (wallaccess) => wallaccess.assigned_by)
+  WallAccess: WallAccess[];
 }

@@ -10,10 +10,14 @@ import jwtConfig from '../auth/config/jwt.config';
 
 import { UserRepository } from './repositories/user.repository';
 import { GenerateTokenProvider } from 'src/common/services/generate-token.provider';
+import { MailService } from 'src/auth/services/mail.service';
+import { Invitation } from './entity/invitation.entity';
+import { WallAccess } from './entity/wall-access.entity';
+import { WallRepository } from 'src/wall/repository/wall.repository';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Invitation, WallAccess]),
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
   ],
@@ -23,6 +27,8 @@ import { GenerateTokenProvider } from 'src/common/services/generate-token.provid
     GenerateTokenProvider,
     UploadService,
     UserRepository,
+    MailService,
+    WallRepository
   ],
   exports: [UserService, UserRepository],
 })

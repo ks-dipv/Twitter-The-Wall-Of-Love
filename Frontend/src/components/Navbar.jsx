@@ -3,14 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { deleteWall } from "../services/api";
 import ShareWallModal from "./ShareWallModal";
 import ConfirmationDialog from "./ConfirmationDialog";
-import {
-  FaShare,
-  FaEdit,
-  FaTrash,
-  FaCog,
-} from "react-icons/fa";
+import { FaShare, FaEdit, FaTrash, FaCog } from "react-icons/fa";
 
-const Navbar = ({ logo, wallId }) => {
+const Navbar = ({ logo, wallId, role }) => {
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
@@ -77,50 +72,71 @@ const Navbar = ({ logo, wallId }) => {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex gap-4">
+          {/* Add User Button */}
+          {(role === "admin" || role === "owner") && (
+            <button
+              className="px-4 py-2 bg-[#334155] text-white rounded font-semibold hover:bg-[#94A3B8] transition"
+              onClick={() => navigate(`/admin/walls/${wallId}/add-user`)}
+            >
+              + Add User
+            </button>
+          )}
+
           {/* Add Tweet Button */}
-          <button
-            className="px-4 py-2 bg-[#334155] text-white rounded font-semibold  hover:bg-[#94A3B8] transition"
-            onClick={() => navigate(`/admin/walls/${wallId}/add-tweet`)}
-          >
-            + Add Tweet
-          </button>
+          {(role === "admin" || role === "owner" || role === "editor") && (
+            <button
+              className="px-4 py-2 bg-[#334155] text-white rounded font-semibold  hover:bg-[#94A3B8] transition"
+              onClick={() => navigate(`/admin/walls/${wallId}/add-tweet`)}
+            >
+              + Add Tweet
+            </button>
+          )}
 
           {/* Wall Settings Button */}
-          <div className="relative" ref={dropdownRef}>
-            <button
-              className="px-4 py-2 bg-[#334155] text-white font-semibold rounded shadow-md hover:bg-[#94A3B8] transition"
-              onClick={() => setDropdownOpen((prev) => !prev)}
-            >
-              <FaCog className="inline mr-2" />Wall Settings
-            </button>
+          {(role === "admin" || role === "owner" || role === "editor") && (
+            <div className="relative" ref={dropdownRef}>
+              <button
+                className="px-4 py-2 bg-[#334155] text-white font-semibold rounded shadow-md hover:bg-[#94A3B8] transition"
+                onClick={() => setDropdownOpen((prev) => !prev)}
+              >
+                <FaCog className="inline mr-2" />
+                Wall Settings
+              </button>
 
-            {/* Dropdown Menu */}
-            {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-52 bg-white shadow-md rounded-lg border z-20">
-                <button
-                  onClick={handleOpenShareModal}
-                  className="block w-full text-left px-4 py-3 font-medium hover:bg-gray-100 transition flex items-center"
-                >
-                  <FaShare className="mr-2 text-blue-500" /> Share Wall
-                </button>
-                <button
-                  onClick={() => {
-                    navigate(`/admin/walls/${wallId}/update`);
-                    setDropdownOpen(false);
-                  }}
-                  className="block w-full text-left px-4 py-3 font-medium hover:bg-gray-100 transition flex items-center"
-                >
-                  <FaEdit className="mr-2 text-gray-700" /> Update Wall
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className="block w-full text-left px-4 py-3 text-red-600 font-medium hover:bg-gray-100 transition flex items-center"
-                >
-                  <FaTrash className="mr-2" /> Delete Wall
-                </button>
-              </div>
-            )}
-          </div>
+              {/* Dropdown Menu */}
+              {dropdownOpen && (
+                <div className="absolute right-0 mt-2 w-52 bg-white shadow-md rounded-lg border z-20">
+                  {(role === "admin" || role === "owner") && (
+                    <button
+                      onClick={handleOpenShareModal}
+                      className="block w-full text-left px-4 py-3 font-medium hover:bg-gray-100 transition flex items-center"
+                    >
+                      <FaShare className="mr-2 text-blue-500" /> Share Wall
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => {
+                      navigate(`/admin/walls/${wallId}/update`);
+                      setDropdownOpen(false);
+                    }}
+                    className="block w-full text-left px-4 py-3 font-medium hover:bg-gray-100 transition flex items-center"
+                  >
+                    <FaEdit className="mr-2 text-gray-700" /> Update Wall
+                  </button>
+
+                  {(role === "admin" || role === "owner") && (
+                    <button
+                      onClick={handleDelete}
+                      className="block w-full text-left px-4 py-3 text-red-600 font-medium hover:bg-gray-100 transition flex items-center"
+                    >
+                      <FaTrash className="mr-2" /> Delete Wall
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Mobile Menu Button */}

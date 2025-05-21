@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { TweetService } from './service/tweet.service';
 import { ApiTags, ApiParam, ApiBody, ApiQuery } from '@nestjs/swagger';
-import { User } from '../common/decorator/user.decorater';
+import { User } from '../common/decorator/user.decorator';
 import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
 import { Auth } from 'src/common/decorator/auth.decorator';
 import { AuthType } from 'src/common/enum/auth-type.enum';

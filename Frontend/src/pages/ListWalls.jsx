@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { deleteWall, getAllWalls } from "../services/api";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FiTrash2, FiEdit, FiPlus } from "react-icons/fi";
+import { FiTrash2, FiEdit, FiPlus, FiUserPlus } from "react-icons/fi";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast, ToastContainer } from "react-toastify";
@@ -327,6 +327,17 @@ const ListWalls = () => {
                   >
                     <FiEdit className="shrink-0" />
                     <span className="hidden xs:inline">Update</span>
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/admin/walls/${wall.id}/add-user`);
+                    }}
+                    className="flex items-center justify-center gap-1 sm:gap-2 bg-[#94A3B8] hover:bg-[#D1D5DB] px-2 py-1 sm:px-3 sm:py-2 rounded-md bg-white border border-[#94A3B8] hover:bg-[#94A3B8] transition text-sm sm:text-base w-full sm:w-auto"
+                    title="Update this wall"
+                  >
+                    <FiUserPlus className="shrink-0" />
+                    <span className="hidden xs:inline">Add User</span>
                   </button>
                 </div>
               </motion.div>

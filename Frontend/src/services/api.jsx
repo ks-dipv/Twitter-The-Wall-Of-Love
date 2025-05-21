@@ -167,4 +167,24 @@ export const addHandleTweetsToWall = (wallId, xHandle) => {
   return api.post(`/walls/${wallId}/tweets/user`, { xHandle });
 };
 
+export const getAssignedWalls = async () => {
+  return await api.get("/wall/assigned-me");
+};
+
+export const sentInvitation = async (data) => {
+  return await api.post("/user/wall/invitation", data);
+};
+
+export const getAssignedUsers = async (id) => {
+  return await api.get(`/wall/${id}/assigned-users`);
+};
+
+export const deleteAssignUser = async (id, assignedUserId) => {
+  return await api.delete(`/wall/${id}/assigned-user/${assignedUserId}`);
+};
+
+export const updateAssignedUserAccess = async (wallId, assignedUserId, accessType) => {
+  return api.patch(`/wall/${wallId}/assigned-user/${assignedUserId}`, { access_type: accessType });
+};
+
 export default api;
