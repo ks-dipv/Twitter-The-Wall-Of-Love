@@ -306,7 +306,10 @@ export class WallService {
   }
 
   // Get wall by ID
-  async getWallById(id: number, user): Promise<Wall> {
+  async getWallById(
+    id: number,
+    user,
+  ): Promise<{ wall: Wall; access_type: string }> {
     try {
       const existingUser = await this.userRepository.getByEmail(user.email);
       if (!existingUser) {
@@ -318,8 +321,10 @@ export class WallService {
         throw new NotFoundException('Wall not found');
       }
 
+      // Process invitation if it exists
       const invitation = await this.invitationRepository.findOne({
         where: { email: user.email },
+        relations: ['user'],
       });
 
       if (invitation) {
@@ -334,6 +339,12 @@ export class WallService {
         await this.invitationRepository.remove(invitation);
       }
 
+      // Check if user is the owner
+      if (wall.user.id === existingUser.id) {
+        return { wall, access_type: 'owner' };
+      }
+
+      // Check if user has access
       const wallAccess = await this.wallAccessRepository.findOne({
         where: {
           wall: { id },
@@ -341,11 +352,11 @@ export class WallService {
         },
       });
 
-      if (!(wall.user.id === existingUser.id) && !wallAccess) {
+      if (!wallAccess) {
         throw new ForbiddenException('You do not have access to this wall');
       }
 
-      return wall;
+      return { wall, access_type: wallAccess.access_type };
     } catch (error) {
       throw new BadRequestException(error.message || 'Failed to fetch wall');
     }

@@ -28,7 +28,7 @@ const UpdateWallPage = () => {
           description,
           visibility,
           social_links = [],
-        } = response.data;
+        } = response.data.wall;
 
         setWallData({
           title,

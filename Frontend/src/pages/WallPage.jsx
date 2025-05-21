@@ -34,23 +34,23 @@ const WallPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
   const [totalItems, setTotalItems] = useState(0);
-
+  const [role, setRole] = useState("owner");
 
   useEffect(() => {
     const fetchWallData = async () => {
       try {
         const wallResponse = await getWallById(id);
         setWall(wallResponse.data);
+        setRole(wallResponse.data.access_type);
         fetchTweets(pageFromUrl); // fetch tweets for the page from URL
       } catch (error) {
         console.error("Error fetching wall:", error);
         setLoading(false);
       }
     };
-  
+
     fetchWallData();
   }, [id, pageFromUrl]);
-  
 
   useEffect(() => {
     const page = parseInt(searchParams.get("page")) || 1;
@@ -85,7 +85,7 @@ const WallPage = () => {
     if (!tweetId) return;
 
     try {
-      await deleteTweet(wall.id, tweetId);
+      await deleteTweet(wall.wall.id, tweetId);
       // After deleting, refresh the current page
       if (isDateFiltered) {
         handleFilter(currentPage);
@@ -126,7 +126,7 @@ const WallPage = () => {
 
       // Send the full ordered list of IDs
       const orderedTweetIds = allTweets.map((tweet) => tweet.id);
-      await reorderTweets(wall.id, orderedTweetIds);
+      await reorderTweets(wall.wall.id, orderedTweetIds);
     } catch (error) {
       console.error("Error reordering tweets:", error);
       toast.error("Error reordering tweets");
@@ -162,7 +162,7 @@ const WallPage = () => {
 
       // Send the full shuffled list of IDs to the backend
       const orderedTweetIds = shuffledTweets.map((tweet) => tweet.id);
-      await reorderTweets(wall.id, orderedTweetIds);
+      await reorderTweets(wall.wall.id, orderedTweetIds);
 
       if (isDateFiltered) {
         handleFilter(currentPage);
@@ -326,7 +326,7 @@ const WallPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <Navbar logo={wall.logo} wallId={wall.id} />
+      <Navbar logo={wall.wall.logo} wallId={wall.wall.id} role={role} />
 
       <main className="flex-grow flex flex-col items-center p-6">
         <motion.div
@@ -336,14 +336,14 @@ const WallPage = () => {
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
           <h1 className="text-4xl font-extrabold text-gray-900 md:text-5xl tracking-wide">
-            {wall.title}
+            {wall.wall.title}
           </h1>
           <motion.p
             className="text-lg mt-4 max-w-2xl mx-auto text-gray-700 font-medium leading-relaxed"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.8, ease: "easeOut" }}
-            dangerouslySetInnerHTML={{ __html: wall.description }}
+            dangerouslySetInnerHTML={{ __html: wall.wall.description }}
           ></motion.p>
         </motion.div>
 
@@ -400,13 +400,16 @@ const WallPage = () => {
               <option value="vertical">Vertical</option>
               <option value="odd-even">Odd-Even</option>
             </select>
-            <button
-              onClick={handleShuffle}
-              disabled={isSaving}
-              className="px-5 py-2 bg-[#334155] text-white font-medium rounded transition-all duration-300 hover:bg-[#94A3B8] flex items-center gap-2"
-            >
-              <FontAwesomeIcon icon={faShuffle} /> Shuffle Tweets
-            </button>
+
+            {(role === "admin" || role === "owner" || role === "editor") && (
+              <button
+                onClick={handleShuffle}
+                disabled={isSaving}
+                className="px-5 py-2 bg-[#334155] text-white font-medium rounded transition-all duration-300 hover:bg-[#94A3B8] flex items-center gap-2"
+              >
+                <FontAwesomeIcon icon={faShuffle} /> Shuffle Tweets
+              </button>
+            )}
           </div>
         </div>
 
@@ -421,7 +424,7 @@ const WallPage = () => {
 
         {renderPagination()}
       </main>
-      <Footer socialLinks={wall.social_links} />
+      <Footer socialLinks={wall.wall.social_links} />
     </div>
   );
 };
