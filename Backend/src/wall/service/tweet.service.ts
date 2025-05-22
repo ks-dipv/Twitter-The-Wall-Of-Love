@@ -277,9 +277,6 @@ export class TweetService {
   }
   async searchTweets(wallId: number, keyword: string, user): Promise<Tweets[]> {
     const existingUser = await this.userRepository.getByEmail(user.email);
-    if (!existingUser) {
-      throw new BadRequestException("User doesn't exist");
-    }
 
     // Validate the wall exists for the given user
     const wall = await this.wallRepository.getWallByIdAndUser(

@@ -226,14 +226,7 @@ export class WallService {
       return savedWall;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      if (
-        error instanceof BadRequestException ||
-        error instanceof UnauthorizedException ||
-        error instanceof NotFoundException ||
-        error instanceof InternalServerErrorException
-      ) {
-        throw error;
-      }
+
       throw new BadRequestException(
         (error as Error).message || 'Failed to create wall',
       );
@@ -246,173 +239,142 @@ export class WallService {
     user,
     paginationQueryDto: PaginationQueryDto,
   ): Promise<Paginated<Wall>> {
-    try {
-      const existingUser = await this.userRepository.getByEmail(user.email);
-      if (!existingUser) {
-        throw new NotFoundException("User doesn't exist");
-      }
-
-      return await this.paginationService.paginateQuery(
-        {
-          limit: paginationQueryDto.limit,
-          page: paginationQueryDto.page,
-        },
-        this.wallRepository,
-        { user: { id: existingUser.id } },
-      );
-    } catch (error) {
-      throw new BadRequestException(error.message || 'Failed to fetch walls');
+    const existingUser = await this.userRepository.getByEmail(user.email);
+    if (!existingUser) {
+      throw new NotFoundException("User doesn't exist");
     }
+
+    return await this.paginationService.paginateQuery(
+      {
+        limit: paginationQueryDto.limit,
+        page: paginationQueryDto.page,
+      },
+      this.wallRepository,
+      { user: { id: existingUser.id } },
+    );
   }
 
   // Get wall by ID
   async getWallById(id: number, user): Promise<Wall> {
-    try {
-      const existingUser = await this.userRepository.getByEmail(user.email);
-      if (!existingUser) {
-        throw new NotFoundException("User doesn't exist");
-      }
+    const existingUser = await this.userRepository.getByEmail(user.email);
+    if (!existingUser) {
+      throw new NotFoundException("User doesn't exist");
+    }
 
-      const wall = await this.wallRepository.getById(id);
-      if (!wall) {
-        throw new NotFoundException('Wall not found');
-      }
+    const wall = await this.wallRepository.getById(id);
+    if (!wall) {
+      throw new NotFoundException('Wall not found');
+    }
 
-      const invitation = await this.invitationRepository.findOne({
-        where: { email: user.email },
+    const invitation = await this.invitationRepository.findOne({
+      where: { email: user.email },
+    });
+
+    if (invitation) {
+      const wallAccess = this.wallAccessRepository.create({
+        user: existingUser,
+        wall: wall,
+        access_type: invitation.access_type,
+        assigned_by: invitation.user,
       });
 
-      if (invitation) {
-        const wallAccess = this.wallAccessRepository.create({
-          user: existingUser,
-          wall: wall,
-          access_type: invitation.access_type,
-          assigned_by: invitation.user,
-        });
-
-        await this.wallAccessRepository.save(wallAccess);
-        await this.invitationRepository.remove(invitation);
-      }
-
-      return wall;
-    } catch (error) {
-      throw new BadRequestException(error.message || 'Failed to fetch wall');
+      await this.wallAccessRepository.save(wallAccess);
+      await this.invitationRepository.remove(invitation);
     }
+
+    return wall;
   }
 
   async getPublicWallById(
     id: number,
     paginationQueryDto: PaginationQueryDto,
   ): Promise<{ wall: Partial<Wall>; paginatedTweets: Paginated<Tweets> }> {
-    try {
-      const wall = await this.wallRepository.findOne({
-        where: { id },
-        relations: ['social_links'],
-      });
+    const wall = await this.wallRepository.findOne({
+      where: { id },
+      relations: ['social_links'],
+    });
 
-      if (!wall) {
-        throw new NotFoundException('Wall not found');
-      }
-
-      if (wall.visibility !== WallVisibility.PUBLIC) {
-        throw new NotFoundException('Wall not found or not public');
-      }
-
-      // Increment view count
-      wall.views = (wall.views || 0) + 1;
-      await this.wallRepository.save(wall);
-
-      // Get paginated tweets
-      const paginatedTweets = await this.paginationService.paginateQuery(
-        {
-          limit: paginationQueryDto.limit || 12,
-          page: paginationQueryDto.page || 1,
-        },
-        this.tweetRepository,
-        { wall: { id: wall.id } },
-      );
-
-      return {
-        wall: {
-          id: wall.id,
-          title: wall.title,
-          description: wall.description,
-          visibility: wall.visibility,
-          views: wall.views,
-          social_links: wall.social_links,
-        },
-        paginatedTweets,
-      };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw new BadRequestException(error.message || 'Failed to fetch wall');
+    if (!wall) {
+      throw new NotFoundException('Wall not found');
     }
+
+    if (wall.visibility !== WallVisibility.PUBLIC) {
+      throw new NotFoundException('Wall not found or not public');
+    }
+
+    // Increment view count
+    wall.views = (wall.views || 0) + 1;
+    await this.wallRepository.save(wall);
+
+    // Get paginated tweets
+    const paginatedTweets = await this.paginationService.paginateQuery(
+      {
+        limit: paginationQueryDto.limit || 12,
+        page: paginationQueryDto.page || 1,
+      },
+      this.tweetRepository,
+      { wall: { id: wall.id } },
+    );
+
+    return {
+      wall: {
+        id: wall.id,
+        title: wall.title,
+        description: wall.description,
+        visibility: wall.visibility,
+        views: wall.views,
+        social_links: wall.social_links,
+      },
+      paginatedTweets,
+    };
   }
 
   // Get wall by sharable Link
   async getWallBySharableLink(wallId: number, uuid: string): Promise<Wall> {
-    try {
-      // Find the wall by ID
-      const wall = await this.wallRepository.findOne({
-        where: { id: wallId },
-        relations: ['tweets', 'social_links'],
-      });
+    // Find the wall by ID
+    const wall = await this.wallRepository.findOne({
+      where: { id: wallId },
+      relations: ['tweets', 'social_links'],
+    });
 
-      if (!wall) {
-        throw new NotFoundException('Wall not found');
-      }
+    if (!wall) {
+      throw new NotFoundException('Wall not found');
+    }
 
-      // Check if the provided UUID matches based on visibility
-      const validUuid =
-        wall.visibility === WallVisibility.PRIVATE
-          ? wall.private_uuid === uuid
-          : wall.public_uuid === uuid;
+    // Check if the provided UUID matches based on visibility
+    const validUuid =
+      wall.visibility === WallVisibility.PRIVATE
+        ? wall.private_uuid === uuid
+        : wall.public_uuid === uuid;
 
-      if (!validUuid) {
-        throw new UnauthorizedException(
-          'Invalid link or insufficient permissions',
-        );
-      }
-
-      // Count views for both public and private walls accessed by valid link
-      wall.views = (wall.views || 0) + 1;
-      await this.wallRepository.save(wall);
-
-      return wall;
-    } catch (error) {
-      throw new BadRequestException(
-        error.message || 'Failed to fetch wall by sharable link',
+    if (!validUuid) {
+      throw new UnauthorizedException(
+        'Invalid link or insufficient permissions',
       );
     }
+
+    // Count views for both public and private walls accessed by valid link
+    wall.views = (wall.views || 0) + 1;
+    await this.wallRepository.save(wall);
+
+    return wall;
   }
 
   async deleteWall(id: number, user) {
-    try {
-      const existingUser = await this.userRepository.getByEmail(user.email);
-      if (!existingUser) {
-        throw new NotFoundException("User doesn't exist");
-      }
-
-      const wall = await this.wallRepository.getById(id);
-
-      if (wall.logo) {
-        const fileName = wall.logo.split('/').pop();
-        if (fileName) await this.uploadService.deleteLogo(fileName);
-      }
-
-      await this.wallRepository.delete(id);
-      return { message: 'Wall deleted successfully' };
-    } catch (error) {
-      if (
-        error instanceof ForbiddenException ||
-        error instanceof NotFoundException
-      ) {
-        throw error;
-      }
-      throw new BadRequestException(error.message || 'Failed to delete wall');
+    const existingUser = await this.userRepository.getByEmail(user.email);
+    if (!existingUser) {
+      throw new NotFoundException("User doesn't exist");
     }
+
+    const wall = await this.wallRepository.getById(id);
+
+    if (wall.logo) {
+      const fileName = wall.logo.split('/').pop();
+      if (fileName) await this.uploadService.deleteLogo(fileName);
+    }
+
+    await this.wallRepository.delete(id);
+    return { message: 'Wall deleted successfully' };
   }
 
   async updateWall(
@@ -532,15 +494,7 @@ export class WallService {
       return updatedWall;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      if (
-        error instanceof BadRequestException ||
-        error instanceof UnauthorizedException ||
-        error instanceof NotFoundException ||
-        error instanceof InternalServerErrorException ||
-        error instanceof ForbiddenException
-      ) {
-        throw error;
-      }
+
       throw new BadRequestException(error.message || 'Failed to update wall');
     } finally {
       await queryRunner.release();
@@ -561,21 +515,17 @@ export class WallService {
 
   // Search for walls based on the provided keyword
   async searchWalls(keyword: string, user): Promise<Wall[]> {
-    try {
-      const existingUser = await this.userRepository.getByEmail(user.email);
+    const existingUser = await this.userRepository.getByEmail(user.email);
 
-      if (!existingUser) {
-        throw new NotFoundException("User doesn't exist");
-      }
-      if (!keyword) {
-        throw new BadRequestException('Search keyword is required');
-      }
-
-      const walls = await this.wallRepository.searchWallsByKeyword(keyword);
-      return walls;
-    } catch (error) {
-      throw new BadRequestException(error.message || 'Failed to search walls');
+    if (!existingUser) {
+      throw new NotFoundException("User doesn't exist");
     }
+    if (!keyword) {
+      throw new BadRequestException('Search keyword is required');
+    }
+
+    const walls = await this.wallRepository.searchWallsByKeyword(keyword);
+    return walls;
   }
 
   async getPublicWall(): Promise<Wall[]> {
