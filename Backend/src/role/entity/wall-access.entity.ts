@@ -13,13 +13,13 @@ export class WallAccess {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.userWallAccess, {
+  @ManyToOne(() => User, (user) => user.user_wall_access, {
     onDelete: 'CASCADE',
     eager: true,
   })
   user: User;
 
-  @ManyToOne(() => User, (assigned) => assigned.WallAccess, {
+  @ManyToOne(() => User, (assigned) => assigned.wallAccess, {
     onDelete: 'CASCADE',
     eager: true,
   })

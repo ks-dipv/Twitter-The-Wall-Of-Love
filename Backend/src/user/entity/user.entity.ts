@@ -60,8 +60,8 @@ export class User {
   invitations: Invitation[];
 
   @OneToMany(() => WallAccess, (wallAccess) => wallAccess.user)
-  userWallAccess: WallAccess[];
+  user_wall_access: WallAccess[];
 
   @OneToMany(() => WallAccess, (wallaccess) => wallaccess.assigned_by)
-  WallAccess: WallAccess[];
+  wallAccess: WallAccess[];
 }

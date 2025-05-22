@@ -14,6 +14,8 @@ import { MailService } from 'src/auth/services/mail.service';
 import { WallRepository } from 'src/wall/repository/wall.repository';
 import { UpdateUserAccessDto } from '../dtos/update-user-role.dto';
 import { ActiveUserData } from 'src/common/interface/active-user.interface';
+import { AssignedByMeResponseDto } from '../dtos/assigned-me-response.dto';
+import { AssignedWallDto } from '../dtos/assigned-wall.dto';
 
 @Injectable()
 export class RoleService {
@@ -42,7 +44,7 @@ export class RoleService {
         throw new NotFoundException("User doesn't exist");
       }
 
-      const baseUrl = 'http://localhost:3000';
+      const baseUrl = process.env.BACKEND_BASE_URL;
       const invitationUrl = `${baseUrl}/api/walls/${wallId}`;
 
       await this.mailService.sendInvitationEmail(invitationUrl, email);
@@ -63,43 +65,31 @@ export class RoleService {
   }
 
   public async getAssignedUsers(wallId: number, user: ActiveUserData) {
-    try {
-      const requestingUser = await this.userRepository.getByEmail(user.email);
-      if (!requestingUser) {
-        throw new NotFoundException('Requesting user not found');
-      }
-
-      const wall = await this.wallRepository.findOne({
-        where: { id: wallId },
-        relations: ['user'],
-      });
-
-      if (!wall) {
-        throw new NotFoundException('Wall not found');
-      }
-
-      const accesses = await this.wallAccessRepository.find({
-        where: { wall: { id: wallId } },
-        relations: ['user'],
-        order: { created_at: 'ASC' },
-      });
-
-      return accesses.map((access) => ({
-        email: access.user.email,
-        access_type: access.access_type,
-        assigned_at: access.created_at,
-      }));
-    } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof ForbiddenException
-      ) {
-        throw error;
-      }
-      throw new BadRequestException(
-        error.message || 'Failed to get assigned user',
-      );
+    const requestingUser = await this.userRepository.getByEmail(user.email);
+    if (!requestingUser) {
+      throw new NotFoundException('Requesting user not found');
     }
+
+    const wall = await this.wallRepository.findOne({
+      where: { id: wallId },
+      relations: ['user'],
+    });
+
+    if (!wall) {
+      throw new NotFoundException('Wall not found');
+    }
+
+    const accesses = await this.wallAccessRepository.find({
+      where: { wall: { id: wallId } },
+      relations: ['user'],
+      order: { created_at: 'ASC' },
+    });
+
+    return accesses.map((access) => ({
+      email: access.user.email,
+      access_type: access.access_type,
+      assigned_at: access.created_at,
+    }));
   }
 
   public async deleteAssignedUser(
@@ -107,55 +97,42 @@ export class RoleService {
     targetUserId: number,
     user: ActiveUserData,
   ): Promise<void> {
-    try {
-      const requestingUser = await this.userRepository.getByEmail(user.email);
-      if (!requestingUser) {
-        throw new NotFoundException('Requesting user not found');
-      }
+    const requestingUser = await this.userRepository.getByEmail(user.email);
+    if (!requestingUser) {
+      throw new NotFoundException('Requesting user not found');
+    }
 
-      const wall = await this.wallRepository.findOne({
-        where: { id: wallId },
-        relations: ['user'],
-      });
+    const wall = await this.wallRepository.findOne({
+      where: { id: wallId },
+      relations: ['user'],
+    });
 
-      if (!wall) {
-        throw new NotFoundException('Wall not found');
-      }
+    if (!wall) {
+      throw new NotFoundException('Wall not found');
+    }
 
-      const wallAccess = await this.wallAccessRepository.findOne({
-        where: {
-          wall: { id: wallId },
-          user: { id: requestingUser.id },
-        },
-      });
+    const wallAccess = await this.wallAccessRepository.findOne({
+      where: {
+        wall: { id: wallId },
+        user: { id: requestingUser.id },
+      },
+    });
 
-      if (!(wall.user.id === requestingUser.id) && !wallAccess) {
-        throw new ForbiddenException(
-          'You do not have permission to remove users from this wall.',
-        );
-      }
-
-      const access = await this.wallAccessRepository.findOne({
-        where: { wall: { id: wallId }, user: { id: targetUserId } },
-      });
-
-      if (wall.user.id === requestingUser.id && targetUserId === user.sub) {
-        throw new BadRequestException('Wall owner cannot remove themselves.');
-      }
-
-      await this.wallAccessRepository.delete(access.id);
-    } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof ForbiddenException ||
-        error instanceof BadRequestException
-      ) {
-        throw error;
-      }
-      throw new BadRequestException(
-        error.message || 'Failed to Delete assigned user',
+    if (!(wall.user.id === requestingUser.id) && !wallAccess) {
+      throw new ForbiddenException(
+        'You do not have permission to remove users from this wall.',
       );
     }
+
+    const access = await this.wallAccessRepository.findOne({
+      where: { wall: { id: wallId }, user: { id: targetUserId } },
+    });
+
+    if (wall.user.id === requestingUser.id && targetUserId === user.sub) {
+      throw new BadRequestException('Wall owner cannot remove themselves.');
+    }
+
+    await this.wallAccessRepository.delete(access.id);
   }
 
   public async updateAssignedUserAccess(
@@ -215,7 +192,9 @@ export class RoleService {
     }
   }
 
-  async getAssignedByme(user: ActiveUserData) {
+  async getAssignedByme(
+    user: ActiveUserData,
+  ): Promise<AssignedByMeResponseDto[]> {
     const userId = user.sub;
 
     const accesses = await this.wallAccessRepository.find({
@@ -226,18 +205,22 @@ export class RoleService {
       order: { created_at: 'ASC' },
     });
 
-    return accesses.map((access) => ({
-      assigned_me: access.assigned_by.email,
-      wall: {
-        id: access.wall.id,
-        name: access.wall.title,
-        logo: access.wall.logo,
-        description: access.wall.description,
-        wall_visibility: access.wall.visibility,
-        created_at: access.wall.created_at,
-      },
-      assigned_at: access.created_at,
-      access_type: access.access_type,
-    }));
+    return accesses.map((access) => {
+      const wallDto = new AssignedWallDto();
+      wallDto.id = access.wall.id;
+      wallDto.name = access.wall.title;
+      wallDto.logo = access.wall.logo;
+      wallDto.description = access.wall.description;
+      wallDto.wall_visibility = access.wall.visibility;
+      wallDto.created_at = access.wall.created_at;
+
+      const responseDto = new AssignedByMeResponseDto();
+      responseDto.assigned_me = access.assigned_by.email;
+      responseDto.wall = wallDto;
+      responseDto.assigned_at = access.created_at;
+      responseDto.access_type = access.access_type;
+
+      return responseDto;
+    });
   }
 }
