@@ -62,9 +62,6 @@ export class RoleService {
 
       await this.invitationRepository.save(invite);
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
       throw new InternalServerErrorException('Failed to send invitation email');
     }
   }
@@ -187,7 +184,7 @@ export class RoleService {
     }
   }
 
-  async getAssignedByme(
+  async getAssignedWithMe(
     user: ActiveUserData,
   ): Promise<AssignedByMeResponseDto[]> {
     const userId = user.sub;

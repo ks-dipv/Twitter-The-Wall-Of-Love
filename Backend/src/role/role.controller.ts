@@ -90,6 +90,6 @@ export class RoleController {
       'List of wall assignments for the authenticated user retrieved',
   })
   async getMyAssignments(@User() user: ActiveUserData) {
-    return await this.roleService.getAssignedByme(user);
+    return await this.roleService.getAssignedWithMe(user);
   }
 }
