@@ -19,7 +19,7 @@ import { Between, Repository } from 'typeorm';
 import { PaginationQueryDto } from 'src/pagination/dtos/pagination-query.dto';
 import { PaginationService } from 'src/pagination/services/pagination.service';
 import { Paginated } from 'src/pagination/interfaces/paginated.interface';
-import { WallAccess } from 'src/user/entity/wall-access.entity';
+import { WallAccess } from 'src/role/entity/wall-access.entity';
 import { AccessType } from 'src/user/enum/accesstype.enum';
 
 @Injectable()

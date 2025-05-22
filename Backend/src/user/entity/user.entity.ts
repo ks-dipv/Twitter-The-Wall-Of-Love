@@ -8,8 +8,9 @@ import {
 import { Wall } from 'src/wall/entity/wall.entity';
 import { OneToMany } from 'typeorm';
 import { Exclude } from 'class-transformer';
-import { Invitation } from './invitation.entity';
-import { WallAccess } from './wall-access.entity';
+import { Invitation } from 'src/role/entity/invitation.entity';
+import { WallAccess } from 'src/role/entity/wall-access.entity';
+
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()

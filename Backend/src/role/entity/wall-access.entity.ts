@@ -5,9 +5,9 @@ import {
   CreateDateColumn,
   Column,
 } from 'typeorm';
-import { User } from './user.entity';
 import { Wall } from 'src/wall/entity/wall.entity';
-import { AccessType } from '../enum/accesstype.enum';
+import { AccessType } from '../enum/access-type.enum';
+import { User } from 'src/user/entity/user.entity';
 @Entity()
 export class WallAccess {
   @PrimaryGeneratedColumn()

@@ -16,6 +16,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from './auth/auth.module';
 import { PaginationModule } from './pagination/pagination.module';
+import { RoleModule } from './role/role.module';
 const ENV = process.env.NODE_ENV;
 
 @Module({
@@ -47,6 +48,7 @@ const ENV = process.env.NODE_ENV;
     JwtModule.registerAsync(jwtConfig.asProvider()),
     AuthModule,
     PaginationModule,
+    RoleModule,
   ],
   controllers: [AppController],
   providers: [

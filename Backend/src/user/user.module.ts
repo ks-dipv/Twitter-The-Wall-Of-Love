@@ -7,17 +7,14 @@ import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { UploadService } from '../common/services/upload.service';
 import jwtConfig from '../auth/config/jwt.config';
-
 import { UserRepository } from './repositories/user.repository';
 import { GenerateTokenProvider } from 'src/common/services/generate-token.provider';
 import { MailService } from 'src/auth/services/mail.service';
-import { Invitation } from './entity/invitation.entity';
-import { WallAccess } from './entity/wall-access.entity';
 import { WallRepository } from 'src/wall/repository/wall.repository';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Invitation, WallAccess]),
+    TypeOrmModule.forFeature([User]),
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
   ],
@@ -28,7 +25,7 @@ import { WallRepository } from 'src/wall/repository/wall.repository';
     UploadService,
     UserRepository,
     MailService,
-    WallRepository
+    WallRepository,
   ],
   exports: [UserService, UserRepository],
 })
