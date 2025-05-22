@@ -15,6 +15,8 @@ import { WallRepository } from 'src/wall/repository/wall.repository';
 import { AccessType } from '../enum/access-type.enum';
 import { UpdateUserAccessDto } from '../dtos/update-user-role.dto';
 import { ActiveUserData } from 'src/common/interface/active-user.interface';
+import { AssignedByMeResponseDto } from '../dtos/assigned-me-response.dto';
+import { AssignedWallDto } from '../dtos/assigned-wall.dto';
 
 @Injectable()
 export class RoleService {
@@ -254,9 +256,9 @@ export class RoleService {
     }
   }
 
-  async getAssignedByme(user: ActiveUserData) {
+  async getAssignedByme(user: ActiveUserData): Promise<AssignedByMeResponseDto[]> {
     const userId = user.sub;
-
+  
     const accesses = await this.wallAccessRepository.find({
       where: {
         user: { id: userId },
@@ -264,19 +266,23 @@ export class RoleService {
       relations: ['user', 'wall', 'assigned_by'],
       order: { created_at: 'ASC' },
     });
-
-    return accesses.map((access) => ({
-      assigned_me: access.assigned_by.email,
-      wall: {
-        id: access.wall.id,
-        name: access.wall.title,
-        logo: access.wall.logo,
-        description: access.wall.description,
-        wall_visibility: access.wall.visibility,
-        created_at: access.wall.created_at,
-      },
-      assigned_at: access.created_at,
-      access_type: access.access_type,
-    }));
+  
+    return accesses.map((access) => {
+      const wallDto = new AssignedWallDto();
+      wallDto.id = access.wall.id;
+      wallDto.name = access.wall.title;
+      wallDto.logo = access.wall.logo;
+      wallDto.description = access.wall.description;
+      wallDto.wall_visibility = access.wall.visibility;
+      wallDto.created_at = access.wall.created_at;
+  
+      const responseDto = new AssignedByMeResponseDto();
+      responseDto.assigned_me = access.assigned_by.email;
+      responseDto.wall = wallDto;
+      responseDto.assigned_at = access.created_at;
+      responseDto.access_type = access.access_type;
+  
+      return responseDto;
+    });
   }
 }
