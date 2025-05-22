@@ -12,7 +12,7 @@ import { RoleType } from 'src/common/enum/role.enum';
 import { ROLE_KEY } from 'src/common/constants/role.constant';
 import { WallRepository } from 'src/wall/repository/wall.repository';
 import { UserRepository } from 'src/user/repositories/user.repository';
-
+import { In } from 'typeorm';
 @Injectable()
 export class RoleGuard implements CanActivate {
   constructor(
@@ -52,15 +52,12 @@ export class RoleGuard implements CanActivate {
         where: {
           wall: { id: wallId },
           user: { id: existingUser.id },
+          access_type: In(roles),
         },
       });
 
       if (!wallAccess || wallAccess == null) {
         throw new ForbiddenException('You do not have access to this wall.');
-      }
-
-      if (roles.includes(wallAccess.access_type as unknown as RoleType)) {
-        return true;
       }
     }
 
