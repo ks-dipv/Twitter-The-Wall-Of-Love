@@ -10,6 +10,8 @@ import {
 import { useParams } from "react-router-dom";
 import { FiTrash2 } from "react-icons/fi";
 import ConfirmationDialog from "../components/ConfirmationDialog";
+import { TiUserDelete } from "react-icons/ti";
+import { AiOutlineUserDelete } from "react-icons/ai";
 
 export default function AddUser() {
   const { id } = useParams();
@@ -199,7 +201,7 @@ export default function AddUser() {
                       onClick={() => handleDeleteClick(user.userId)}
                       className=" px-2 py-2 rounded-md hover:bg-[#94A3B8] ml-2"
                     >
-                      <FiTrash2 className="shrink-0" />
+                      <AiOutlineUserDelete className="shrink-0" />
                     </button>
                   </td>
                 </tr>
