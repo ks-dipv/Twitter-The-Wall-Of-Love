@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
 import { User } from 'src/common/decorator/user.decorator';
-import { AssignUserRoleDto } from './dtos/assign-user-role.dto';
+import { AssignUserRoleDto } from './dtos/req-user-role.dto';
 import { SuccessDto } from 'src/common/dtos/success.dto';
 import { RoleService } from './services/role.service';
 import { UpdateUserAccessDto } from './dtos/update-user-role.dto';

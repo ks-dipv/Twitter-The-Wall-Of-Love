@@ -40,8 +40,13 @@ export class RoleService {
     try {
       const existingUser = await this.userRepository.getByEmail(user.email);
 
-      if (!existingUser) {
-        throw new NotFoundException("User doesn't exist");
+      const wall = await this.wallRepository.findOne({
+        where: { id: wallId },
+        relations: ['user'],
+      });
+
+      if (!wall) {
+        throw new NotFoundException('Wall not found');
       }
 
       const baseUrl = process.env.BACKEND_BASE_URL;
@@ -66,9 +71,6 @@ export class RoleService {
 
   public async getAssignedUsers(wallId: number, user: ActiveUserData) {
     const requestingUser = await this.userRepository.getByEmail(user.email);
-    if (!requestingUser) {
-      throw new NotFoundException('Requesting user not found');
-    }
 
     const wall = await this.wallRepository.findOne({
       where: { id: wallId },
@@ -98,9 +100,6 @@ export class RoleService {
     user: ActiveUserData,
   ): Promise<void> {
     const requestingUser = await this.userRepository.getByEmail(user.email);
-    if (!requestingUser) {
-      throw new NotFoundException('Requesting user not found');
-    }
 
     const wall = await this.wallRepository.findOne({
       where: { id: wallId },
@@ -127,10 +126,6 @@ export class RoleService {
     const access = await this.wallAccessRepository.findOne({
       where: { wall: { id: wallId }, user: { id: targetUserId } },
     });
-
-    if (wall.user.id === requestingUser.id && targetUserId === user.sub) {
-      throw new BadRequestException('Wall owner cannot remove themselves.');
-    }
 
     await this.wallAccessRepository.delete(access.id);
   }
