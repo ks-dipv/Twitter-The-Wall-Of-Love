@@ -43,7 +43,7 @@ export class RoleService {
         throw new NotFoundException("User doesn't exist");
       }
 
-      const baseUrl = 'http://localhost:3000';
+      const baseUrl = process.env.BACKEND_BASE_URL;
       const invitationUrl = `${baseUrl}/api/walls/${wallId}`;
 
       await this.mailService.sendInvitationEmail(invitationUrl, email);
