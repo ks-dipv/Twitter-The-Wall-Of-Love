@@ -12,7 +12,6 @@ import { Repository } from 'typeorm';
 import { Invitation } from '../entity/invitation.entity';
 import { MailService } from 'src/auth/services/mail.service';
 import { WallRepository } from 'src/wall/repository/wall.repository';
-import { AccessType } from '../enum/access-type.enum';
 import { UpdateUserAccessDto } from '../dtos/update-user-role.dto';
 import { ActiveUserData } from 'src/common/interface/active-user.interface';
 
@@ -77,25 +76,6 @@ export class RoleService {
 
       if (!wall) {
         throw new NotFoundException('Wall not found');
-      }
-
-      let hasAdminAccess = false;
-
-      const wallAccess = await this.wallAccessRepository.findOne({
-        where: {
-          wall: { id: wallId },
-          user: { id: requestingUser.id },
-        },
-      });
-
-      if (wallAccess?.access_type === AccessType.ADMIN) {
-        hasAdminAccess = true;
-      }
-
-      if (!(wall.user.id === requestingUser.id) && !hasAdminAccess) {
-        throw new ForbiddenException(
-          "You do not have permission to view this wall's assigned users.",
-        );
       }
 
       const accesses = await this.wallAccessRepository.find({
@@ -198,25 +178,6 @@ export class RoleService {
       });
       if (!currentWall) {
         throw new NotFoundException('Current wall not found');
-      }
-
-      let hasAdminAccess = false;
-
-      const wallAccess = await this.wallAccessRepository.findOne({
-        where: {
-          wall: { id: currentWallId },
-          user: { id: requestingUser.id },
-        },
-      });
-
-      if (wallAccess?.access_type === AccessType.ADMIN) {
-        hasAdminAccess = true;
-      }
-
-      if (!(currentWall.user.id === requestingUser.id) && !hasAdminAccess) {
-        throw new ForbiddenException(
-          'You do not have permission to update user access for this wall.',
-        );
       }
 
       if (

@@ -5,7 +5,7 @@ import { AccessType } from '../enum/access-type.enum';
 export class UpdateUserAccessDto {
   @ApiProperty({
     description: 'New access type for the user',
-    example: AccessType.ADMIN,
+    example: AccessType.EDITOR,
     enum: AccessType,
   })
   @IsEnum(AccessType)

@@ -19,7 +19,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { WallVisibility } from '../enum/wall-visibility.enum';
 import { v4 as uuidv4 } from 'uuid';
 import { User } from 'src/common/decorator/user.decorator';
-
 import { ConfigService } from '@nestjs/config';
 import { PaginationQueryDto } from 'src/pagination/dtos/pagination-query.dto';
 import { PaginationService } from 'src/pagination/services/pagination.service';
@@ -28,7 +27,6 @@ import { Tweets } from '../entity/tweets.entity';
 import { TweetRepository } from '../repository/tweet.repository';
 import { Invitation } from 'src/role/entity/invitation.entity';
 import { WallAccess } from 'src/role/entity/wall-access.entity';
-import { AccessType } from 'src/user/enum/accesstype.enum';
 
 @Injectable()
 export class WallService {
@@ -61,25 +59,6 @@ export class WallService {
       }
 
       const wall = await this.wallRepository.getById(wallId);
-
-      let hasEditAccess = false;
-
-      const wallAccess = await this.wallAccessRepository.findOne({
-        where: {
-          wall: { id: wallId },
-          user: { id: existingUser.id },
-        },
-      });
-
-      if (wallAccess && wallAccess.access_type === AccessType.ADMIN) {
-        hasEditAccess = true;
-      }
-
-      if (!(wall.user.id === existingUser.id) && !hasEditAccess) {
-        throw new ForbiddenException(
-          'You do not have access to generate link for share wall',
-        );
-      }
 
       // Generate UUIDs if they don't exist
       if (!wall.public_uuid) {
@@ -130,25 +109,6 @@ export class WallService {
       }
 
       const wall = await this.wallRepository.getById(wallId);
-
-      let hasEditAccess = false;
-
-      const wallAccess = await this.wallAccessRepository.findOne({
-        where: {
-          wall: { id: wallId },
-          user: { id: existingUser.id },
-        },
-      });
-
-      if (wallAccess && wallAccess.access_type === AccessType.ADMIN) {
-        hasEditAccess = true;
-      }
-
-      if (!(wall.user.id === existingUser.id) && !hasEditAccess) {
-        throw new ForbiddenException(
-          'You do not have access to generate link for share wall',
-        );
-      }
 
       wall.public_uuid = uuidv4();
 
@@ -334,17 +294,6 @@ export class WallService {
         await this.invitationRepository.remove(invitation);
       }
 
-      const wallAccess = await this.wallAccessRepository.findOne({
-        where: {
-          wall: { id },
-          user: { id: existingUser.id },
-        },
-      });
-
-      if (!(wall.user.id === existingUser.id) && !wallAccess) {
-        throw new ForbiddenException('You do not have access to this wall');
-      }
-
       return wall;
     } catch (error) {
       throw new BadRequestException(error.message || 'Failed to fetch wall');
@@ -448,23 +397,6 @@ export class WallService {
 
       const wall = await this.wallRepository.getById(id);
 
-      let hasEditAccess = false;
-
-      const wallAccess = await this.wallAccessRepository.findOne({
-        where: {
-          wall: { id },
-          user: { id: existingUser.id },
-        },
-      });
-
-      if (wallAccess && wallAccess.access_type === AccessType.ADMIN) {
-        hasEditAccess = true;
-      }
-
-      if (!(wall.user.id === existingUser.id) && !hasEditAccess) {
-        throw new ForbiddenException('You do not have access to delete wall');
-      }
-
       if (wall.logo) {
         const fileName = wall.logo.split('/').pop();
         if (fileName) await this.uploadService.deleteLogo(fileName);
@@ -505,27 +437,6 @@ export class WallService {
 
       if (!wall) {
         throw new NotFoundException(`Wall with ID ${id} not found`);
-      }
-
-      let hasEditAccess = false;
-
-      const wallAccess = await this.wallAccessRepository.findOne({
-        where: {
-          wall: { id },
-          user: { id: existingUser.id },
-        },
-      });
-
-      if (
-        wallAccess &&
-        (wallAccess.access_type === AccessType.EDITOR ||
-          wallAccess.access_type === AccessType.ADMIN)
-      ) {
-        hasEditAccess = true;
-      }
-
-      if (!(wall.user.id === existingUser.id) && !hasEditAccess) {
-        throw new ForbiddenException('You do not have access to update wall ');
       }
 
       let logoUrl: string | null = wall.logo;

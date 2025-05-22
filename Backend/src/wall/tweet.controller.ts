@@ -15,6 +15,8 @@ import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
 import { Auth } from 'src/common/decorator/auth.decorator';
 import { AuthType } from 'src/common/enum/auth-type.enum';
 import { PaginationQueryDto } from 'src/pagination/dtos/pagination-query.dto';
+import { Roles } from 'src/common/decorator/role.decorator';
+import { RoleType } from 'src/common/enum/role.enum';
 
 @ApiTags('Tweets')
 @Controller('api/walls')
@@ -39,6 +41,7 @@ export class TweetController {
       },
     },
   })
+  @Roles(RoleType.EDITOR)
   async addTweet(
     @Param('wallId') wallId: number,
     @Body('tweetUrl') tweetUrl: string,
@@ -65,6 +68,7 @@ export class TweetController {
       },
     },
   })
+  @Roles(RoleType.EDITOR)
   async addTweetByXHandle(
     @Param('wallId') wallId: number,
     @Body('xHandle') xHandle: string,
@@ -132,6 +136,7 @@ export class TweetController {
       },
     },
   })
+  @Roles(RoleType.EDITOR)
   async reorderTweets(
     @Param('wallId') wallId: number,
     @User() user,
@@ -211,6 +216,7 @@ export class TweetController {
       },
     },
   })
+  @Roles(RoleType.EDITOR)
   async addTweetsByHashtag(
     @Param('wallId') wallId: number,
     @Body('hashtag') hashtag: string,

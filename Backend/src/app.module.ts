@@ -17,10 +17,13 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from './auth/auth.module';
 import { PaginationModule } from './pagination/pagination.module';
 import { RoleModule } from './role/role.module';
+import { RoleGuard } from './common/guards/role/role.guard';
+import { WallAccess } from './role/entity/wall-access.entity';
 const ENV = process.env.NODE_ENV;
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([WallAccess]),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: !ENV ? '.env' : `.env.${ENV}`,
@@ -56,6 +59,10 @@ const ENV = process.env.NODE_ENV;
     {
       provide: APP_GUARD,
       useClass: AuthenticationGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RoleGuard,
     },
     AccessTokenGuard,
   ],

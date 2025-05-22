@@ -20,7 +20,6 @@ import { PaginationQueryDto } from 'src/pagination/dtos/pagination-query.dto';
 import { PaginationService } from 'src/pagination/services/pagination.service';
 import { Paginated } from 'src/pagination/interfaces/paginated.interface';
 import { WallAccess } from 'src/role/entity/wall-access.entity';
-import { AccessType } from 'src/user/enum/accesstype.enum';
 
 @Injectable()
 export class TweetService {
@@ -49,29 +48,6 @@ export class TweetService {
       const wall = await this.wallRepository.getById(wallId);
       if (!wall) {
         throw new NotFoundException('Wall not found');
-      }
-
-      let hasEditAccess = false;
-
-      const wallAccess = await this.wallAccessRepository.findOne({
-        where: {
-          wall: { id: wallId },
-          user: { id: existingUser.id },
-        },
-      });
-
-      if (
-        wallAccess &&
-        (wallAccess.access_type === AccessType.EDITOR ||
-          wallAccess.access_type === AccessType.ADMIN)
-      ) {
-        hasEditAccess = true;
-      }
-
-      if (!(wall.user.id === existingUser.id) && !hasEditAccess) {
-        throw new ForbiddenException(
-          'You do not have access to add tweets to this wall',
-        );
       }
 
       const tweetData = await this.twitterService.fetchTweetDetails(tweetUrl);
@@ -108,28 +84,6 @@ export class TweetService {
         throw new NotFoundException('Wall not found');
       }
 
-      let hasEditAccess = false;
-
-      const wallAccess = await this.wallAccessRepository.findOne({
-        where: {
-          wall: { id: wallId },
-          user: { id: existingUser.id },
-        },
-      });
-
-      if (
-        wallAccess &&
-        (wallAccess.access_type === AccessType.EDITOR ||
-          wallAccess.access_type === AccessType.ADMIN)
-      ) {
-        hasEditAccess = true;
-      }
-
-      if (!(wall.user.id === existingUser.id) && !hasEditAccess) {
-        throw new ForbiddenException(
-          'You do not have access to add tweets to this wall',
-        );
-      }
       const tweetsData =
         await this.xUserHandleService.fetchTweetsDetailsByXHandle(xHandle);
       if (!tweetsData || tweetsData.length === 0)
@@ -282,25 +236,6 @@ export class TweetService {
         throw new NotFoundException('Wall not found');
       }
 
-      let hasEditAccess = false;
-
-      const wallAccess = await this.wallAccessRepository.findOne({
-        where: {
-          wall: { id: wallId },
-          user: { id: existingUser.id },
-        },
-      });
-
-      if (wallAccess && wallAccess.access_type === AccessType.ADMIN) {
-        hasEditAccess = true;
-      }
-
-      if (!(wall.user.id === existingUser.id) && !hasEditAccess) {
-        throw new ForbiddenException(
-          'You do not have access to delete tweet to this wall',
-        );
-      }
-
       const tweet = await this.tweetRepository.getTweetByIdAndWall(
         tweetId,
         wallId,
@@ -335,29 +270,6 @@ export class TweetService {
       const wall = await this.wallRepository.getById(wallId);
       if (!wall) {
         throw new NotFoundException('Wall not found');
-      }
-
-      let hasEditAccess = false;
-
-      const wallAccess = await this.wallAccessRepository.findOne({
-        where: {
-          wall: { id: wallId },
-          user: { id: existingUser.id },
-        },
-      });
-
-      if (
-        wallAccess &&
-        (wallAccess.access_type === AccessType.EDITOR ||
-          wallAccess.access_type === AccessType.ADMIN)
-      ) {
-        hasEditAccess = true;
-      }
-
-      if (!(wall.user.id === existingUser.id) && !hasEditAccess) {
-        throw new ForbiddenException(
-          'You do not have access to add tweets to this wall',
-        );
       }
 
       const tweets = await this.tweetRepository.getTweetsByWall(wallId);
@@ -515,28 +427,6 @@ export class TweetService {
         throw new NotFoundException('Wall not found');
       }
 
-      let hasEditAccess = false;
-
-      const wallAccess = await this.wallAccessRepository.findOne({
-        where: {
-          wall: { id: wallId },
-          user: { id: existingUser.id },
-        },
-      });
-
-      if (
-        wallAccess &&
-        (wallAccess.access_type === AccessType.EDITOR ||
-          wallAccess.access_type === AccessType.ADMIN)
-      ) {
-        hasEditAccess = true;
-      }
-
-      if (!(wall.user.id === existingUser.id) && !hasEditAccess) {
-        throw new ForbiddenException(
-          'You do not have access to add tweets to this wall',
-        );
-      }
       // Fetch tweets by hashtag
       const tweetsData =
         await this.twitterService.fetchTweetsByHashtag(hashtag);

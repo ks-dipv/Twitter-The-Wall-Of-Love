@@ -26,6 +26,8 @@ import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
 import { AuthType } from 'src/common/enum/auth-type.enum';
 import { Auth } from 'src/common/decorator/auth.decorator';
 import { PaginationQueryDto } from 'src/pagination/dtos/pagination-query.dto';
+import { Roles } from 'src/common/decorator/role.decorator';
+import { RoleType } from 'src/common/enum/role.enum';
 
 @ApiTags('Walls')
 @Controller('api/walls')
@@ -69,6 +71,7 @@ export class WallController {
     errorDescription: 'Wall not found',
   })
   @ApiParam({ name: 'id', description: 'ID of the Wall', type: Number })
+  @Roles(RoleType.EDITOR, RoleType.VIEWER)
   async getWallById(@Param('id') id: number, @User() user) {
     return await this.wallService.getWallById(id, user);
   }
@@ -157,6 +160,7 @@ export class WallController {
   @ApiParam({ name: 'id', description: 'ID of the Wall', type: Number })
   @ApiBody({ type: UpdateWallDto })
   @UseInterceptors(FileInterceptor('logo'))
+  @Roles(RoleType.EDITOR)
   async updateWall(
     @Param('id') id: number,
     @Body() updateWallDto: UpdateWallDto,
