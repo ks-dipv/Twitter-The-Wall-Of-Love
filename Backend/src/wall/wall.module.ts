@@ -16,9 +16,19 @@ import { UploadService } from '../common/services/upload.service';
 import { XUserHandleService } from './service/x-user-handle.service';
 import { TweetHandleQueue } from './entity/tweet-handle-queue.entity';
 import { PaginationModule } from 'src/pagination/pagination.module';
+import { Invitation } from 'src/role/entity/invitation.entity';
+import { WallAccess } from 'src/role/entity/wall-access.entity';
+
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Wall, SocialLink, Tweets, TweetHandleQueue]),
+    TypeOrmModule.forFeature([
+      Wall,
+      SocialLink,
+      Tweets,
+      TweetHandleQueue,
+      Invitation,
+      WallAccess,
+    ]),
     UserModule,
     PaginationModule,
   ],

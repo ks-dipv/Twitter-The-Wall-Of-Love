@@ -15,9 +15,8 @@ import { ApiTags, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { Auth } from '../common/decorator/auth.decorator';
 import { UsePipes, ValidationPipe } from '@nestjs/common';
 import { SuccessDto } from 'src/common/dtos/success.dto';
-import { User } from 'src/common/decorator/user.decorater';
+import { User } from 'src/common/decorator/user.decorator';
 import { CommonApiDecorators } from 'src/common/decorator/common-api.decorator';
-
 @ApiTags('Users')
 @Controller('api')
 export class UserController {
