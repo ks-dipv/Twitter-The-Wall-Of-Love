@@ -15,7 +15,7 @@ import { RoleService } from './services/role.service';
 import { UpdateUserAccessDto } from './dtos/update-user-role.dto';
 import { ActiveUserData } from 'src/common/interface/active-user.interface';
 import { AssignedWithMeDto , GetAssignedUserDto} from 'src/wall/dtos/wall.dto';
-@Controller('api/role')
+@Controller('api')
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
