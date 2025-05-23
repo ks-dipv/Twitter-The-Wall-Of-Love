@@ -19,7 +19,7 @@ import { AssignedWithMeDto , GetAssignedUserDto} from 'src/wall/dtos/wall.dto';
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
-  @Post('wall/invitation')
+  @Post('wall/:wallId/invitation')
   @CommonApiDecorators({
     summary: 'Invitation mail send to assigned user',
     successDescription: 'Invitation mail sent successfully',
