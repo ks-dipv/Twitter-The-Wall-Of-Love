@@ -37,7 +37,7 @@ export class RoleController {
     );
   }
 
-  @Get('wall/:wallId/assigned-users')
+  @Get('wall/:wallId/assignees')
   @CommonApiDecorators({
     summary: 'Get list of assigned users',
     successDescription: 'List of assigned users retrieved',
