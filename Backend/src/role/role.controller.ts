@@ -14,7 +14,7 @@ import { SuccessDto } from 'src/common/dtos/success.dto';
 import { RoleService } from './services/role.service';
 import { UpdateUserAccessDto } from './dtos/update-user-role.dto';
 import { ActiveUserData } from 'src/common/interface/active-user.interface';
-
+import { AssignedWithMeDto , GetAssignedUserDto} from 'src/wall/dtos/wall.dto';
 @Controller('api/role')
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
@@ -32,7 +32,9 @@ export class RoleController {
   ) {
     const { email, wallId, accessType } = assignUserRoleDto;
     this.roleService.sentInvitation(email, wallId, accessType, user);
-    return new SuccessDto('Successfuly invitation mail to assign role of wall');
+    return new SuccessDto(
+      `Successfully sent an invitation email to "${user.email}" to the wall`,
+    );
   }
 
   @Get('wall/:wallId/assigned-users')
@@ -44,7 +46,8 @@ export class RoleController {
     @Param('wallId') wallId: number,
     @User() user: ActiveUserData,
   ) {
-    return await this.roleService.getAssignedUsers(wallId, user);
+    const accesses = await this.roleService.getAssignedUsers(wallId, user);
+    return accesses.map((access) => GetAssignedUserDto.toDto(access));
   }
 
   @Delete('wall/:wallId/assigned-user/:userId')
@@ -90,6 +93,7 @@ export class RoleController {
       'List of wall assignments for the authenticated user retrieved',
   })
   async getMyAssignments(@User() user: ActiveUserData) {
-    return await this.roleService.getAssignedWithMe(user);
+    const accesses = await this.roleService.getAssignedWithMe(user);
+    return accesses.map((access) => AssignedWithMeDto.toDto(access));
   }
 }
