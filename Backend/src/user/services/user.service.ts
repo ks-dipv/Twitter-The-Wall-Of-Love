@@ -34,7 +34,7 @@ export class UserService {
   public async findOneByGoogleId(googleId: string) {
     return await this.userRepository.findOne({
       where: {
-        googleId: googleId,
+        google_id: googleId,
       },
     });
   }

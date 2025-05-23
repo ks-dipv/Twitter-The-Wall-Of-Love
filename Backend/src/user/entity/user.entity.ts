@@ -31,7 +31,7 @@ export class User {
     nullable: true,
   })
   @Exclude()
-  googleId?: string;
+  google_id?: string;
 
   @Column({ type: 'varchar', nullable: true })
   profile_pic?: string;
