@@ -193,6 +193,20 @@ const Sidebar = () => {
                 {isOpen && <span className="truncate">List of Walls</span>}
               </Link>
             </li>
+            <li>
+              <Link
+                to="/admin/share-with-me"
+                className={`flex items-center gap-2 p-2 rounded ${
+                  isActive("/admin/share-with-me")
+                    ? "bg-gray-400"
+                    : "hover:bg-gray-700"
+                }`}
+                onClick={() => isMobile && setIsOpen(false)}
+              >
+                <User className="w-5 h-5 flex-shrink-0" />
+                {isOpen && <span className="truncate">Share with Me</span>}
+              </Link>
+            </li>
           </ul>
         </div>
 

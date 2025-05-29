@@ -255,11 +255,27 @@ export class WallService {
   }
 
   // Get wall by ID
-  async getWallById(id: number, user): Promise<Wall> {
-    const existingUser = await this.userRepository.getByEmail(user.email);
-    if (!existingUser) {
-      throw new NotFoundException("User doesn't exist");
-    }
+  async getWallById(
+    id: number,
+    user,
+  ): Promise<{ wall: Wall; access_type: string }> {
+    try {
+      const existingUser = await this.userRepository.getByEmail(user.email);
+      if (!existingUser) {
+        throw new NotFoundException("User doesn't exist");
+      }
+
+      const wall = await this.wallRepository.getById(id);
+      if (!wall) {
+        throw new NotFoundException('Wall not found');
+      }
+
+      // Process invitation if it exists
+      const invitation = await this.invitationRepository.findOne({
+        where: { email: user.email },
+        relations: ['user'],
+      });
+
 
     const wall = await this.wallRepository.getById(id);
     if (!wall) {
