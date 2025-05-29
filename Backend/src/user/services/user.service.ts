@@ -11,14 +11,12 @@ import { UploadService } from '../../common/services/upload.service';
 import { UpdateDto } from '../dtos/update.dto';
 import { UserRepository } from '../repositories/user.repository';
 import { User } from '../entity/user.entity';
-import { GenerateTokenProvider } from 'src/common/services/generate-token.provider';
 import { GoogleUser } from '../interfaces/google-user.interface';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly generateTokenProvider: GenerateTokenProvider,
     private readonly uploadService: UploadService,
   ) {}
 
@@ -36,7 +34,7 @@ export class UserService {
   public async findOneByGoogleId(googleId: string) {
     return await this.userRepository.findOne({
       where: {
-        googleId: googleId,
+        google_id: googleId,
       },
     });
   }

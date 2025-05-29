@@ -8,6 +8,9 @@ import {
 import { Wall } from 'src/wall/entity/wall.entity';
 import { OneToMany } from 'typeorm';
 import { Exclude } from 'class-transformer';
+import { Invitation } from 'src/role/entity/invitation.entity';
+import { WallAccess } from 'src/role/entity/wall-access.entity';
+
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -28,7 +31,7 @@ export class User {
     nullable: true,
   })
   @Exclude()
-  googleId?: string;
+  google_id?: string;
 
   @Column({ type: 'varchar', nullable: true })
   profile_pic?: string;
@@ -52,4 +55,13 @@ export class User {
 
   @OneToMany(() => Wall, (wall) => wall.user)
   walls: Wall[];
+
+  @OneToMany(() => Invitation, (invitation) => invitation.user)
+  invitations: Invitation[];
+
+  @OneToMany(() => WallAccess, (wallAccess) => wallAccess.user)
+  user_wall_access: WallAccess[];
+
+  @OneToMany(() => WallAccess, (wallaccess) => wallaccess.assigned_by)
+  wallAccess: WallAccess[];
 }
