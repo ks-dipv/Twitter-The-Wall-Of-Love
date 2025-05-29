@@ -13,7 +13,7 @@ import { SocialLink } from './social-links.entity';
 import { Tweets } from './tweets.entity';
 import { Exclude } from 'class-transformer';
 import { TweetHandleQueue } from './tweet-handle-queue.entity';
-import { WallAccess } from 'src/user/entity/wall-access.entity';
+import { WallAccess } from 'src/role/entity/wall-access.entity';
 
 @Entity()
 export class Wall {

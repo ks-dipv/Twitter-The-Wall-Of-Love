@@ -5,7 +5,6 @@ import {
   InternalServerErrorException,
   NotFoundException,
   ConflictException,
-  ForbiddenException,
 } from '@nestjs/common';
 
 import { UploadService } from '../../common/services/upload.service';
@@ -13,30 +12,12 @@ import { UpdateDto } from '../dtos/update.dto';
 import { UserRepository } from '../repositories/user.repository';
 import { User } from '../entity/user.entity';
 import { GoogleUser } from '../interfaces/google-user.interface';
-import { MailService } from 'src/auth/services/mail.service';
-import { ConfigService } from '@nestjs/config';
-import { AccessType } from '../enum/accesstype.enum';
-import { WallRepository } from 'src/wall/repository/wall.repository';
-import { WallAccess } from '../entity/wall-access.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { UpdateUserAccessDto } from '../dtos/update-user-role.dto';
-import { Invitation } from '../entity/invitation.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly uploadService: UploadService,
-    private readonly mailService: MailService,
-    private readonly configService: ConfigService,
-
-    private readonly wallRepository: WallRepository,
-    @InjectRepository(WallAccess)
-    private wallAccessRepository: Repository<WallAccess>,
-
-    @InjectRepository(Invitation)
-    private readonly invitationRepository: Repository<Invitation>,
   ) {}
 
   public async createGoogleUser(googleUser: GoogleUser) {
@@ -53,7 +34,7 @@ export class UserService {
   public async findOneByGoogleId(googleId: string) {
     return await this.userRepository.findOne({
       where: {
-        googleId: googleId,
+        google_id: googleId,
       },
     });
   }
@@ -135,6 +116,7 @@ export class UserService {
       throw new InternalServerErrorException('Failed to delete user');
     }
   }
+
 
   public async getAssignedUsers(wallId: number, user) {
     try {

@@ -5,21 +5,21 @@ import {
   CreateDateColumn,
   Column,
 } from 'typeorm';
-import { User } from './user.entity';
 import { Wall } from 'src/wall/entity/wall.entity';
-import { AccessType } from '../enum/accesstype.enum';
+import { AccessType } from '../enum/access-type.enum';
+import { User } from 'src/user/entity/user.entity';
 @Entity()
 export class WallAccess {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.userWallAccess, {
+  @ManyToOne(() => User, (user) => user.user_wall_access, {
     onDelete: 'CASCADE',
     eager: true,
   })
   user: User;
 
-  @ManyToOne(() => User, (assigned) => assigned.WallAccess, {
+  @ManyToOne(() => User, (assigned) => assigned.wallAccess, {
     onDelete: 'CASCADE',
     eager: true,
   })

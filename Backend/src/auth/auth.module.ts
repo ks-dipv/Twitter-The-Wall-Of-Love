@@ -17,8 +17,8 @@ import { UserRepository } from 'src/user/repositories/user.repository';
 import { GoogleAuthenticationService } from './services/google-authentication.service';
 import { UserService } from 'src/user/services/user.service';
 import { WallRepository } from 'src/wall/repository/wall.repository';
-import { WallAccess } from 'src/user/entity/wall-access.entity';
-import { Invitation } from 'src/user/entity/invitation.entity';
+import { WallAccess } from 'src/role/entity/wall-access.entity';
+import { Invitation } from 'src/role/entity/invitation.entity';
 
 @Module({
   imports: [
